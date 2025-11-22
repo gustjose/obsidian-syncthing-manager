@@ -1,0 +1,10 @@
+{
+	"id": "obsidian-syncthing-manager",
+	"name": "Syncthing Manager",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Painel de controle para Syncthing. Monitore status e force a sincronização no Desktop e Mobile.",
+	"author": "Gustavo Carreiro",
+	"authorUrl": "https://github.com/gustjose",
+	"isDesktopOnly": false
+}

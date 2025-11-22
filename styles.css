@@ -1,0 +1,175 @@
+/* --- PAINEL LATERAL (VIEW) --- */
+
+.syncthing-view-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Caixa de Status */
+.st-status-box {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.st-big-icon svg {
+    width: 48px;
+    height: 48px;
+}
+
+.st-status-text {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Tabela de Informações */
+.st-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.st-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.st-info-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+}
+
+.st-info-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.st-info-value {
+    font-weight: bold;
+    color: var(--text-normal);
+}
+
+/* Botões */
+.st-btn-container button {
+    width: 100%;
+    margin-top: 15px;
+    height: 40px;
+}
+
+/* --- ALERTA DE CONFLITO (VIEW) --- */
+
+.st-conflict-alert {
+    background-color: var(--background-modifier-error);
+    color: var(--text-on-accent);
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: opacity 0.2s ease;
+}
+
+.st-conflict-alert:hover {
+    opacity: 0.9;
+}
+
+/* Classe que resolve o erro do VS Code */
+.st-conflict-subtext {
+    font-size: 0.8em;
+    font-weight: normal;
+    margin-top: 4px;
+    opacity: 0.9;
+}
+
+/* --- MODAL DE RESOLUÇÃO DE CONFLITOS --- */
+
+.conflict-item-box {
+    border: 1px solid var(--background-modifier-border);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    background-color: var(--background-primary);
+}
+
+.conflict-meta {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.conflict-meta-path {
+    font-size: 0.8em;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+    font-family: var(--font-monospace);
+}
+
+.conflict-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--background-modifier-border);
+    padding-top: 10px;
+}
+
+/* --- COMPARAÇÃO DE CONTEÚDO (DIFF) --- */
+
+.st-diff-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-top: 1px solid var(--background-modifier-border);
+    padding-top: 10px;
+}
+
+.st-diff-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.st-diff-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 0.8em;
+    text-transform: uppercase;
+}
+
+.st-diff-content {
+    background-color: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 10px;
+    height: 200px;
+    overflow-y: auto;
+    font-family: var(--font-monospace);
+    font-size: 0.8em;
+    white-space: pre-wrap;
+    user-select: text;
+}
+
+.st-diff-original {
+    border-left: 3px solid var(--text-success);
+}
+
+.st-diff-conflict {
+    border-left: 3px solid var(--text-warning);
+}
