@@ -16,15 +16,35 @@ export class SyncthingSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        // --- CONEXÃO ---
+        new Setting(containerEl).setName('Syncthing Manager').setHeading();
+
+        // GERAL
+        containerEl.createEl('h4', { text: t('setting_header_general') });
+
+        new Setting(containerEl)
+            .setName(t('setting_lang_name'))
+            .setDesc(t('setting_lang_desc'))
+            .addDropdown(dropDown => {
+                dropDown.addOption('auto', 'Auto');
+                dropDown.addOption('en', 'English');
+                dropDown.addOption('pt', 'Português');
+                dropDown.setValue(this.plugin.settings.language);
+                dropDown.onChange(async (value) => {
+                    this.plugin.settings.language = value;
+                    await this.plugin.saveSettings();
+                    setLanguage(value); 
+                    this.display(); 
+                });
+            });
+
+        // CONEXÃO
         containerEl.createEl('h4', { text: t('setting_header_conn') });
 
         new Setting(containerEl)
             .setName(t('setting_host_name'))
             .setDesc(t('setting_host_desc'))
             .addText(text => {
-                text
-                    .setPlaceholder('127.0.0.1')
+                text.setPlaceholder('127.0.0.1')
                     .setValue(this.plugin.settings.syncthingHost)
                     .onChange(async (value) => {
                         this.plugin.settings.syncthingHost = value;
@@ -37,13 +57,13 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .setName(t('setting_port_name'))
             .setDesc(t('setting_port_desc'))
             .addText(text => {
-                text
-                    .setPlaceholder('8384')
+                text.setPlaceholder('8384')
                     .setValue(this.plugin.settings.syncthingPort)
                     .onChange(async (value) => {
                         this.plugin.settings.syncthingPort = value;
                         await this.plugin.saveSettings();
                     });
+                text.inputEl.addClass('st-input-full-width');
             });
 
         new Setting(containerEl)
@@ -60,8 +80,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .setName(t('setting_api_name'))
             .setDesc(t('setting_api_desc'))
             .addText(text => {
-                text
-                    .setPlaceholder('...')
+                text.setPlaceholder('...')
                     .setValue(this.plugin.settings.syncthingApiKey)
                     .onChange(async (value) => {
                         this.plugin.settings.syncthingApiKey = value;
@@ -78,7 +97,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                     await this.plugin.testarApiApenas();
                 }));
 
-        // --- PASTA ---
+        // PASTA
         containerEl.createEl('br');
         containerEl.createEl('h4', { text: t('setting_header_folder') });
 
@@ -114,10 +133,9 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 try {
                     new Notice(t('notice_searching'));
                     const folders = await SyncthingAPI.getFolders(this.plugin.apiUrl, this.plugin.settings.syncthingApiKey);
-                    
                     const selectEl = folderSetting.controlEl.querySelector('select');
                     if (selectEl) selectEl.innerHTML = '';
-
+                    
                     const optionDefault = document.createElement('option');
                     optionDefault.value = '';
                     optionDefault.text = t('dropdown_default');
@@ -132,7 +150,6 @@ export class SyncthingSettingTab extends PluginSettingTab {
                     });
                     
                     new Notice(`${folders.length} ${t('notice_folders_found')}`);
-
                 } catch (error) {
                     new Notice(t('notice_fail_conn'));
                     console.error(error);
@@ -159,26 +176,9 @@ export class SyncthingSettingTab extends PluginSettingTab {
                     new IgnoreModal(this.app).open();
                 }));
 
-
-        // --- INTERFACE ---
+        // INTERFACE
         containerEl.createEl('br');
         containerEl.createEl('h4', { text: t('setting_header_interface') });
-
-        new Setting(containerEl)
-            .setName(t('setting_lang_name'))
-            .setDesc(t('setting_lang_desc'))
-            .addDropdown(dropDown => {
-                dropDown.addOption('auto', 'Auto');
-                dropDown.addOption('en', 'English');
-                dropDown.addOption('pt', 'Português');
-                dropDown.setValue(this.plugin.settings.language);
-                dropDown.onChange(async (value) => {
-                    this.plugin.settings.language = value;
-                    await this.plugin.saveSettings();
-                    setLanguage(value); // Atualiza imediatamente
-                    this.display(); // Recarrega a interface para aplicar a tradução
-                });
-            });
 
         new Setting(containerEl)
             .setName(t('setting_status_bar_name'))

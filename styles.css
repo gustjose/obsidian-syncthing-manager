@@ -1,5 +1,62 @@
-/* --- PAINEL LATERAL (VIEW) --- */
+/* --- STATUS COLORS (USADO NO ÍCONE E TEXTO) --- */
+.st-color-success { color: var(--text-success); }
+.st-color-warning { color: var(--text-warning); }
+.st-color-error { color: var(--text-error); }
+.st-color-muted { color: var(--text-muted); }
 
+/* --- ÍCONE SVG --- */
+.st-icon-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Para a barra de status (Desktop) - Força tamanho pequeno */
+.status-bar-item-icon .st-icon-svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* --- INPUTS & TEXTAREAS --- */
+.st-input-full-width { width: 100%; }
+
+.st-textarea-code {
+    width: 100%;
+    height: 300px;
+    font-family: var(--font-monospace);
+}
+
+/* --- MODAIS --- */
+.st-modal-wide {
+    width: 80vw;
+    max-width: 1000px;
+}
+
+.st-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* --- DETAILS / SUMMARY (.stignore) --- */
+.st-details-box {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
+
+.st-summary-title {
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+    margin-top: 0;
+    outline: none;
+}
+
+/* --- VIEW LATERAL --- */
 .syncthing-view-container {
     padding: 20px;
     display: flex;
@@ -7,70 +64,7 @@
     gap: 20px;
 }
 
-/* Caixa de Status */
-.st-status-box {
-    background-color: var(--background-secondary);
-    border: 1px solid var(--background-modifier-border);
-    border-radius: 10px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.st-big-icon svg {
-    width: 48px;
-    height: 48px;
-}
-
-.st-status-text {
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-/* Tabela de Informações */
-.st-info-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.st-info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.st-info-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-muted);
-}
-
-.st-info-icon svg {
-    width: 16px;
-    height: 16px;
-}
-
-.st-info-value {
-    font-weight: bold;
-    color: var(--text-normal);
-}
-
-/* Botões */
-.st-btn-container button {
-    width: 100%;
-    margin-top: 15px;
-    height: 40px;
-}
-
-/* --- ALERTA DE CONFLITO (VIEW) --- */
-
+/* Alerta de Conflito */
 .st-conflict-alert {
     background-color: var(--background-modifier-error);
     color: var(--text-on-accent);
@@ -83,12 +77,8 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     transition: opacity 0.2s ease;
 }
+.st-conflict-alert:hover { opacity: 0.9; }
 
-.st-conflict-alert:hover {
-    opacity: 0.9;
-}
-
-/* Classe que resolve o erro do VS Code */
 .st-conflict-subtext {
     font-size: 0.8em;
     font-weight: normal;
@@ -96,8 +86,46 @@
     opacity: 0.9;
 }
 
-/* --- MODAL DE RESOLUÇÃO DE CONFLITOS --- */
+/* Status Box */
+.st-status-box {
+    background-color: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
 
+.st-big-icon svg { width: 48px; height: 48px; }
+.st-status-text { font-size: 1.2em; font-weight: bold; }
+
+/* Info Table */
+.st-info-container { display: flex; flex-direction: column; gap: 10px; }
+.st-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+.st-info-left { display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
+.st-info-icon svg { width: 16px; height: 16px; }
+.st-info-value { 
+    font-weight: bold; 
+    color: var(--text-normal);
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Botões */
+.st-btn-container button { width: 100%; margin-top: 15px; height: 40px; }
+
+/* --- MODAL DE CONFLITOS --- */
 .conflict-item-box {
     border: 1px solid var(--background-modifier-border);
     padding: 15px;
@@ -105,54 +133,16 @@
     border-radius: 8px;
     background-color: var(--background-primary);
 }
+.st-conflict-title { margin-bottom: 5px; }
+.conflict-meta { font-size: 0.85em; color: var(--text-muted); margin-top: 4px; }
+.conflict-meta-path { font-size: 0.8em; color: var(--text-faint); margin-bottom: 10px; font-family: var(--font-monospace); }
+.conflict-actions { display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--background-modifier-border); padding-top: 10px; }
+.st-flex-grow { flex-grow: 1; }
 
-.conflict-meta {
-    font-size: 0.85em;
-    color: var(--text-muted);
-    margin-top: 4px;
-}
-
-.conflict-meta-path {
-    font-size: 0.8em;
-    color: var(--text-faint);
-    margin-bottom: 10px;
-    font-family: var(--font-monospace);
-}
-
-.conflict-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    border-top: 1px solid var(--background-modifier-border);
-    padding-top: 10px;
-}
-
-/* --- COMPARAÇÃO DE CONTEÚDO (DIFF) --- */
-
-.st-diff-container {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    margin-bottom: 15px;
-    border-top: 1px solid var(--background-modifier-border);
-    padding-top: 10px;
-}
-
-.st-diff-box {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    width: 50%;
-}
-
-.st-diff-header {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: var(--text-muted);
-    font-size: 0.8em;
-    text-transform: uppercase;
-}
-
+/* Diff View */
+.st-diff-container { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 15px; border-top: 1px solid var(--background-modifier-border); padding-top: 10px; }
+.st-diff-box { flex: 1; display: flex; flex-direction: column; width: 50%; }
+.st-diff-header { font-weight: bold; margin-bottom: 5px; color: var(--text-muted); font-size: 0.8em; text-transform: uppercase; }
 .st-diff-content {
     background-color: var(--background-primary-alt);
     border: 1px solid var(--background-modifier-border);
@@ -165,69 +155,5 @@
     white-space: pre-wrap;
     user-select: text;
 }
-
-.st-diff-original {
-    border-left: 3px solid var(--text-success);
-}
-
-.st-diff-conflict {
-    border-left: 3px solid var(--text-warning);
-}
-
-/* --- REFACTOR: CONFLICT MODAL STYLES --- */
-
-/* Largura do modal */
-.st-modal-wide {
-    width: 80vw;
-    max-width: 1000px;
-}
-
-/* Espaçador flexível */
-.st-flex-grow {
-    flex-grow: 1;
-}
-
-/* Margem do título H4 */
-.st-conflict-title {
-    margin-bottom: 5px;
-}
-
-/* --- REFACTOR: GENERIC UI HELPERS --- */
-
-/* Faz inputs de texto ocuparem a largura toda */
-.st-input-full-width {
-    width: 100%;
-}
-
-/* Estilo para o editor de código (.stignore) */
-.st-textarea-code {
-    width: 100%;
-    height: 300px;
-    font-family: var(--font-monospace);
-}
-
-/* Estilo para o container <details> */
-.st-details-box {
-    border: 1px solid var(--background-modifier-border);
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    margin-top: 15px;
-}
-
-/* Estilo para o <summary> */
-.st-summary-title {
-    cursor: pointer;
-    font-weight: bold;
-    margin-bottom: 10px;
-    margin-top: 0;
-    outline: none;
-}
-
-/* Rodapé de Modais (Botões à direita) */
-.st-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
+.st-diff-original { border-left: 3px solid var(--text-success); }
+.st-diff-conflict { border-left: 3px solid var(--text-warning); }

@@ -15,7 +15,7 @@ export class IgnoreModal extends Modal {
         const { contentEl } = this;
         contentEl.empty();
         
-        this.modalEl.style.width = '600px';
+        this.modalEl.addClass('st-modal-wide');
 
         contentEl.createEl('h2', { text: t('modal_ignore_title') });
         contentEl.createEl('p', { text: t('modal_ignore_desc') });
@@ -25,7 +25,6 @@ export class IgnoreModal extends Modal {
         const container = contentEl.createDiv();
 
         const textArea = new TextAreaComponent(container);
-        
         textArea.inputEl.addClass('st-textarea-code');
         textArea.setValue(this.content);
         
@@ -37,23 +36,21 @@ export class IgnoreModal extends Modal {
         
         const details = container.createEl('details', { cls: 'st-details-box' });
 
-
         const summary = details.createEl('summary', { 
             text: t('header_ignore_templates'),
             cls: 'st-summary-title'
         });
-
 
         const suggestionsContainer = details.createDiv();
 
         const patterns = [
             { label: 'Workspace Config', rule: '.obsidian/workspace*' },
             { label: 'Installer Cache', rule: '.obsidian/installer.json' },
+            { label: 'Hidden Folders', rule: '.*' },
         ];
 
         patterns.forEach(p => {
             const settingDiv = suggestionsContainer.createDiv();
-
             new Setting(settingDiv)
                 .setName(p.label)
                 .setDesc(p.rule)
@@ -69,7 +66,6 @@ export class IgnoreModal extends Modal {
                     }));
         });
 
-        
         const footer = contentEl.createDiv({ cls: 'st-modal-footer' });
 
         const btnSave = footer.createEl('button', { cls: 'mod-cta', text: t('btn_save_ignore') });
