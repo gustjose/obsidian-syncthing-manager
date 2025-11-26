@@ -101,7 +101,6 @@ export class SyncthingView extends ItemView {
         btn.addEventListener('click', () => {
             btn.setText(t('btn_requesting'));
             btn.disabled = true;
-            // Tratamento correto da Promise
             this.plugin.forcarSincronizacao().catch(err => console.error(err));
         });
     }
