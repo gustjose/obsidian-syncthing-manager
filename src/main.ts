@@ -6,6 +6,10 @@ import { SyncthingView, VIEW_TYPE_SYNCTHING } from './ui/view';
 import { t, setLanguage } from './lang/lang';
 import { IgnoreManager } from './services/ignore-manager';
 
+interface AppWithCommands {
+    commands: { executeCommandById: (id: string) => boolean };
+}
+
 // --- Constants ---
 
 const LS_KEY_HOST = 'syncthing-controller-host';
@@ -122,7 +126,7 @@ export default class SyncthingController extends Plugin {
         await this.verificarConexao(false);
         await this.atualizarContagemDispositivos();
         
-        this.monitor.start();
+        void this.monitor.start();
     }
 
     onunload() {
@@ -199,7 +203,7 @@ export default class SyncthingController extends Plugin {
             const count = Object.values(devices).filter((d: { connected: boolean }) => d.connected).length;
             this.connectedDevices = count;
             this.atualizarTodosVisuais();
-        } catch (e) {
+        } catch {
             // Fail silently
         }
     }
@@ -210,8 +214,9 @@ export default class SyncthingController extends Plugin {
             return;
         }
 
-        if ((this.app as any).commands) {
-            (this.app as any).commands.executeCommandById('editor:save-file');
+        const app = this.app as unknown as AppWithCommands;
+        if (app.commands) {
+            app.commands.executeCommandById('editor:save-file');
         }
 
         new Notice(t('notice_syncing'));

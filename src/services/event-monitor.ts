@@ -70,7 +70,7 @@ export class SyncthingEventMonitor {
                     }
                 } 
 
-            } catch (error) {
+            } catch {
                 await this.sleep(2000);
             }
         }

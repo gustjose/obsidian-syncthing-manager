@@ -29,7 +29,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 dropDown.addOption('ru', 'Russian');
                 dropDown.setValue(this.plugin.settings.language);
                 dropDown.onChange((value) => {
-                    (async () => {
+                    void (async () => {
                         this.plugin.settings.language = value;
                         await this.plugin.saveSettings();
                         setLanguage(value);
@@ -48,7 +48,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 text.setPlaceholder('127.0.0.1')
                     .setValue(this.plugin.settings.syncthingHost)
                     .onChange((value) => {
-                        (async () => {
+                        void (async () => {
                             this.plugin.settings.syncthingHost = value;
                             await this.plugin.saveSettings();
                         })();
@@ -63,7 +63,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 text.setPlaceholder('8384')
                     .setValue(this.plugin.settings.syncthingPort)
                     .onChange((value) => {
-                        (async () => {
+                        void (async () => {
                             this.plugin.settings.syncthingPort = value;
                             await this.plugin.saveSettings();
                         })();
@@ -77,7 +77,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.useHttps)
                 .onChange((value) => {
-                    (async () => {
+                    void (async () => {
                         this.plugin.settings.useHttps = value;
                         await this.plugin.saveSettings();
                     })();
@@ -90,7 +90,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 text.setPlaceholder('...')
                     .setValue(this.plugin.settings.syncthingApiKey)
                     .onChange((value) => {
-                        (async () => {
+                        void (async () => {
                             this.plugin.settings.syncthingApiKey = value;
                             await this.plugin.saveSettings();
                         })();
@@ -103,7 +103,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 .setButtonText(t('btn_test_conn'))
                 .setCta()
                 .onClick(() => {
-                    (async () => {
+                    void (async () => {
                         try {
                             await this.plugin.testarApiApenas();
                         } catch (e) {
@@ -127,7 +127,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             dropdown.setValue(currentId);
 
             dropdown.onChange((value) => {
-                (async () => {
+                void (async () => {
                     this.plugin.settings.syncthingFolderId = value;
                     const index = dropdown.selectEl.selectedIndex;
                     if (index >= 0) {
@@ -146,7 +146,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .setIcon('search')
             .setTooltip(t('btn_search_folders'))
             .onClick(() => {
-                (async () => {
+                void (async () => {
                     try {
                         new Notice(t('notice_searching'));
                         const folders = await SyncthingAPI.getFolders(this.plugin.apiUrl, this.plugin.settings.syncthingApiKey);
@@ -181,7 +181,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.modalConflict)
                 .onChange((value) => {
-                    (async () => {
+                    void (async () => {
                         this.plugin.settings.modalConflict = value;
                         await this.plugin.saveSettings();
                     })();
@@ -206,7 +206,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.showStatusBar)
                 .onChange((value) => {
-                    (async () => {
+                    void (async () => {
                         this.plugin.settings.showStatusBar = value;
                         await this.plugin.saveSettings();
                     })();
@@ -218,7 +218,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.showRibbonIcon)
                 .onChange((value) => {
-                    (async () => {
+                    void (async () => {
                         this.plugin.settings.showRibbonIcon = value;
                         await this.plugin.saveSettings();
                     })();

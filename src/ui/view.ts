@@ -20,7 +20,10 @@ export class SyncthingView extends ItemView {
     getDisplayText() { return 'Syncthing Controller'; }
     getIcon() { return 'refresh-cw'; }
 
-    async onOpen() { this.render(); }
+    onOpen() { 
+        this.render(); 
+        return Promise.resolve();
+    }
     async onClose() {}
 
     render() {

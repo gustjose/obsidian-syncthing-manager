@@ -1,4 +1,4 @@
-import { App, Modal, Setting, TFile, ButtonComponent, Notice } from 'obsidian';
+import { App, Modal, TFile, ButtonComponent } from 'obsidian';
 import { ConflictManager, ConflictFile } from '../services/conflict-manager';
 import { t } from '../lang/lang';
 

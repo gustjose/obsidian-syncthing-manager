@@ -23,7 +23,7 @@ export class IgnoreManager {
 
             try {
                 await this.app.vault.adapter.write(this.ignoreFile, defaultContent);
-            } catch (e) { /* ... */ }
+            } catch { /* ... */ }
         }
     }
 
