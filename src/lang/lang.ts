@@ -1,6 +1,7 @@
 import { moment } from 'obsidian';
 import en from './locales/en';
 import pt from './locales/pt';
+import pt from './locales/ru';
 
 // --- Global State ---
 
