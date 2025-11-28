@@ -88,22 +88,22 @@ export default class SyncthingController extends Plugin {
         if (this.settings.showStatusBar) {
             this.statusBarItem = this.addStatusBarItem();
             this.statusBarItem.addClass('mod-clickable');
-            this.statusBarItem.setAttribute('aria-label', 'Syncthing Controller');
-            this.statusBarItem.addEventListener('click', async () => {
-                await this.forcarSincronizacao();
+            this.statusBarItem.setAttribute('aria-label', 'Syncthing controller');
+            this.statusBarItem.addEventListener('click', () => {
+                void this.forcarSincronizacao();
             });
         }
 
         if (this.settings.showRibbonIcon) {
             this.ribbonIconEl = this.addRibbonIcon('refresh-cw', t('ribbon_tooltip'), () => {
-                this.activateView();
+                void this.activateView();
             });
         }
 
         this.addCommand({
             id: 'open-syncthing-view',
             name: t('cmd_open_panel'),
-            callback: () => { this.activateView(); }
+            callback: () => { void this.activateView(); }
         });
 
         this.addCommand({
@@ -146,7 +146,7 @@ export default class SyncthingController extends Plugin {
             leaf = workspace.getRightLeaf(false);
             if (leaf) await leaf.setViewState({ type: VIEW_TYPE_SYNCTHING, active: true });
         }
-        if (leaf) workspace.revealLeaf(leaf);
+        if (leaf) await workspace.revealLeaf(leaf);
     }
 
     atualizarTodosVisuais() {
@@ -192,6 +192,7 @@ export default class SyncthingController extends Plugin {
             const status = await SyncthingAPI.getStatus(this.apiUrl, this.settings.syncthingApiKey);
             new Notice(`${t('notice_success_conn')} ${status.myID.substring(0, 5)}...`);
         } catch (error) {
+            console.error("Falha no teste de API:", error);
             new Notice(t('notice_fail_conn'));
         }
     }
@@ -231,6 +232,7 @@ export default class SyncthingController extends Plugin {
             );
             await this.atualizarContagemDispositivos();
         } catch (error) {
+            console.warn("Erro ao forçar scan:", error);
             new Notice('Erro ao solicitar Sync.');
             this.currentStatus = 'erro';
             this.atualizarTodosVisuais();

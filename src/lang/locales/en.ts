@@ -5,7 +5,7 @@ export default {
     cmd_debug_connect: 'Debug: test connection',
 
     // Ribbon Icon
-    ribbon_tooltip: 'Open Syncthing Manager',
+    ribbon_tooltip: 'Open Syncthing manager',
 
     // Status / View
     status_synced: 'Synced',
@@ -32,7 +32,7 @@ export default {
 
     // Settings - Connection
     setting_https_name: 'Use HTTPS',
-    setting_https_desc: '⚠️ IMPORTANT: Keep this DISABLED for Android/Mobile to work correctly. Only enable if you have configured a valid TLS certificate on your Desktop.',
+    setting_https_desc: 'Important: Keep this disabled for Android/mobile to work correctly. Only enable if you have configured a valid TLS certificate on your desktop.',
     setting_host_name: 'IP address / Host',
     setting_host_desc: 'The address where Syncthing GUI is running. Use "127.0.0.1" for localhost.',
     setting_port_name: 'Port',
@@ -43,7 +43,7 @@ export default {
     
     // Settings - Folder
     setting_folder_name: 'Vault folder ID',
-    setting_folder_desc: 'Select the Syncthing folder ID that matches this Obsidian Vault to track its specific status.',
+    setting_folder_desc: 'Select the Syncthing folder ID that matches this Obsidian vault to track its specific status.',
     dropdown_default: 'Select a folder...',
     dropdown_none: 'No folder selected',
     btn_search_folders: 'Fetch folders from Syncthing',
@@ -54,18 +54,18 @@ export default {
 
     // Settings - Interface
     setting_status_bar_name: 'Show status bar item',
-    setting_status_bar_desc: 'Displays the connection icon and quick actions in the bottom right status bar (Desktop only).',
+    setting_status_bar_desc: 'Displays the connection icon and quick actions in the bottom right status bar (desktop only).',
     setting_ribbon_name: 'Show ribbon icon',
     setting_ribbon_desc: 'Displays the icon in the left sidebar ribbon to quickly open the controller panel.',
 
     // Notices / Errors
     notice_syncing: 'Sync requested...',
     notice_success_conn: 'Connection successful! Device ID: ',
-    notice_fail_conn: 'Connection failed. Please check the IP, Port, and ensure HTTPS is disabled (especially on Android).',
-    notice_error_auth: 'Authentication failed. Please check your API Key.',
+    notice_fail_conn: 'Connection failed. Please check the IP, port, and ensure HTTPS is disabled (especially on Android).',
+    notice_error_auth: 'Authentication failed. Please check your API key.',
     notice_offline: 'Syncthing is unreachable. Is it running?',
     notice_folders_found: 'folders found.',
-    notice_config_first: 'Please configure the API Key and URL first.',
+    notice_config_first: 'Please configure the API key and URL first.',
     notice_searching: 'Connecting to Syncthing...',
 
     // Conflict Modal
@@ -79,7 +79,7 @@ export default {
     tooltip_keep_conflict: 'Overwrites your local file with the conflict version (right side).',
     
     // Diff View
-    diff_original_header: 'Current file (Original)',
+    diff_original_header: 'Current file (original)',
     diff_conflict_header: 'Incoming conflict',
     diff_loading: 'Loading file content...',
     diff_original_missing: '(Original file was deleted or not found)',

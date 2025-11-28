@@ -17,7 +17,7 @@ export class SyncthingView extends ItemView {
     }
 
     getViewType() { return VIEW_TYPE_SYNCTHING; }
-    getDisplayText() { return 'Syncthing Controller'; }
+    getDisplayText() { return 'Syncthing controller'; }
     getIcon() { return 'refresh-cw'; }
 
     onOpen() { 
