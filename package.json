@@ -1,6 +1,6 @@
 {
   "name": "syncthing-manager",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Control panel for Syncthing. Monitor status, resolve conflicts, and force synchronization on Desktop and Mobile.",
   "main": "main.js",
   "scripts": {
