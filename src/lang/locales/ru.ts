@@ -9,7 +9,7 @@ export default {
 
     // Status / View
     status_synced: 'Синхронизировано',
-    status_syncing: 'Синхронизирую...',
+    status_syncing: 'Синхронизация...',
     status_offline: 'Не в сети',
     status_error: 'Ошибка',
     status_unknown: 'Неизвестно',
@@ -18,13 +18,13 @@ export default {
     info_devices: 'Устройств в сети',
     info_folder: 'Папка хранилища',
     btn_sync_now: 'Синхронизировать сейчас',
-    btn_requesting: 'Запрашиваю...',
+    btn_requesting: 'Запрашивается...',
 
     // Settings - Headers
     setting_header_conn: 'Настройки соединения',
     setting_header_folder: 'Папки и файлы',
     setting_header_interface: 'Параметры интерфейса',
-    setting_header_general: 'Общие',
+    setting_header_general: 'Основные',
 
     // Settings - General
     setting_lang_name: 'Язык интерфейса',
@@ -32,9 +32,9 @@ export default {
 
     // Settings - Connection
     setting_https_name: 'Использовать HTTPS',
-    setting_https_desc: 'ВАЖНО: Для корректной работы c Android/Mobile ОТКЛЮЧИТЕ эту функцию, она также должна быть ОТКЛЮЧЕНА в Syncthing. Включайте только в том случае, если вы настроили действующий сертификат TLS на своем ПК.',
+    setting_https_desc: 'ВАЖНО: Для корректной работы c Android/Mobile ОТКЛЮЧИТЕ эту функцию, она также должна быть ОТКЛЮЧЕНА в Syncthing. Включайте только в том случае, если вы настроили действующий сертификат TLS на своем Устройстве.',
     setting_host_name: 'IP Адрес / Хост',
-    setting_host_desc: 'The address where Syncthing GUI is running. Use "127.0.0.1" for localhost.',
+    setting_host_desc: 'Адрес, по которому открывается доступ к интерфейсу Syncthing. Используйте "127.0.0.1" для локальной сети.',
     setting_port_name: 'Порт',
     setting_port_desc: 'Стандартный 8384. Проверьте настройки Syncthing через интерфейс, если вы его изменили.',
     setting_api_name: 'API Ключ',
@@ -45,7 +45,7 @@ export default {
     setting_folder_name: 'ID папки хранилища',
     setting_folder_desc: 'Выберите ID папки в Syncthing, соответствующий этому хранилищу Obsidian, чтобы отслеживать ее конкретный статус.',
     dropdown_default: 'Выберите папку...',
-    dropdown_none: 'Папка не выбрала',
+    dropdown_none: 'Папка не выбрана',
     btn_search_folders: 'Найти папки из Syncthing',
     
     // Settings - Conflict
@@ -75,7 +75,7 @@ export default {
     btn_compare: 'Сравнить содержимое',
     btn_keep_original: 'Оставить оригинал',
     tooltip_keep_original: 'Удалит конфликтные файлы (правая сторона) и оставит Ваши локальные.',
-    btn_keep_conflict: 'Use Conflict Version',
+    btn_keep_conflict: 'Использовать конфликтную',
     tooltip_keep_conflict: 'Заменяет Ваши локальные файлы на конфликтные (правая сторона).',
     
     // Diff View
@@ -93,7 +93,7 @@ export default {
     // Ignore Modal
     modal_ignore_title: 'Редактирование .stignore',
     modal_ignore_desc: 'Файлы или шаблоны вписанные ниже будут полностью проигнорированы Syncthing.',
-    header_ignore_templates: 'Встроенные Шаблоны:',
+    header_ignore_templates: 'Встроенные Шаблоны',
     btn_add_ignore: 'Добавить',
     btn_save_ignore: 'Сохранить изменения',
     notice_ignore_saved: '.stignore успешно сохранен.',
