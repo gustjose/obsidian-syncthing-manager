@@ -32,7 +32,7 @@ export default {
 
     // Settings - Connection
     setting_https_name: 'Use HTTPS',
-    setting_https_desc: 'Important: keep this disabled for android/mobile to work correctly. Only enable if you have configured a valid TLS certificate on your desktop.',
+    setting_https_desc: 'Important: keep this disabled for android/mobile to work correctly. Only enable if you have configured a valid tls certificate on your desktop.',
     setting_host_name: 'IP address / host',
     setting_host_desc: 'The address where syncthing GUI is running. Use "127.0.0.1" for localhost.',
     setting_port_name: 'Port',
@@ -43,7 +43,7 @@ export default {
     
     // Settings - Folder
     setting_folder_name: 'Vault folder ID',
-    setting_folder_desc: 'Select the Syncthing folder ID that matches this Obsidian vault to track its specific status.',
+    setting_folder_desc: 'Select the syncthing folder ID that matches this obsidian vault to track its specific status.',
     dropdown_default: 'Select a folder...',
     dropdown_none: 'No folder selected',
     btn_search_folders: 'Fetch folders from syncthing',
@@ -64,7 +64,7 @@ export default {
     notice_fail_conn: 'Connection failed. Please check the IP, port, and ensure HTTPS is disabled (especially on Android).',
     notice_error_auth: 'Authentication failed. Please check your API key.',
     notice_offline: 'Syncthing is unreachable. Is it running?',
-    notice_folders_found: 'folders found.',
+    notice_folders_found: 'Folders found.',
     notice_config_first: 'Please configure the API key and URL first.',
     notice_searching: 'Connecting to syncthing...',
 
