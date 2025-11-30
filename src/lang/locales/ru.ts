@@ -2,7 +2,7 @@ export default {
     // Commands
     cmd_open_panel: 'Открыть Боковую Панель',
     cmd_force_sync: 'Принудительно синхронизировать сейчас',
-    cmd_debug_connect: 'Отладка: Проверить Соединение',
+    cmd_debug_connect: 'Отладка: Проверить соединение',
 
     // Ribbon Icon
     ribbon_tooltip: 'Открыть контроллер Syncthing',
@@ -32,7 +32,7 @@ export default {
 
     // Settings - Connection
     setting_https_name: 'Использовать HTTPS',
-    setting_https_desc: 'ВАЖНО: Для корректной работы c Android/Mobile ОТКЛЮЧИТЕ эту функцию, она также должна быть ОТКЛЮЧЕНА в Syncthing. Включайте только в том случае, если вы настроили действующий сертификат TLS на своем Устройстве.',
+    setting_https_desc: 'ВАЖНО: Для корректной работы c Android/Mobile ОТКЛЮЧИТЕ эту функцию, она также должна быть ОТКЛЮЧЕНА в Syncthing. Включайте только в том случае, если вы настроили действующий сертификат TLS на своем устройстве.',
     setting_host_name: 'IP Адрес / Хост',
     setting_host_desc: 'Адрес, по которому открывается доступ к интерфейсу Syncthing. Используйте "127.0.0.1" для локальной сети.',
     setting_port_name: 'Порт',
@@ -50,12 +50,12 @@ export default {
     
     // Settings - Conflict
     setting_modal_conflict_name: 'Обнаружение конфликтов',
-    setting_modal_conflict_desc: 'Включить автоматический поиск ".sync-conflict" файлов. При обнаружении конфликтов на Боковой Панели появится красное предупреждение.',
+    setting_modal_conflict_desc: 'Включить автоматический поиск ".sync-conflict" файлов. При обнаружении конфликтов на боковой панели появится красное предупреждение.',
 
     // Settings - Interface
-    setting_status_bar_name: 'Показывать значок в Строке Состояния',
+    setting_status_bar_name: 'Показывать значок в строке состояния',
     setting_status_bar_desc: 'Отображает значок подключения и быстрые действия в нижней правой строке состояния (Только для ПК). Перезапустите Obsidian, чтобы применить.',
-    setting_ribbon_name: 'Показывать иконку на Вертикальной Панели',
+    setting_ribbon_name: 'Показывать иконку на вертикальной панели',
     setting_ribbon_desc: 'Отображает значок на левой вертикальной панели, чтобы быстро открыть панель управления. Перезапустите Obsidian, чтобы применить.',
 
     // Notices / Errors
@@ -93,7 +93,7 @@ export default {
     // Ignore Modal
     modal_ignore_title: 'Редактирование .stignore',
     modal_ignore_desc: 'Файлы или шаблоны вписанные ниже будут полностью проигнорированы Syncthing.',
-    header_ignore_templates: 'Встроенные Шаблоны',
+    header_ignore_templates: 'Встроенные Шаблоны:',
     btn_add_ignore: 'Добавить',
     btn_save_ignore: 'Сохранить изменения',
     notice_ignore_saved: '.stignore успешно сохранен.',
