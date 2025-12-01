@@ -325,7 +325,7 @@ export default class SyncthingController extends Plugin {
     // --- Data Persistence ---
 
     async loadSettings() {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, (await this.loadData()) as typeof DEFAULT_SETTINGS);
 
         if (this.settings.syncthingHost === 'device-specific') this.settings.syncthingHost = '';
         if (this.settings.syncthingPort === 'device-specific') this.settings.syncthingPort = '';

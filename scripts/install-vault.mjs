@@ -16,7 +16,7 @@ console.log(`📂 Destino: ${targetDir}`);
 try {
     console.log('🔨 Compilando (npm run build)...');
     execSync('npm run build', { stdio: 'inherit' });
-} catch (e) {
+} catch {
     console.error('❌ Erro na compilação. Processo abortado.');
     process.exit(1);
 }
