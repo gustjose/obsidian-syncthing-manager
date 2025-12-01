@@ -1,6 +1,6 @@
 {
   "name": "syncthing-manager",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Control panel for Syncthing. Monitor status, resolve conflicts, and force synchronization on Desktop and Mobile.",
   "type": "module",
   "main": "main.js",
@@ -9,11 +9,8 @@
     "test-cofre": "node scripts/install-vault.mjs",
     "sync-conflict": "node scripts/create-conflict.mjs",
     "build": "tsc -noEmit -skipLibCheck && node scripts/esbuild.config.mjs production",
-    
     "version": "node scripts/version-bump.mjs && git add manifest.json versions.json package-lock.json",
-    
     "lint": "eslint .",
-    
     "release:patch": "npm run lint && npm version patch",
     "release:minor": "npm run lint && npm version minor"
   },
