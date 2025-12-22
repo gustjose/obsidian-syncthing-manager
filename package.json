@@ -11,8 +11,8 @@
     "build": "tsc -noEmit -skipLibCheck && node scripts/esbuild.config.mjs production",
     "version": "node scripts/version-bump.mjs && git add manifest.json versions.json package-lock.json",
     "lint": "eslint .",
-    "release:patch": "npm run lint && npm version patch",
-    "release:minor": "npm run lint && npm version minor"
+    "release:patch": "npm run lint && npm version patch && git push --follow-tags",
+    "release:minor": "npm run lint && npm version minor && git push --follow-tags"
   },
   "keywords": [
     "obsidian",
