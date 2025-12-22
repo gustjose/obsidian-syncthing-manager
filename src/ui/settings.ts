@@ -26,7 +26,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
                 dropDown.addOption('auto', 'Auto');
                 dropDown.addOption('en', 'English');
                 dropDown.addOption('pt', 'Português');
-                dropDown.addOption('ru', 'Russian');
+                dropDown.addOption('ru', 'Русский');
                 dropDown.setValue(this.plugin.settings.language);
                 dropDown.onChange((value) => {
                     void (async () => {
