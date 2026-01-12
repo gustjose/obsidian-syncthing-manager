@@ -113,6 +113,22 @@ export default {
 	btn_save_ignore: "Save changes",
 	notice_ignore_saved: ".stignore file saved successfully.",
 	notice_ignore_exists: "This rule is already in the list.",
+	ignore_help_text:
+		'Click "add" to include common rules that prevent sync issues between desktop and mobile.',
+
+	ignore_pattern_workspace_label: "Workspace config",
+	ignore_pattern_workspace_desc:
+		"Essential! Ignores open window positions and tabs (avoids visual conflicts between desktop and mobile).",
+
+	ignore_pattern_installer_label: "Installer cache",
+	ignore_pattern_installer_desc: "Ignores temporary Obsidian update files.",
+
+	ignore_pattern_hidden_label: "Hidden files",
+	ignore_pattern_hidden_desc:
+		"Ignores system files (like .ds_store on mac or thumbs.db on Windows).",
+
+	notice_ignore_added: "Added: ",
+	notice_ignore_error: "Error saving .stignore",
 
 	// Alerts
 	alert_conflict_detected: "Conflict(s) detected!",
