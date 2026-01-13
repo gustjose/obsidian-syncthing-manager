@@ -23,50 +23,65 @@ jobs:
                   python-version: "3.10"
 
             - name: Install Dependencies
-              run: pip install -q -U google-generativeai
+              run: pip install -q -U google-genai
 
             - name: Generate Notes
               env:
                   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
                   TAG_NAME: ${{ github.ref_name }}
               run: |
-                  # 1. Coleta dados do Git
                   LATEST_TAG=$TAG_NAME
                   if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-                    LATEST_TAG=$(git describe --tags --abbrev=0)
+                    LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "latest")
                   fi
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
 
                   git log $PREVIOUS_TAG..$LATEST_TAG --oneline > commits.txt
                   git diff $PREVIOUS_TAG..$LATEST_TAG > changes.diff
 
-                  # 2. Roda o script Python (Gera o arquivo gemini_notes.md)
                   python - <<EOF
                   import os
-                  import google.generativeai as genai
+                  from google import genai
 
-                  genai.configure(api_key=os.environ['GEMINI_API_KEY'])
-                  model = genai.GenerativeModel('gemini-1.5-flash')
-
-                  commits = open('commits.txt').read()
-                  diff = open('changes.diff').read()[:5000] # Limite de seguranca
-
-                  prompt = f"""Write professional Release Notes in English for version {os.environ['TAG_NAME']}.
-                  Structure: 🚀 Features, 🐛 Bug Fixes, ⚙️ Technical Changes.
-
-                  COMMITS:
-                  {commits}
-
-                  DIFF:
-                  {diff}"""
+                  # Nova sintaxe da biblioteca google-genai
+                  client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
 
                   try:
-                      response = model.generate_content(prompt)
-                      with open('gemini_notes.md', 'w') as f:
+                      with open('commits.txt', 'r') as f: commits = f.read()
+                      with open('changes.diff', 'r') as f: diff = f.read()[:7000]
+
+                      prompt = f"""You are a Senior Software Engineer. Generate professional release notes in Markdown.
+                      Version: {os.environ['TAG_NAME']}
+                      
+                      Structure:
+                      ## 🚀 Features
+                      ## 🐛 Bug Fixes
+                      ## ⚙️ Technical Changes
+
+                      COMMITS:
+                      {commits}
+
+                      DIFF:
+                      {diff}
+                      """
+
+                      # Chamada atualizada para o modelo 2.0
+                      response = client.models.generate_content(
+                          model="gemini-1.5-flash",
+                          contents=prompt
+                      )
+                      
+                      with open('gemini_notes.md', 'w', encoding='utf-8') as f:
                           f.write(response.text)
+
                   except Exception as e:
-                      with open('gemini_notes.md', 'w') as f:
-                          f.write(f"Release {os.environ['TAG_NAME']}\n\nAutomated notes unavailable.\n\nCommits:\n{commits}")
+                      # Fallback melhor estruturado em Markdown caso a IA falhe
+                      with open('gemini_notes.md', 'w', encoding='utf-8') as f:
+                          f.write(f"# Release {os.environ['TAG_NAME']}\n\n")
+                          f.write("⚠️ *AI Generation failed, listing commits manually:*\n\n")
+                          f.write("## 📝 Commits\n")
+                          with open('commits.txt', 'r') as c: f.write(c.read())
+                          print(f"Error detail: {e}")
                   EOF
 
             - name: Create Release
