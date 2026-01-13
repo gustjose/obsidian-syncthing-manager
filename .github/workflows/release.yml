@@ -2,8 +2,7 @@ name: Gemini AI Release Notes
 
 on:
     push:
-        tags:
-            - "*"
+        tags: ["*"]
     workflow_dispatch:
 
 jobs:
@@ -18,56 +17,59 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Prepare Prompt and Context
-              id: prepare_data
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: "3.10"
+
+            - name: Install Dependencies
+              run: pip install -q -U google-generativeai
+
+            - name: Generate Notes
+              env:
+                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+                  TAG_NAME: ${{ github.ref_name }}
               run: |
-                  # Identifica as tags
-                  LATEST_TAG=${{ github.ref_name }}
+                  # 1. Coleta dados do Git
+                  LATEST_TAG=$TAG_NAME
                   if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
                     LATEST_TAG=$(git describe --tags --abbrev=0)
                   fi
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
 
-                  # Coleta commits e diff
-                  if [ -z "$PREVIOUS_TAG" ]; then
-                    git log --oneline > commits.txt
-                    git diff > changes.diff
-                  else
-                    git log $PREVIOUS_TAG..$LATEST_TAG --oneline > commits.txt
-                    git diff $PREVIOUS_TAG..$LATEST_TAG > changes.diff
-                  fi
+                  git log $PREVIOUS_TAG..$LATEST_TAG --oneline > commits.txt
+                  git diff $PREVIOUS_TAG..$LATEST_TAG > changes.diff
 
-                  # Monta o arquivo de prompt final para evitar erros de interpolação no YAML
-                  echo "You are a Senior Software Engineer. Write professional Release Notes in English for version $LATEST_TAG." > final_prompt.txt
-                  echo -e "\nSTRUCTURE:" >> final_prompt.txt
-                  echo -e "## 🚀 Features\n## 🐛 Bug Fixes\n## ⚙️ Technical Changes\n" >> final_prompt.txt
-                  echo "COMMITS:" >> final_prompt.txt
-                  cat commits.txt >> final_prompt.txt
-                  echo -e "\nDIFF:" >> final_prompt.txt
-                  cat changes.diff | head -c 5000 >> final_prompt.txt
+                  # 2. Roda o script Python (Gera o arquivo gemini_notes.md)
+                  python - <<EOF
+                  import os
+                  import google.generativeai as genai
 
-            - name: Generate Release Notes with Gemini
-              uses: google-github-actions/run-gemini-cli@v0
-              id: gemini_step
-              with:
-                  gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
-                  gemini_model: "gemini-1.5-flash"
-                  # Passamos o conteúdo do arquivo criado no passo anterior
-                  prompt: "$(cat final_prompt.txt)"
+                  genai.configure(api_key=os.environ['GEMINI_API_KEY'])
+                  model = genai.GenerativeModel('gemini-1.5-flash')
 
-            - name: Save Gemini Output to File
-              run: |
-                  # Captura a resposta da IA. Se estiver vazia, gera um fallback básico.
-                  RESPONSE="${{ steps.gemini_step.outputs.gemini_response }}"
-                  if [ -z "$RESPONSE" ] || [ "$RESPONSE" == "null" ]; then
-                    echo "## Release ${{ github.ref_name }}" > gemini_notes.md
-                    echo "AI generation failed. Please check the commits manually." >> gemini_notes.md
-                    cat commits.txt >> gemini_notes.md
-                  else
-                    echo "$RESPONSE" > gemini_notes.md
-                  fi
+                  commits = open('commits.txt').read()
+                  diff = open('changes.diff').read()[:5000] # Limite de seguranca
 
-            - name: Create or Update GitHub Release
+                  prompt = f"""Write professional Release Notes in English for version {os.environ['TAG_NAME']}.
+                  Structure: 🚀 Features, 🐛 Bug Fixes, ⚙️ Technical Changes.
+
+                  COMMITS:
+                  {commits}
+
+                  DIFF:
+                  {diff}"""
+
+                  try:
+                      response = model.generate_content(prompt)
+                      with open('gemini_notes.md', 'w') as f:
+                          f.write(response.text)
+                  except Exception as e:
+                      with open('gemini_notes.md', 'w') as f:
+                          f.write(f"Release {os.environ['TAG_NAME']}\n\nAutomated notes unavailable.\n\nCommits:\n{commits}")
+                  EOF
+
+            - name: Create Release
               uses: softprops/action-gh-release@v1
               with:
                   body_path: gemini_notes.md
