@@ -1,158 +1,65 @@
-name: Gemini AI Release Notes
+name: AI Release
 
 on:
     push:
         tags:
             - "*"
-    workflow_dispatch:
 
 jobs:
-    release-ai:
+    build-release:
         runs-on: ubuntu-latest
-
         permissions:
             contents: write
 
         steps:
-            - name: Checkout code
+            - name: Checkout Code
               uses: actions/checkout@v4
               with:
                   fetch-depth: 0
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install NPM Dependencies and Build
+              run: |
+                  npm install
+                  npm run build
 
             - name: Set up Python
               uses: actions/setup-python@v4
               with:
                   python-version: "3.10"
 
-            - name: Install dependencies
-              run: pip install -q -U google-genai
+            - name: Install Python Dependencies
+              run: pip install google-genai
 
-            - name: Prepare git data & generate release notes
+            - name: Get Git Data
+              run: |
+                  # Define o intervalo de comparação (da tag anterior até a atual)
+                  PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
+
+                  # Git Log com exclusão
+                  git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s" -- . ":(exclude).github/workflows" ":(exclude)scripts" > commits.txt
+
+                  # Git Diff com exclusão
+                  git diff $PREVIOUS_TAG..HEAD -- . ":(exclude).github/workflows" ":(exclude)scripts" > changes.diff
+
+            - name: Generate Notes with Gemini
               env:
                   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-                  GITHUB_REF_NAME: ${{ github.ref_name }}
-                  GITHUB_EVENT_NAME: ${{ github.event_name }}
-              run: |
-                  set -e
-
-                  echo "🔖 Ref name: $GITHUB_REF_NAME"
-                  echo "🎯 Event: $GITHUB_EVENT_NAME"
-
-                  # --------------------------------------------------
-                  # 1. Determinar tag atual
-                  # --------------------------------------------------
-                  if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
-                    echo "⚠️ workflow_dispatch detectado — nenhum release será criado."
-                    CURRENT_REF="HEAD"
-                  else
-                    CURRENT_REF="$GITHUB_REF_NAME"
-                  fi
-
-                  # --------------------------------------------------
-                  # 2. Encontrar tag anterior
-                  # --------------------------------------------------
-                  PREVIOUS_TAG=$(git describe --tags --abbrev=0 "${CURRENT_REF}^" 2>/dev/null || echo "")
-                  echo "⬅️ Previous tag: $PREVIOUS_TAG"
-
-                  # --------------------------------------------------
-                  # 3. Coletar commits e diff (com exclusões)
-                  # --------------------------------------------------
-                  EXCLUDE_PATH=":(exclude).github/* :(exclude)*.py :(exclude)scripts/*"
-
-                  git log ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$CURRENT_REF \
-                    --oneline -- . $EXCLUDE_PATH > commits.txt || true
-
-                  git diff ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$CURRENT_REF \
-                    -- . $EXCLUDE_PATH > changes.diff || true
-
-                  # --------------------------------------------------
-                  # 4. Gerar release notes com Gemini
-                  # --------------------------------------------------
-                  python - <<'EOF'
-                  import os, traceback
-                  from google import genai
-                  from google.genai import types
-
-                  tag_name = os.environ.get("GITHUB_REF_NAME", "latest")
-
-                  try:
-                      client = genai.Client()
-
-                      commits = open("commits.txt", encoding="utf-8").read().strip()
-                      diff = open("changes.diff", encoding="utf-8").read()[:7000]
-
-                      if not commits:
-                          commits = "Internal maintenance and updates."
-
-                      system_instruction = (
-                          "You are a release notes generator. "
-                          "Return ONLY raw Markdown. "
-                          "No greetings. No explanations. No code fences."
-                      )
-
-                      prompt = (
-                          f"Write professional release notes in English for version {tag_name}.\n\n"
-                          f"COMMITS:\n{commits}\n\n"
-                          f"DIFF:\n{diff}"
-                      )
-
-                      response = client.models.generate_content(
-                          model="gemini-2.5-flash",
-                          config=types.GenerateContentConfig(
-                              system_instruction=system_instruction
-                          ),
-                          contents=prompt
-                      )
-
-                      content = (response.text or "").strip()
-
-                      if content.startswith("```"):
-                          content = "\n".join(
-                              line for line in content.splitlines()
-                              if not line.startswith("```")
-                          )
-
-                      if not content.startswith("#"):
-                          content = f"# Release {tag_name}\n\n{content}"
-
-                      with open("gemini_notes.md", "w", encoding="utf-8") as f:
-                          f.write(content.strip())
-
-                  except Exception:
-                      with open("error.log", "w") as f:
-                          f.write(traceback.format_exc())
-
-                      fallback_commits = "Internal maintenance and updates."
-                      try:
-                          fallback_commits = open("commits.txt").read()
-                      except Exception:
-                          pass
-
-                      with open("gemini_notes.md", "w", encoding="utf-8") as f:
-                          f.write(
-                              f"# Release {tag_name}\n\n"
-                              "⚠️ AI generation failed. See error.log.\n\n"
-                              "## Commits\n"
-                              f"{fallback_commits}"
-                          )
-                  EOF
-
-            - name: Show Gemini error (if any)
-              if: always()
-              run: |
-                  if [ -f error.log ]; then
-                    echo "❌ Gemini error:"
-                    cat error.log
-                  fi
+                  TAG_NAME: ${{ github.ref_name }}
+              run: python .github/workflows/generate_notes.py
 
             - name: Create GitHub Release
-              if: startsWith(github.ref, 'refs/tags/')
               uses: softprops/action-gh-release@v1
               with:
-                  tag_name: ${{ github.ref_name }}
-                  name: Release ${{ github.ref_name }}
                   body_path: gemini_notes.md
+                  name: Release ${{ github.ref_name }}
                   draft: true
+                  prerelease: false
                   files: |
                       main.js
                       manifest.json
