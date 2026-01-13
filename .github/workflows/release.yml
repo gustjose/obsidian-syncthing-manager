@@ -21,16 +21,12 @@ jobs:
             - name: Get Changes (Diff & Logs)
               id: get_changes
               run: |
-                  # Identifica a tag atual (seja por push ou manual)
                   LATEST_TAG=${{ github.ref_name }}
                   if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
                     LATEST_TAG=$(git describe --tags --abbrev=0)
                   fi
 
-                  # Tenta encontrar a tag anterior
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
-
-                  echo "Analysing changes for $LATEST_TAG since $PREVIOUS_TAG"
 
                   if [ -z "$PREVIOUS_TAG" ]; then
                     git log --oneline > commits.txt
@@ -45,9 +41,10 @@ jobs:
               id: gemini_step
               with:
                   gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
+                  gemini_model: "gemini-1.5-flash"
                   prompt: |
-                      You are a Senior Software Engineer. Write professional Release Notes in English for version ${{ github.ref_name }}.
-                      Analyze the provided Git Commits and the Git Diff.
+                      Analyze these Git Commits and the Code Diff. 
+                      Generate a professional release note in English for version ${{ github.ref_name }}.
 
                       STRUCTURE:
                       ## 🚀 Features
@@ -58,12 +55,11 @@ jobs:
                       $(cat commits.txt)
 
                       DIFF:
-                      $(cat changes.diff | head -c 8000)
+                      $(cat changes.diff | head -c 5000)
 
             - name: Save Gemini Output to File
               run: |
-                  # A Action coloca a resposta em steps.<id>.outputs.responses
-                  # Salvamos o conteúdo no arquivo que o próximo passo irá ler
+                  # Limpa a resposta para garantir que seja apenas o texto Markdown
                   echo "${{ steps.gemini_step.outputs.responses }}" > gemini_notes.md
 
             - name: Create or Update GitHub Release
