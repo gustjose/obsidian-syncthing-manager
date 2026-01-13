@@ -1,7 +1,7 @@
 {
 	"id": "syncthing-manager",
 	"name": "Syncthing Manager",
-	"version": "1.0.15",
+	"version": "1.0.16",
 	"minAppVersion": "0.15.0",
 	"description": "Control panel for Syncthing. Monitor status, resolve conflicts, and force synchronization on Desktop and Mobile.",
 	"author": "Gustavo Carreiro",
