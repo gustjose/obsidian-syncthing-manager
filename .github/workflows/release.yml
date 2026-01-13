@@ -32,7 +32,7 @@ jobs:
               run: |
                   # 1. Definição do intervalo de análise
                   LATEST_TAG=$TAG_NAME
-                  if [[ "${{ github.event_name }}" == "workflow_dispatch" || "$LATEST_TAG" == "master" ]]; then
+                  if [[ "${{ github.event_name }}" == "workflow_dispatch" || "$LATEST_TAG" == "master" || "$LATEST_TAG" == "main" ]]; then
                     LATEST_TAG="HEAD"
                   fi
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
@@ -43,8 +43,8 @@ jobs:
                   git log ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$LATEST_TAG --oneline -- . $EXCLUDE_PATH > commits.txt
                   git diff ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$LATEST_TAG -- . $EXCLUDE_PATH > changes.diff
 
-                  # 3. Script Python Robusto
-                  python - <<EOF
+                  # 3. Script Python Robusto (com 'EOF' para evitar erro de Syntax)
+                  python - <<'EOF'
                   import os
                   from google import genai
                   from google.genai import types
@@ -58,11 +58,13 @@ jobs:
                       with open('commits.txt', 'r') as f: commits = f.read()
                       with open('changes.diff', 'r') as f: diff = f.read()[:7000]
 
+                      tag_display = os.environ.get('TAG_NAME', 'latest')
+                      
                       if not commits.strip():
                           commits = "Internal maintenance and updates."
 
                       sys_instr = "You are a professional tool. Output ONLY raw Markdown. No conversational text, no greetings, no backticks."
-                      prompt = f"Write release notes in English for version {os.environ['TAG_NAME']}.\nCommits: {commits}\nDiff: {diff}"
+                      prompt = f"Write release notes in English for version {tag_display}.\nCommits: {commits}\nDiff: {diff}"
 
                       response = client.models.generate_content(
                           model="gemini-2.5-flash",
@@ -82,8 +84,9 @@ jobs:
                       with open('gemini_notes.md', 'w', encoding='utf-8') as f:
                           f.write(content.strip())
                   except Exception as e:
+                      tag_display = os.environ.get('TAG_NAME', 'Manual')
                       with open('gemini_notes.md', 'w', encoding='utf-8') as f:
-                          f.write(f"# Release {os.environ['TAG_NAME']}\n\n⚠️ AI failed. Commits:\n{commits}")
+                          f.write(f"# Release {tag_display}\n\n⚠️ AI failed. Commits:\n{commits}")
                   EOF
 
             - name: Create Release
