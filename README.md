@@ -1,98 +1,128 @@
-<h1 align="center">
-  Syncthing Manager for Obsidian
-</h1>
-<br>
+<div align="center">
+  <img src="docs/images/logo.png" width="75" height="75" style="vertical-align: middle;">
+  <span style="font-size: 2.5em; font-weight: bold; vertical-align: middle; margin-left: 10px;">
+    Syncthing Manager for Obsidian
+  </span>
+</div>
+
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/gustjose/obsidian-syncthing-manager?style=for-the-badge&color=8A2BE2" alt="Latest Release">
-  <img src="https://img.shields.io/github/downloads/gustjose/obsidian-syncthing-manager/total?style=for-the-badge&color=8A2BE2" alt="Total Downloads">
+  <b>Control, monitor, and manage your Syncthing synchronization directly from Obsidian.</b>
 </p>
+
+<p align="center" style="margin-top:3rem; margin-botton: 3rem; display:flex; justify-content: center; gap: 2rem;">
+  <img src="https://img.shields.io/github/v/release/gustjose/obsidian-syncthing-manager?style=for-the-badge&logo=github&color=0890C2" alt="Latest Release">
+  <img src="https://img.shields.io/github/downloads/gustjose/obsidian-syncthing-manager/total?style=for-the-badge&logo=obsidian&color=0890C2" alt="Total Downloads">
+  <img src="https://img.shields.io/github/last-commit/gustjose/obsidian-syncthing-manager?style=for-the-badge&color=0890C2" alt="Last Commit">
+  <img src="https://img.shields.io/github/license/gustjose/obsidian-syncthing-manager?style=for-the-badge&logo=opensourceinitiative&logoColor=fff&color=0890C2" alt="License">
+</p>
+
 <br>
 
-**Control, monitor, and manage your Syncthing synchronization directly from Obsidian.**
+![Plugin Overview](docs/images/overview.gif)
 
 This plugin acts as a bridge to your local Syncthing API, providing real-time status updates, a powerful conflict resolver, and tools to keep your vault healthy across Desktop and Mobile devices.
 
-![Plugin Overview](docs/images/overview.png)
+## Table of Contents
 
-## ✨ Key Features
-
-* **🟢 Live Status Monitoring:** Know immediately if your vault is Synced, Syncing, or Disconnected via the Status Bar (Desktop) or Side Panel (Mobile).
-* **⚔️ Conflict Resolver:** Automatically detects `.sync-conflict` files and provides a **side-by-side diff view** to compare content before deciding to keep the original or accept the conflict version.
-* **🛡️ .stignore Editor:** Easily manage ignored files (like `workspace.json` layouts) using built-in templates to prevent glitches between Mobile and Desktop.
-* **📱 Mobile Optimized:** Features a responsive **Side Panel View** designed specifically for Android workflows.
-* **🌍 Multi-language:** Fully translated into **English**,**Portuguese (Português-BR)** and **Russian**.
-
-## ⚙️ Configuration
-
-### 1. Get your API Key
-1.  Open Syncthing on your device.
-2.  Go to **Actions** > **Settings** > **General**.
-3.  Copy the **API Key**.
-
-### 2. Setup in Obsidian
-1.  Open Obsidian Settings > **Syncthing Manager**.
-2.  Paste your **API Key**.
-3.  Set the URL/Host (Default: `127.0.0.1`) and Port (Default: `8384`).
-4.  Click **Test Connection**.
-5.  **Important:** Select your **Vault Folder** from the dropdown menu to track specific events for this vault.
+-   [Features](#features)
+-   [Quick Start](#quick-start)
+-   [Android Setup (Critical)](#android-setup-critical)
+-   [Conflict Resolution](#conflict-resolution)
+-   [Ignoring Files (.stignore)](#ignoring-files-stignore)
+-   [FAQ & Troubleshooting](#faq--troubleshooting)
+-   [Installation](#installation)
 
 ---
 
-### 📱 Android Setup (Critical)
+## Features
 
-To use this plugin on Android (via *Syncthing-Fork* or the official app), you must configure Syncthing to allow local HTTP connections.
-
-> [!WARNING]
-> **HTTPS Restriction:** Obsidian Mobile cannot connect to self-signed HTTPS certificates on localhost. You **must disable HTTPS** for the GUI in the Syncthing App settings.
-
-1.  Open the Syncthing App > **Settings** > **GUI**.
-2.  Set **GUI Listen Address** to `127.0.0.1:8384` (This restricts access to your phone only, keeping it safe).
-3.  **Disable** the "Use HTTPS for GUI" option.
-    * *Note: If the app keeps re-enabling HTTPS, ensure you have cleared the "GUI Authentication User/Password" fields, as the app enforces HTTPS if a password is set.*
-4.  Restart the Syncthing App.
-5.  In the Obsidian Plugin Settings, ensure **Use HTTPS** is **OFF**.
+-   **Status Monitoring:** Real-time visibility of your vault status (Synced, Syncing, or Disconnected) via the Status Bar or Side Panel.
+-   **Conflict Resolver:** Intelligent detection of `.sync-conflict` files with a side-by-side diff view for safe resolution.
+-   **.stignore Editor:** Manage ignored files (such as `workspace.json`) directly within Obsidian using built-in templates.
+-   **Mobile Optimized:** Responsive Side Panel View designed specifically for Android integration.
+-   **Localization:** Full support for English, Portuguese (Português-BR), and Russian.
 
 ---
 
-## 📖 Features Guide
+## Quick Start
 
-### ⚔️ Conflict Resolution
-When a sync conflict occurs (e.g., edited the same note on two devices while offline), a red alert will appear in the Syncthing View.
+1. **Install:** Use [BRAT](#installation) or download the latest release.
+2. **Get API Key:** In Syncthing, navigate to **Actions** > **Settings** > **General** and copy the **API Key**.
+3. **Configure:** - Open Obsidian Settings > **Syncthing Manager**.
+    - Paste your API Key and click **Test Connection**.
+    - **Note:** Select your **Vault Folder** from the dropdown menu to track specific vault events.
 
-1.  Click the alert to open the **Conflict Resolver**.
-2.  Click **Compare Content** to see the differences side-by-side.
-3.  Choose:
-    * **Keep Original:** Deletes the conflict file.
-    * **Use This Version:** Overwrites your current note with the conflict version.
+---
+
+## Android Setup (Critical)
+
+To use this plugin on Android (via _Syncthing-Fork_ or the official app), you must allow local HTTP connections.
+
+> [!WARNING] > **HTTPS Restriction:** Obsidian Mobile cannot connect to self-signed HTTPS certificates on localhost. You **must disable HTTPS** in the Syncthing App settings. Since the address is restricted to `127.0.0.1`, your traffic remains local and secure.
+
+1. Open Syncthing App > **Settings** > **GUI**.
+2. Set **GUI Listen Address** to `127.0.0.1:8384`.
+3. **Disable** "Use HTTPS for GUI".
+    - _Note: Ensure you have cleared "GUI Authentication User/Password" fields, otherwise the app may enforce HTTPS._
+4. Restart the Syncthing App.
+5. In Obsidian, ensure **Use HTTPS** is toggled **OFF**.
+
+---
+
+## Features Guide
+
+### Conflict Resolution
+
+When a sync conflict occurs, a status alert will appear in the Syncthing View.
+
+1. Click the alert to open the **Conflict Resolver**.
+2. Select **Compare Content** for a side-by-side comparison.
+3. Choose **Keep Original** (removes conflict file) or **Use This Version** (overwrites current file).
 
 ![Conflict Modal](docs/images/conflict.png)
 
-### 🛡️ Ignoring Files (.stignore)
-To prevent Obsidian layout settings from syncing and messing up your mobile workspace:
+### Ignoring Files (.stignore)
 
-1.  Open **Settings** > **Syncthing Manager**.
-2.  Click **Edit .stignore**.
-3.  Use the "Add Common Patterns" buttons to quickly ignore workspace configs or installer caches.
-
-![Ignoring Files](docs/images/ignore_files.png)
+1. Open **Settings** > **Syncthing Manager** > **Edit .stignore**.
+2. Use "Add Common Patterns" to ignore `workspace.json` or cache files to prevent UI inconsistencies between devices.
 
 ---
 
-## 📥 Installation
+## FAQ & Troubleshooting
 
-### Manual / BRAT (Beta)
-1.  Install the **BRAT** plugin from the Community Store.
-2.  Add this repository URL: `https://github.com/gustjose/obsidian-syncthing-manager`.
-3.  Enable "Syncthing Manager".
+**Q: Plugin status shows "Disconnected".**
+
+-   Verify that the Syncthing service is running on your device.
+-   Ensure the API Key in settings matches your Syncthing configuration exactly.
+
+**Q: Is it secure to disable HTTPS on Android?**
+
+-   Yes. By setting the **GUI Listen Address** to `127.0.0.1`, access is restricted exclusively to applications running on the same device.
 
 ---
 
-## 🤝 Contributing
+## Installation
 
-Feel free to open issues or PRs!
+### BRAT (Beta)
 
-* **Build:** `npm run build`
-* **Dev:** `npm run dev`
+1. Install the **BRAT** plugin from the Obsidian Community Store.
+2. Add this repository URL: `https://github.com/gustjose/obsidian-syncthing-manager`.
+3. Enable **Syncthing Manager**.
+
+---
+
+## Contributing
+
+Contributions are welcome! If you encounter bugs or have feature requests, please open an issue.
+
+-   **Build:** `npm run build`
+-   **Dev:** `npm run dev`
+
+---
 
 ## License
-[LICENSE](LICENSE)
+
+This project is licensed under the [MIT License](LICENSE).  
+Copyright © 2025 Gustavo Carreiro.
+
+Distributed under the MIT License. See `LICENSE` for more information.
