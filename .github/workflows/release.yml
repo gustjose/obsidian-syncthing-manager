@@ -18,16 +18,17 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Get Changes (Diff & Logs)
-              id: get_changes
+            - name: Prepare Prompt and Context
+              id: prepare_data
               run: |
+                  # Identifica as tags
                   LATEST_TAG=${{ github.ref_name }}
                   if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
                     LATEST_TAG=$(git describe --tags --abbrev=0)
                   fi
-
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
 
+                  # Coleta commits e diff
                   if [ -z "$PREVIOUS_TAG" ]; then
                     git log --oneline > commits.txt
                     git diff > changes.diff
@@ -36,31 +37,35 @@ jobs:
                     git diff $PREVIOUS_TAG..$LATEST_TAG > changes.diff
                   fi
 
+                  # Monta o arquivo de prompt final para evitar erros de interpolação no YAML
+                  echo "You are a Senior Software Engineer. Write professional Release Notes in English for version $LATEST_TAG." > final_prompt.txt
+                  echo -e "\nSTRUCTURE:" >> final_prompt.txt
+                  echo -e "## 🚀 Features\n## 🐛 Bug Fixes\n## ⚙️ Technical Changes\n" >> final_prompt.txt
+                  echo "COMMITS:" >> final_prompt.txt
+                  cat commits.txt >> final_prompt.txt
+                  echo -e "\nDIFF:" >> final_prompt.txt
+                  cat changes.diff | head -c 5000 >> final_prompt.txt
+
             - name: Generate Release Notes with Gemini
               uses: google-github-actions/run-gemini-cli@v0
               id: gemini_step
               with:
                   gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
                   gemini_model: "gemini-1.5-flash"
-                  prompt: |
-                      Analyze these Git Commits and the Code Diff. 
-                      Generate a professional release note in English for version ${{ github.ref_name }}.
-
-                      STRUCTURE:
-                      ## 🚀 Features
-                      ## 🐛 Bug Fixes
-                      ## ⚙️ Technical Changes
-
-                      COMMITS:
-                      $(cat commits.txt)
-
-                      DIFF:
-                      $(cat changes.diff | head -c 5000)
+                  # Passamos o conteúdo do arquivo criado no passo anterior
+                  prompt: "$(cat final_prompt.txt)"
 
             - name: Save Gemini Output to File
               run: |
-                  # Limpa a resposta para garantir que seja apenas o texto Markdown
-                  echo "${{ steps.gemini_step.outputs.responses }}" > gemini_notes.md
+                  # Captura a resposta da IA. Se estiver vazia, gera um fallback básico.
+                  RESPONSE="${{ steps.gemini_step.outputs.gemini_response }}"
+                  if [ -z "$RESPONSE" ] || [ "$RESPONSE" == "null" ]; then
+                    echo "## Release ${{ github.ref_name }}" > gemini_notes.md
+                    echo "AI generation failed. Please check the commits manually." >> gemini_notes.md
+                    cat commits.txt >> gemini_notes.md
+                  else
+                    echo "$RESPONSE" > gemini_notes.md
+                  fi
 
             - name: Create or Update GitHub Release
               uses: softprops/action-gh-release@v1
