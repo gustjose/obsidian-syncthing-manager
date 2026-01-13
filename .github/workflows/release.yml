@@ -30,58 +30,60 @@ jobs:
                   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
                   TAG_NAME: ${{ github.ref_name }}
               run: |
+                  # 1. Definição do intervalo de análise
                   LATEST_TAG=$TAG_NAME
-                  if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-                    LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "latest")
+                  if [[ "${{ github.event_name }}" == "workflow_dispatch" || "$LATEST_TAG" == "master" ]]; then
+                    LATEST_TAG="HEAD"
                   fi
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
 
-                  git log $PREVIOUS_TAG..$LATEST_TAG --oneline > commits.txt
-                  git diff $PREVIOUS_TAG..$LATEST_TAG > changes.diff
+                  # 2. Filtros para ignorar arquivos de infraestrutura e scripts
+                  EXCLUDE_PATH=':(exclude).github/* :(exclude)*.py :(exclude)scripts/*'
 
+                  git log ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$LATEST_TAG --oneline -- . $EXCLUDE_PATH > commits.txt
+                  git diff ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$LATEST_TAG -- . $EXCLUDE_PATH > changes.diff
+
+                  # 3. Script Python Robusto
                   python - <<EOF
                   import os
                   from google import genai
-
-                  # Nova sintaxe da biblioteca google-genai
-                  client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])
+                  from google.genai import types
 
                   try:
+                      client = genai.Client(
+                          api_key=os.environ['GEMINI_API_KEY'],
+                          http_options={'api_version': 'v1'}
+                      )
+                      
                       with open('commits.txt', 'r') as f: commits = f.read()
                       with open('changes.diff', 'r') as f: diff = f.read()[:7000]
 
-                      prompt = f"""You are a Senior Software Engineer. Generate professional release notes in Markdown.
-                      Version: {os.environ['TAG_NAME']}
-                      
-                      Structure:
-                      ## 🚀 Features
-                      ## 🐛 Bug Fixes
-                      ## ⚙️ Technical Changes
+                      if not commits.strip():
+                          commits = "Internal maintenance and updates."
 
-                      COMMITS:
-                      {commits}
+                      sys_instr = "You are a professional tool. Output ONLY raw Markdown. No conversational text, no greetings, no backticks."
+                      prompt = f"Write release notes in English for version {os.environ['TAG_NAME']}.\nCommits: {commits}\nDiff: {diff}"
 
-                      DIFF:
-                      {diff}
-                      """
-
-                      # Chamada atualizada para o modelo 2.0
                       response = client.models.generate_content(
-                          model="gemini-1.5-flash",
+                          model="gemini-2.5-flash",
+                          config=types.GenerateContentConfig(system_instruction=sys_instr),
                           contents=prompt
                       )
                       
-                      with open('gemini_notes.md', 'w', encoding='utf-8') as f:
-                          f.write(response.text)
+                      content = response.text.strip()
+                      
+                      # Limpeza de blocos de código Markdown indesejados
+                      if content.startswith("```"):
+                          content = "\n".join([l for l in content.splitlines() if not l.startswith("```")])
+                      
+                      if "#" in content:
+                          content = content[content.find("#"):]
 
-                  except Exception as e:
-                      # Fallback melhor estruturado em Markdown caso a IA falhe
                       with open('gemini_notes.md', 'w', encoding='utf-8') as f:
-                          f.write(f"# Release {os.environ['TAG_NAME']}\n\n")
-                          f.write("⚠️ *AI Generation failed, listing commits manually:*\n\n")
-                          f.write("## 📝 Commits\n")
-                          with open('commits.txt', 'r') as c: f.write(c.read())
-                          print(f"Error detail: {e}")
+                          f.write(content.strip())
+                  except Exception as e:
+                      with open('gemini_notes.md', 'w', encoding='utf-8') as f:
+                          f.write(f"# Release {os.environ['TAG_NAME']}\n\n⚠️ AI failed. Commits:\n{commits}")
                   EOF
 
             - name: Create Release
@@ -91,3 +93,8 @@ jobs:
                   tag_name: ${{ github.ref_name }}
                   name: Release ${{ github.ref_name }}
                   draft: true
+                  files: |
+                      main.js
+                      manifest.json
+                      styles.css
+                      versions.json
