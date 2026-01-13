@@ -21,12 +21,13 @@ jobs:
             - name: Get Changes (Diff & Logs)
               id: get_changes
               run: |
-                  # Se rodar por tag, usa a tag. Se rodar manual, usa a última tag do repo.
+                  # Identifica a tag atual (seja por push ou manual)
                   LATEST_TAG=${{ github.ref_name }}
                   if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
                     LATEST_TAG=$(git describe --tags --abbrev=0)
                   fi
 
+                  # Tenta encontrar a tag anterior
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
 
                   echo "Analysing changes for $LATEST_TAG since $PREVIOUS_TAG"
@@ -41,13 +42,14 @@ jobs:
 
             - name: Generate Release Notes with Gemini
               uses: google-github-actions/run-gemini-cli@v0
-              env:
-                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+              id: gemini_step
               with:
+                  gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
                   prompt: |
-                      You are a Senior Software Engineer. Write professional Release Notes in English for version $LATEST_TAG.
+                      You are a Senior Software Engineer. Write professional Release Notes in English for version ${{ github.ref_name }}.
+                      Analyze the provided Git Commits and the Git Diff.
 
-                      Structure:
+                      STRUCTURE:
                       ## 🚀 Features
                       ## 🐛 Bug Fixes
                       ## ⚙️ Technical Changes
@@ -57,7 +59,12 @@ jobs:
 
                       DIFF:
                       $(cat changes.diff | head -c 8000)
-                  output_file: gemini_notes.md
+
+            - name: Save Gemini Output to File
+              run: |
+                  # A Action coloca a resposta em steps.<id>.outputs.responses
+                  # Salvamos o conteúdo no arquivo que o próximo passo irá ler
+                  echo "${{ steps.gemini_step.outputs.responses }}" > gemini_notes.md
 
             - name: Create or Update GitHub Release
               uses: softprops/action-gh-release@v1
