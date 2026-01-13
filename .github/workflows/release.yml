@@ -28,13 +28,12 @@ jobs:
             - name: Generate Notes
               env:
                   GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-                  # Passamos as variáveis do GitHub para o ambiente do sistema
                   GITHUB_REF_NAME: ${{ github.ref_name }}
                   GITHUB_EVENT_NAME: ${{ github.event_name }}
               run: |
-                  # 1. Lógica de Tags no Bash
+                  # 1. Preparação do Git
                   LATEST_TAG=$GITHUB_REF_NAME
-                  if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" || "$LATEST_TAG" == "master" || "$LATEST_TAG" == "main" ]]; then
+                  if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" || "$LATEST_TAG" == "master" ]]; then
                     LATEST_TAG="HEAD"
                   fi
                   PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
@@ -43,30 +42,26 @@ jobs:
                   git log ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$LATEST_TAG --oneline -- . $EXCLUDE_PATH > commits.txt
                   git diff ${PREVIOUS_TAG:+$PREVIOUS_TAG..}$LATEST_TAG -- . $EXCLUDE_PATH > changes.diff
 
-                  # 2. Script Python com 'EOF' para estabilidade total
+                  # 2. Script Python (Ajustado para evitar conflito de chaves {{ }})
                   python - <<'EOF'
                   import os
                   from google import genai
                   from google.genai import types
 
                   try:
-                      # Acessa as variáveis via os.environ (Seguro)
-                      api_key = os.environ.get('GEMINI_API_KEY')
-                      tag_name = os.environ.get('GITHUB_REF_NAME', 'latest')
-
-                      client = genai.Client(
-                          api_key=api_key,
-                          http_options={'api_version': 'v1'}
-                      )
+                      # Usamos uma inicialização mais simples para evitar conflito de sintaxe no YAML
+                      client = genai.Client(api_key=os.environ.get('GEMINI_API_KEY'))
                       
                       with open('commits.txt', 'r') as f: commits = f.read()
                       with open('changes.diff', 'r') as f: diff = f.read()[:7000]
 
-                      if not commits.strip():
-                          commits = "Internal maintenance and updates."
+                      tag_name = os.environ.get('GITHUB_REF_NAME', 'latest')
+                      
+                      if not commits.strip() or len(commits) < 5:
+                          commits = "Internal updates and maintenance."
 
-                      sys_instr = "You are a professional tool. Output ONLY raw Markdown for GitHub Releases. No conversational text, no greetings, no backticks."
-                      prompt = f"Write release notes in English for version {tag_name}.\n\nCOMMITS:\n{commits}\n\nDIFF:\n{diff}"
+                      sys_instr = "You are a specialized tool. Output ONLY raw Markdown. No conversational text, no greetings, no backticks."
+                      prompt = f"Write professional release notes in English for version {tag_name}.\n\nCOMMITS:\n{commits}\n\nDIFF:\n{diff}"
 
                       response = client.models.generate_content(
                           model="gemini-2.5-flash",
@@ -76,7 +71,7 @@ jobs:
                       
                       content = response.text.strip()
                       
-                      # Limpeza de blocos de código
+                      # Limpeza de possíveis blocos de código
                       if content.startswith("```"):
                           content = "\n".join([l for l in content.splitlines() if not l.startswith("```")])
                       
@@ -86,10 +81,9 @@ jobs:
                       with open('gemini_notes.md', 'w', encoding='utf-8') as f:
                           f.write(content.strip())
                   except Exception as e:
-                      print(f"Error: {e}")
+                      tag_name = os.environ.get('GITHUB_REF_NAME', 'Manual')
                       with open('gemini_notes.md', 'w', encoding='utf-8') as f:
-                          tag_name = os.environ.get('GITHUB_REF_NAME', 'Manual')
-                          f.write(f"# Release {tag_name}\n\n⚠️ AI failed. Commits:\n{commits}")
+                          f.write(f"# Release {tag_name}\n\n⚠️ AI generation failed. Check action logs.\n\n## Commits\n{commits}")
                   EOF
 
             - name: Create Release
