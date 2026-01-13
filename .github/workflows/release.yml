@@ -1,38 +1,68 @@
-name: Release Obsidian Plugin
+name: Gemini AI Release Notes
 
 on:
     push:
         tags:
             - "*"
-
-permissions:
-    contents: write
+    workflow_dispatch:
 
 jobs:
-    build:
+    release-ai:
         runs-on: ubuntu-latest
+        permissions:
+            contents: write
 
         steps:
-            - uses: actions/checkout@v3
-
-            - name: Use Node.js
-              uses: actions/setup-node@v3
+            - name: Checkout Code
+              uses: actions/checkout@v4
               with:
-                  node-version: "20.x"
+                  fetch-depth: 0
 
-            - name: Install dependencies
-              run: npm install
+            - name: Get Changes (Diff & Logs)
+              id: get_changes
+              run: |
+                  # Se rodar por tag, usa a tag. Se rodar manual, usa a última tag do repo.
+                  LATEST_TAG=${{ github.ref_name }}
+                  if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+                    LATEST_TAG=$(git describe --tags --abbrev=0)
+                  fi
 
-            - name: Build plugin
-              run: npm run build
+                  PREVIOUS_TAG=$(git describe --tags --abbrev=0 $LATEST_TAG^ 2>/dev/null || echo "")
 
-            - name: Create Release
+                  echo "Analysing changes for $LATEST_TAG since $PREVIOUS_TAG"
+
+                  if [ -z "$PREVIOUS_TAG" ]; then
+                    git log --oneline > commits.txt
+                    git diff > changes.diff
+                  else
+                    git log $PREVIOUS_TAG..$LATEST_TAG --oneline > commits.txt
+                    git diff $PREVIOUS_TAG..$LATEST_TAG > changes.diff
+                  fi
+
+            - name: Generate Release Notes with Gemini
+              uses: google-github-actions/run-gemini-cli@v0
+              env:
+                  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+              with:
+                  prompt: |
+                      You are a Senior Software Engineer. Write professional Release Notes in English for version $LATEST_TAG.
+
+                      Structure:
+                      ## 🚀 Features
+                      ## 🐛 Bug Fixes
+                      ## ⚙️ Technical Changes
+
+                      COMMITS:
+                      $(cat commits.txt)
+
+                      DIFF:
+                      $(cat changes.diff | head -c 8000)
+                  output_file: gemini_notes.md
+
+            - name: Create or Update GitHub Release
               uses: softprops/action-gh-release@v1
               with:
-                  files: |
-                      main.js
-                      manifest.json
-                      styles.css
-                      versions.json
-                  draft: false
-                  prerelease: false
+                  body_path: gemini_notes.md
+                  tag_name: ${{ github.ref_name }}
+                  name: Release ${{ github.ref_name }}
+                  draft: true
