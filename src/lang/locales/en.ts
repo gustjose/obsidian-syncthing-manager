@@ -17,6 +17,13 @@ export default {
 	info_last_sync: "Last sync",
 	info_devices: "Online devices",
 	info_folder: "Vault folder",
+	info_history: "Recent activity", // Garanti que esta chave existe para o título
+	history_empty: "No recent activity", // Garanti que esta chave existe para lista vazia
+
+	// History Directions (Tooltips for arrows)
+	history_incoming: "Incoming (remote)",
+	history_outgoing: "Outgoing (local)",
+
 	btn_sync_now: "Sync now",
 	btn_requesting: "Requesting...",
 
@@ -66,6 +73,11 @@ export default {
 	setting_ribbon_name: "Show ribbon icon",
 	setting_ribbon_desc:
 		"Displays the icon in the left sidebar ribbon to quickly open the controller panel.",
+
+	// --- NEW: History Filter ---
+	setting_history_filter_name: "History filter",
+	setting_history_filter_desc:
+		"Files or folders to hide from the history panel (comma separated, e.g. .Obsidian, .ds_store).",
 
 	// Notices / Errors
 	notice_syncing: "Sync requested...",
