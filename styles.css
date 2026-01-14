@@ -108,7 +108,7 @@
 
 /* Status Box */
 .st-status-box {
-	background-color: var(--background-secondary);
+	background-color: #363636;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 10px;
 	padding: 20px;
@@ -165,6 +165,7 @@
 	width: 100%;
 	margin-top: 15px;
 	height: 40px;
+	font-weight: 700;
 }
 
 /* --- MODAL DE CONFLITOS --- */
@@ -242,12 +243,15 @@
 }
 
 .st-history-container {
-	margin-top: 10px;
 	max-height: 200px;
 	overflow-y: auto;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
 	padding: 5px;
+}
+
+.st-history-title {
+	margin: 0.5rem 0rem !important;
 }
 
 .st-history-item {
@@ -294,12 +298,21 @@
 	overflow: hidden; /* Evita que nomes longos quebrem o layout */
 }
 
+.st-history-container .st-history-item:last-child {
+	border-bottom: none;
+}
+
 /* --- NOVO: Estilos das Setas --- */
 .st-history-arrow {
-	margin-right: 6px; /* Espaço entre a seta e o ícone do arquivo */
+	margin: 0px 6px;
 	display: flex;
 	align-items: center;
 	opacity: 0.8;
+}
+
+.st-history-arrow svg {
+	height: 24px;
+	width: 24px;
 }
 
 /* Seta de Entrada (Recebido) - Verde/Sucesso */
@@ -337,4 +350,32 @@
 .st-history-time {
 	font-size: 0.8em;
 	color: var(--text-muted);
+}
+
+/* Alinhamento interno do botão */
+.st-sync-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px; /* Espaço entre ícone e texto */
+}
+
+/* Ajuste do ícone para não ficar desalinhado verticalmente */
+.st-btn-icon-span {
+	display: flex;
+	align-items: center;
+}
+
+/* Opcional: Animação de rotação quando clica */
+@keyframes st-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.st-spin-anim {
+	animation: st-spin 1s linear infinite;
 }

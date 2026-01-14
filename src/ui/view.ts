@@ -131,16 +131,29 @@ export class SyncthingView extends ItemView {
 		// 4. Botão
 		const btnContainer = container.createDiv({ cls: "st-btn-container" });
 		const btn = btnContainer.createEl("button", {
-			cls: "mod-cta",
-			text: t("btn_sync_now"),
+			cls: "mod-cta st-sync-button", // Adicionei uma classe extra para CSS
 		});
 
+		// A: Cria o container do ícone
+		const btnIcon = btn.createSpan({ cls: "st-btn-icon-span" });
+		setIcon(btnIcon, "refresh-cw"); // Ícone do Obsidian (flechas circulares)
+
+		// B: Cria o container do texto
+		const btnText = btn.createSpan({ text: t("btn_sync_now") });
+
 		btn.addEventListener("click", () => {
-			btn.setText(t("btn_requesting"));
+			// Alteramos apenas o span de texto, preservando o ícone
+			btnText.setText(t("btn_requesting"));
 			btn.disabled = true;
+
+			// Opcional: Adiciona uma animação de rotação ao ícone durante o clique
+			btnIcon.addClass("st-spin-anim");
+
 			this.plugin
 				.forcarSincronizacao()
 				.catch((err) => console.error(err));
+			// Nota: O botão permanece desabilitado até a view recarregar
+			// pelo evento do monitor, o que é o comportamento correto.
 		});
 
 		// 5. Seção de Histórico
@@ -154,13 +167,7 @@ export class SyncthingView extends ItemView {
 			cls: "st-history-container",
 		});
 
-		if (this.plugin.history.length === 0) {
-			const emptyHistoryKey = "history_empty";
-			historyContainer.createDiv({
-				text: t(emptyHistoryKey as never) || "No recent activity",
-				cls: "st-history-empty",
-			});
-		} else {
+		if (this.plugin.history.length != 0) {
 			this.plugin.history.forEach((item: SyncthingHistoryItem) => {
 				const itemEl = historyContainer.createDiv({
 					cls: "st-history-item",
