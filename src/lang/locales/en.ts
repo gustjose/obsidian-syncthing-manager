@@ -73,6 +73,8 @@ export default {
 	setting_ribbon_name: "Show ribbon icon",
 	setting_ribbon_desc:
 		"Displays the icon in the left sidebar ribbon to quickly open the controller panel.",
+	setting_tab_icon_name: "Show sync status in tabs",
+	setting_tab_icon_desc: "Displays a icon in the file tab when syncing.",
 
 	// --- NEW: History Filter ---
 	setting_history_filter_name: "History filter",

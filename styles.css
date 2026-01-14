@@ -379,3 +379,29 @@
 .st-spin-anim {
 	animation: st-spin 1s linear infinite;
 }
+
+/* --- Ícone de status na aba do arquivo --- */
+
+.st-tab-sync-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	margin-right: 6px;
+	color: var(--text-muted);
+	vertical-align: middle;
+	transition: color 0.3s ease, opacity 0.3s ease; /* Transição suave de cor */
+}
+
+/* Estado: Sincronizando (Pendente) -> Laranja */
+.st-sync-pending {
+	/* color: var(--text-warning) !important; */
+	opacity: 1;
+	width: 16px;
+	height: 16px;
+}
+
+/* Estado: Sucesso (Sincronizado) -> Verde */
+.st-sync-success {
+	color: var(--text-success) !important;
+	opacity: 1;
+}

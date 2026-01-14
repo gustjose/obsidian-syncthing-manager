@@ -256,6 +256,25 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
+			.setName(t("setting_tab_icon_name"))
+			.setDesc(t("setting_tab_icon_desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showTabIcon)
+					.onChange((value) => {
+						void (async () => {
+							this.plugin.settings.showTabIcon = value;
+							await this.plugin.saveSettings();
+
+							// Se desativar, força a limpeza dos ícones atuais
+							if (!value) {
+								this.plugin.tabManager.clearAllIcons();
+							}
+						})();
+					})
+			);
+
+		new Setting(containerEl)
 			.setName(t("setting_history_filter_name"))
 			.setDesc(t("setting_history_filter_desc"))
 			.addText((text) => {

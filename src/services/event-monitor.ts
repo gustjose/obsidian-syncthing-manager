@@ -188,6 +188,26 @@ export class SyncthingEventMonitor {
 				void this.plugin.refreshHistory();
 			}
 		}
+
+		if (event.type === "LocalIndexUpdated") {
+			const data = event.data as {
+				filenames?: string[];
+				items?: string[];
+			};
+
+			const rawFiles = data.filenames || data.items;
+			const items = Array.isArray(rawFiles) ? rawFiles : [];
+
+			if (items.length > 0) {
+				void this.plugin.refreshHistory();
+
+				items.forEach((filename: string) => {
+					if (typeof filename === "string") {
+						this.plugin.tabManager.setSynced(filename);
+					}
+				});
+			}
+		}
 	}
 
 	private sleep(ms: number): Promise<void> {

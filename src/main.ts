@@ -1,10 +1,11 @@
-import { Plugin, Notice, WorkspaceLeaf } from "obsidian";
+import { Plugin, Notice, WorkspaceLeaf, TFile } from "obsidian";
 import { SyncthingSettingTab } from "./ui/settings";
 import { SyncthingAPI, SyncthingHistoryItem } from "./api/syncthing-api";
 import { SyncthingEventMonitor } from "./services/event-monitor";
 import { SyncthingView, VIEW_TYPE_SYNCTHING } from "./ui/view";
 import { t, setLanguage } from "./lang/lang";
 import { IgnoreManager } from "./services/ignore-manager";
+import { TabManager } from "./services/tab-manager";
 
 interface AppWithCommands {
 	commands: { executeCommandById: (id: string) => boolean };
@@ -34,6 +35,7 @@ export interface SyncthingPluginSettings {
 	showRibbonIcon: boolean;
 	language: string;
 	modalConflict: boolean;
+	showTabIcon: boolean;
 	ignoredPaths: string;
 }
 
@@ -49,6 +51,7 @@ const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	showRibbonIcon: true,
 	language: "auto",
 	modalConflict: true,
+	showTabIcon: true,
 	ignoredPaths: "",
 };
 
@@ -69,6 +72,7 @@ export default class SyncthingController extends Plugin {
 	monitor: SyncthingEventMonitor;
 	history: SyncthingHistoryItem[] = [];
 	myDeviceID: string = "";
+	tabManager: TabManager;
 
 	public lastSyncTime: string = "--:--";
 	public connectedDevices: number = 0;
@@ -88,6 +92,8 @@ export default class SyncthingController extends Plugin {
 		await this.loadSettings();
 
 		setLanguage(this.settings.language);
+
+		this.tabManager = new TabManager(this.app, this);
 
 		const ignoreManager = new IgnoreManager(this.app);
 		await ignoreManager.ensureDefaults();
@@ -120,6 +126,24 @@ export default class SyncthingController extends Plugin {
 				}
 			);
 		}
+
+		this.registerEvent(
+			this.app.vault.on("modify", (abstractFile) => {
+				// Debug: Ver se o evento dispara
+				console.debug(
+					`ST-Debug: Evento 'modify' detectado para: ${abstractFile.path}`
+				);
+
+				if (abstractFile instanceof TFile) {
+					console.debug(
+						`ST-Debug: É um arquivo válido. Chamando TabManager.`
+					);
+					this.tabManager.setPendingSync(abstractFile);
+				} else {
+					console.debug(`ST-Debug: Ignorado (não é TFile).`);
+				}
+			})
+		);
 
 		this.addCommand({
 			id: "open-syncthing-view",
