@@ -1,36 +1,40 @@
-import { moment } from 'obsidian';
-import en from './locales/en';
-import pt from './locales/pt';
-import ru from './locales/ru';
+import { moment } from "obsidian";
+import en from "./locales/en";
+import pt from "./locales/pt";
+import ru from "./locales/ru";
 
-// --- Global State ---
+const locales: Record<string, Partial<typeof en>> = {
+	pt: pt,
+	ru: ru,
+};
 
-let userLanguage = 'auto';
+export const LANGUAGE_LIST = [
+	{ code: "auto", display: "Auto" },
+	{ code: "en", display: "English" },
+	{ code: "pt", display: "Português" },
+	{ code: "ru", display: "Russian" },
+];
+
+export type TranslationKey = keyof typeof en;
+let userLanguage = "auto";
 
 export function setLanguage(lang: string) {
-    userLanguage = lang;
+	userLanguage = lang;
 }
 
-// --- Translation Helper ---
+export function t(key: TranslationKey): string {
+	let lang = userLanguage;
 
-export function t(key: keyof typeof en): string {
-    let current = userLanguage;
+	if (lang === "auto") {
+		lang = moment.locale();
+	}
 
-    if (current === 'auto') {
-        // @ts-ignore
-        current = moment.locale(); 
-    }
+	if (lang && lang.length >= 2) {
+		lang = lang.substring(0, 2).toLowerCase();
+	}
 
-    if (current && current.toLowerCase().startsWith('pt')) {
-        // @ts-ignore
-        return pt[key] || en[key];
-    }
+	const dict = locales[lang];
+	const translation = (dict && dict[key] ? dict[key] : en[key]) as string;
 
-    if (current && current.startsWith('ru')) {
-        // @ts-ignore
-        return ru[key] || en[key];
-    }
-
-
-    return en[key];
+	return translation || key;
 }

@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting, Notice } from "obsidian";
 import SyncthingController from "../main";
 import { SyncthingAPI, SyncthingFolder } from "../api/syncthing-api";
-import { t, setLanguage } from "../lang/lang";
+import { t, setLanguage, LANGUAGE_LIST } from "../lang/lang";
 import { IgnoreModal } from "./ignore-modal";
 
 export class SyncthingSettingTab extends PluginSettingTab {
@@ -25,16 +25,17 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			.setName(t("setting_lang_name"))
 			.setDesc(t("setting_lang_desc"))
 			.addDropdown((dropDown) => {
-				dropDown.addOption("auto", "Auto");
-				dropDown.addOption("en", "English");
-				dropDown.addOption("pt", "Português");
-				dropDown.addOption("ru", "Russian");
+				LANGUAGE_LIST.forEach((lang) => {
+					dropDown.addOption(lang.code, lang.display);
+				});
+
 				dropDown.setValue(this.plugin.settings.language);
 				dropDown.onChange((value) => {
 					void (async () => {
 						this.plugin.settings.language = value;
 						await this.plugin.saveSettings();
 						setLanguage(value);
+						this.plugin.atualizarTodosVisuais();
 						this.display();
 					})();
 				});
