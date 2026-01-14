@@ -1,6 +1,6 @@
 import { Plugin, Notice, WorkspaceLeaf } from "obsidian";
 import { SyncthingSettingTab } from "./ui/settings";
-import { SyncthingAPI } from "./api/syncthing-api";
+import { SyncthingAPI, SyncthingHistoryItem } from "./api/syncthing-api";
 import { SyncthingEventMonitor } from "./services/event-monitor";
 import { SyncthingView, VIEW_TYPE_SYNCTHING } from "./ui/view";
 import { t, setLanguage } from "./lang/lang";
@@ -34,6 +34,7 @@ export interface SyncthingPluginSettings {
 	showRibbonIcon: boolean;
 	language: string;
 	modalConflict: boolean;
+	ignoredPaths: string;
 }
 
 const DEFAULT_SETTINGS: SyncthingPluginSettings = {
@@ -48,6 +49,7 @@ const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	showRibbonIcon: true,
 	language: "auto",
 	modalConflict: true,
+	ignoredPaths: "",
 };
 
 type SyncStatus =
@@ -65,6 +67,8 @@ export default class SyncthingController extends Plugin {
 	statusBarItem: HTMLElement | null = null;
 	ribbonIconEl: HTMLElement | null = null;
 	monitor: SyncthingEventMonitor;
+	history: SyncthingHistoryItem[] = [];
+	myDeviceID: string = "";
 
 	public lastSyncTime: string = "--:--";
 	public connectedDevices: number = 0;
@@ -87,6 +91,8 @@ export default class SyncthingController extends Plugin {
 
 		const ignoreManager = new IgnoreManager(this.app);
 		await ignoreManager.ensureDefaults();
+
+		await this.fetchMyDeviceID();
 
 		this.registerView(
 			VIEW_TYPE_SYNCTHING,
@@ -251,6 +257,7 @@ export default class SyncthingController extends Plugin {
 	}
 
 	async forcarSincronizacao() {
+		console.debug("ST-Debug: Iniciando forcarSincronizacao");
 		if (!this.settings.syncthingApiKey) {
 			new Notice(t("notice_config_first"));
 			return;
@@ -272,6 +279,7 @@ export default class SyncthingController extends Plugin {
 				this.settings.syncthingFolderId
 			);
 			await this.atualizarContagemDispositivos();
+			await this.refreshHistory();
 		} catch (error) {
 			console.warn("Erro ao forçar scan:", error);
 			new Notice("Erro!");
@@ -384,6 +392,56 @@ export default class SyncthingController extends Plugin {
 			const svg = this.createSyncthingIcon(cssClass);
 			iconContainer.appendChild(svg);
 			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
+		}
+	}
+
+	async fetchMyDeviceID() {
+		try {
+			const status = await SyncthingAPI.getStatus(
+				this.apiUrl,
+				this.settings.syncthingApiKey
+			);
+			this.myDeviceID = status.myID;
+			console.debug("ST-Debug: Meu Device ID é", this.myDeviceID);
+		} catch (e) {
+			console.error("Erro ao buscar Device ID", e);
+		}
+	}
+
+	async refreshHistory() {
+		try {
+			if (!this.settings.syncthingFolderId) {
+				console.warn(
+					"ST-Debug: Nenhuma pasta Syncthing configurada. Pulando histórico."
+				);
+				return;
+			}
+
+			const configFolder = this.app.vault.configDir;
+			const defaultIgnores = `${configFolder}, .DS_Store, desktop.ini`;
+
+			this.history = await SyncthingAPI.getHistory(
+				this.apiUrl,
+				this.settings.syncthingApiKey,
+				this.settings.syncthingFolderId,
+				this.settings.ignoredPaths || defaultIgnores,
+				this.myDeviceID
+			);
+			// Chame a atualização da view se ela existir
+			const leaves =
+				this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
+
+			console.debug(
+				`ST-Debug: Found ${leaves.length} active leaves to update`
+			);
+
+			leaves.forEach((leaf) => {
+				if (leaf.view instanceof SyncthingView) {
+					leaf.view.updateView();
+				}
+			});
+		} catch (error) {
+			console.error("Failed to fetch history", error);
 		}
 	}
 

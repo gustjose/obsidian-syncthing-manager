@@ -240,3 +240,101 @@
 .st-diff-conflict {
 	border-left: 3px solid var(--text-warning);
 }
+
+.st-history-container {
+	margin-top: 10px;
+	max-height: 200px;
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 5px;
+}
+
+.st-history-item {
+	display: flex;
+	align-items: center;
+	padding: 6px;
+	font-size: 0.85em;
+	border-bottom: 1px solid var(--background-modifier-border-soft);
+}
+
+.st-history-left {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	width: 100%;
+}
+
+.st-history-filename {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 180px;
+}
+
+.st-history-time {
+	font-size: 0.75em;
+	color: var(--text-muted);
+}
+
+/* Container do item do histórico */
+.st-history-item {
+	display: flex;
+	justify-content: space-between;
+	padding: 6px 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+	font-size: 0.9em;
+}
+
+/* Lado esquerdo (ícones + texto) */
+.st-history-left {
+	display: flex;
+	align-items: center;
+	overflow: hidden; /* Evita que nomes longos quebrem o layout */
+}
+
+/* --- NOVO: Estilos das Setas --- */
+.st-history-arrow {
+	margin-right: 6px; /* Espaço entre a seta e o ícone do arquivo */
+	display: flex;
+	align-items: center;
+	opacity: 0.8;
+}
+
+/* Seta de Entrada (Recebido) - Verde/Sucesso */
+.st-direction-in {
+	color: var(--text-success);
+}
+
+/* Seta de Saída (Enviado) - Roxo/Accent ou Laranja */
+.st-direction-out {
+	/* Usei text-accent para indicar ação do usuário, ou use --text-warning para laranja */
+	color: var(--text-accent);
+}
+/* ------------------------------- */
+
+.st-history-icon {
+	margin-right: 8px;
+	display: flex;
+	align-items: center;
+}
+
+.st-history-details {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.st-history-filename {
+	font-weight: 500;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: var(--text-normal);
+}
+
+.st-history-time {
+	font-size: 0.8em;
+	color: var(--text-muted);
+}
