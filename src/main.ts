@@ -413,7 +413,7 @@ export default class SyncthingController extends Plugin {
 			const iconContainer = this.ribbonIconEl.createDiv({
 				cls: "ribbon-icon-svg",
 			});
-			const svg = this.createSyncthingIcon(cssClass);
+			const svg = this.createSyncthingIcon("");
 			iconContainer.appendChild(svg);
 			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
 		}
