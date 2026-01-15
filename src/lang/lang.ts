@@ -34,7 +34,8 @@ export function t(key: TranslationKey): string {
 	}
 
 	const dict = locales[lang];
-	const translation = (dict && dict[key] ? dict[key] : en[key]) as string;
+
+	const translation = dict && dict[key] ? dict[key] : en[key];
 
 	return translation || key;
 }

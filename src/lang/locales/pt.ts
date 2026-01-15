@@ -17,6 +17,13 @@ export default {
 	info_last_sync: "Último Sync",
 	info_devices: "Dispositivos Online",
 	info_folder: "Pasta Monitorada",
+	info_history: "Atividade Recente",
+	history_empty: "Nenhuma atividade recente",
+
+	// History Directions (Tooltips for arrows)
+	history_incoming: "Recebido (Remoto)",
+	history_outgoing: "Enviado (Local)",
+
 	btn_sync_now: "Sincronizar Agora",
 	btn_requesting: "Solicitando...",
 
@@ -66,6 +73,14 @@ export default {
 	setting_ribbon_name: "Mostrar Ícone no Ribbon",
 	setting_ribbon_desc:
 		"Exibe o ícone na barra lateral esquerda para acesso rápido ao painel. Reinicie o obsidian para aplicar.",
+	setting_tab_icon_name: "Mostrar status de sync nas abas",
+	setting_tab_icon_desc:
+		"Exibe um ícone na aba do arquivo enquanto ele está sendo sincronizado.",
+
+	// --- NEW: History Filter ---
+	setting_history_filter_name: "Filtro de Histórico",
+	setting_history_filter_desc:
+		"Arquivos ou pastas para esconder do painel de histórico (separados por vírgula, ex: .Obsidian, .DS_Store).",
 
 	// Notices / Errors
 	notice_syncing: "Sincronização solicitada...",
@@ -112,7 +127,6 @@ export default {
 		"Arquivos ou padrões listados abaixo serão completamente ignorados pelo Syncthing.",
 	header_ignore_templates: "Modelos Rápidos:",
 
-	// Chaves reorganizadas e unificadas:
 	ignore_help_text:
 		'Clique em "Adicionar" para incluir regras comuns que evitam problemas de sincronização entre Desktop e Mobile.',
 

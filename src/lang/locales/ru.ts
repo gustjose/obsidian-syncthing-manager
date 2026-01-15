@@ -17,6 +17,13 @@ export default {
 	info_last_sync: "Последняя синхронизация",
 	info_devices: "Устройств в сети",
 	info_folder: "Папка хранилища",
+	info_history: "Недавняя активность",
+	history_empty: "Нет недавней активности",
+
+	// History Directions (Tooltips for arrows)
+	history_incoming: "Входящие (удаленно)",
+	history_outgoing: "Исходящие (локально)",
+
 	btn_sync_now: "Синхронизировать сейчас",
 	btn_requesting: "Запрашивается...",
 
@@ -66,6 +73,14 @@ export default {
 	setting_ribbon_name: "Показывать иконку на Вертикальной Панели",
 	setting_ribbon_desc:
 		"Отображает значок на левой вертикальной панели, чтобы быстро открыть панель управления. Перезапустите Obsidian, чтобы применить.",
+	setting_tab_icon_name: "Показывать статус синхронизации во вкладках",
+	setting_tab_icon_desc:
+		"Отображает иконку во вкладке файла во время его синхронизации.",
+
+	// --- NEW: History Filter ---
+	setting_history_filter_name: "Фильтр истории",
+	setting_history_filter_desc:
+		"Файлы или папки, которые нужно скрыть из панели истории (через запятую, например .Obsidian, .ds_store).",
 
 	// Notices / Errors
 	notice_syncing: "Запрошена синхронизация...",
