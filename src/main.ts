@@ -417,6 +417,13 @@ export default class SyncthingController extends Plugin {
 			iconContainer.appendChild(svg);
 			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
 		}
+
+		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
+		leaves.forEach((leaf) => {
+			if (leaf.view instanceof SyncthingView) {
+				leaf.view.updateView();
+			}
+		});
 	}
 
 	async fetchMyDeviceID() {
