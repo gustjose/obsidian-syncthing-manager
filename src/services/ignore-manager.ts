@@ -17,8 +17,8 @@ interface ChildProcessLib {
 		callback: (
 			error: ExecException | null,
 			stdout: string,
-			stderr: string
-		) => void
+			stderr: string,
+		) => void,
 	) => void;
 }
 
@@ -71,9 +71,6 @@ export class IgnoreManager {
 				(sysError.code === "EPERM" || sysError.code === "EACCES") &&
 				Platform.isWin
 			) {
-				console.debug(
-					"Syncthing Manager: Arquivo .stignore bloqueado/oculto. Tentando forçar escrita..."
-				);
 				await this.forceWriteWindows(content);
 			} else {
 				throw error;
@@ -86,7 +83,7 @@ export class IgnoreManager {
 
 		if (!(adapter instanceof FileSystemAdapter)) {
 			throw new Error(
-				"O adaptador de arquivos não suporta acesso ao caminho completo (Mobile?)."
+				"O adaptador de arquivos não suporta acesso ao caminho completo (Mobile?).",
 			);
 		}
 
@@ -98,7 +95,7 @@ export class IgnoreManager {
 			await adapter.write(this.ignoreFile, content);
 		} finally {
 			await this.runCmd(`attrib +h "${fullPath}"`).catch((err) =>
-				console.error("Falha ao re-ocultar .stignore", err)
+				console.error("Falha ao re-ocultar .stignore", err),
 			);
 		}
 	}

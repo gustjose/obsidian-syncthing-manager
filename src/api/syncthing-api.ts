@@ -1,4 +1,5 @@
 import { requestUrl, RequestUrlParam } from "obsidian";
+import { Logger, LOG_MODULES } from "../utils/logger";
 
 // --- Interfaces de Tipagem ---
 export interface SyncthingStatus {
@@ -69,34 +70,34 @@ export class SyncthingAPI {
 
 	static async getStatus(
 		url: string,
-		apiKey: string
+		apiKey: string,
 	): Promise<SyncthingStatus> {
 		return this.request<SyncthingStatus>(
 			url,
 			apiKey,
-			"/rest/system/status"
+			"/rest/system/status",
 		);
 	}
 
 	static async getConnections(
 		url: string,
-		apiKey: string
+		apiKey: string,
 	): Promise<SyncthingConnectionsResponse> {
 		return this.request<SyncthingConnectionsResponse>(
 			url,
 			apiKey,
-			"/rest/system/connections"
+			"/rest/system/connections",
 		);
 	}
 
 	static async getFolders(
 		url: string,
-		apiKey: string
+		apiKey: string,
 	): Promise<SyncthingFolder[]> {
 		const config = await this.request<SyncthingConfig>(
 			url,
 			apiKey,
-			"/rest/config"
+			"/rest/config",
 		);
 		return config.folders;
 	}
@@ -106,19 +107,19 @@ export class SyncthingAPI {
 	static async getFolderStats(
 		url: string,
 		apiKey: string,
-		folderId: string
+		folderId: string,
 	): Promise<SyncthingFolderStats> {
 		return this.request<SyncthingFolderStats>(
 			url,
 			apiKey,
-			`/rest/db/status?folder=${folderId}`
+			`/rest/db/status?folder=${folderId}`,
 		);
 	}
 
 	static async forceScan(
 		url: string,
 		apiKey: string,
-		folderId?: string
+		folderId?: string,
 	): Promise<void> {
 		let endpoint = "/rest/db/scan";
 
@@ -134,14 +135,14 @@ export class SyncthingAPI {
 		apiKey: string,
 		folderId: string,
 		ignoredPaths: string,
-		myDeviceID: string
+		myDeviceID: string,
 	): Promise<SyncthingHistoryItem[]> {
 		const endpoint = `/rest/events?limit=100&events=ItemFinished,LocalIndexUpdated`;
 
 		const events = await this.request<SyncthingEvent[]>(
 			url,
 			apiKey,
-			endpoint
+			endpoint,
 		);
 
 		const patterns = ignoredPaths
@@ -241,12 +242,12 @@ export class SyncthingAPI {
 		url: string,
 		apiKey: string,
 		endpointPath: string,
-		method: string = "GET"
+		method: string = "GET",
 	): Promise<T> {
 		const baseUrl = url.replace(/\/$/, "");
 		const endpoint = `${baseUrl}${endpointPath}`;
 
-		console.debug(`ST-Debug: Requesting [${method}] ${endpoint}`);
+		Logger.debug(LOG_MODULES.API, `Requesting [${method}] ${endpoint}`);
 
 		const params: RequestUrlParam = {
 			url: endpoint,

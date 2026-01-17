@@ -6,68 +6,17 @@ import { SyncthingView, VIEW_TYPE_SYNCTHING } from "./ui/view";
 import { t, setLanguage } from "./lang/lang";
 import { IgnoreManager } from "./services/ignore-manager";
 import { TabManager } from "./services/tab-manager";
-
-interface AppWithCommands {
-	commands: { executeCommandById: (id: string) => boolean };
-}
-
-// --- Constants ---
-
-const LS_KEY_HOST = "syncthing-controller-host";
-const LS_KEY_PORT = "syncthing-controller-port";
-const LS_KEY_HTTPS = "syncthing-controller-https";
-const LS_KEY_API = "syncthing-controller-api-key";
-const LS_KEY_FOLDER = "syncthing-controller-folder-id";
-const LS_KEY_FOLDER_LABEL = "syncthing-controller-folder-label";
-
-// --- Interfaces & Defaults ---
-
-export interface SyncthingPluginSettings {
-	syncthingHost: string;
-	syncthingPort: string;
-	useHttps: boolean;
-	syncthingApiKey: string;
-	syncthingFolderId: string;
-	syncthingFolderLabel: string;
-
-	updateInterval: number;
-	showStatusBar: boolean;
-	showRibbonIcon: boolean;
-	language: string;
-	modalConflict: boolean;
-	showTabIcon: boolean;
-	ignoredPaths: string;
-}
-
-const DEFAULT_SETTINGS: SyncthingPluginSettings = {
-	syncthingHost: "127.0.0.1",
-	syncthingPort: "8384",
-	useHttps: false,
-	syncthingApiKey: "",
-	syncthingFolderId: "",
-	syncthingFolderLabel: "",
-	updateInterval: 30,
-	showStatusBar: true,
-	showRibbonIcon: true,
-	language: "auto",
-	modalConflict: true,
-	showTabIcon: true,
-	ignoredPaths: "",
-};
-
-type SyncStatus =
-	| "conectado"
-	| "sincronizando"
-	| "escutando"
-	| "desconectado"
-	| "erro"
-	| "desconhecido";
-
-// --- Main Class ---
+import { SettingsManager } from "./services/settings-manager";
+import { StatusBarManager } from "./ui/status-bar-manager";
+import { Logger, LOG_MODULES } from "./utils/logger";
+import { createSyncthingIcon } from "./ui/icons";
+import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
 
 export default class SyncthingController extends Plugin {
 	settings: SyncthingPluginSettings;
-	statusBarItem: HTMLElement | null = null;
+	settingsManager: SettingsManager;
+	statusBarManager: StatusBarManager;
+
 	ribbonIconEl: HTMLElement | null = null;
 	monitor: SyncthingEventMonitor;
 	history: SyncthingHistoryItem[] = [];
@@ -89,62 +38,55 @@ export default class SyncthingController extends Plugin {
 	// --- Lifecycle ---
 
 	async onload() {
-		await this.loadSettings();
+		// 1. Carrega Configurações (Delegado para SettingsManager)
+		this.settingsManager = new SettingsManager(this);
+		this.settings = await this.settingsManager.loadSettings();
 
 		setLanguage(this.settings.language);
 
+		// 2. Inicializa Gerenciadores
 		this.tabManager = new TabManager(this.app, this);
-
 		const ignoreManager = new IgnoreManager(this.app);
 		await ignoreManager.ensureDefaults();
 
+		// 3. Verifica ID do Dispositivo
 		await this.fetchMyDeviceID();
 
+		// 4. Registra Views
 		this.registerView(
 			VIEW_TYPE_SYNCTHING,
-			(leaf) => new SyncthingView(leaf, this)
+			(leaf) => new SyncthingView(leaf, this),
 		);
 
+		// 5. Interface - Barra de Status (Delegado para StatusBarManager)
 		if (this.settings.showStatusBar) {
-			this.statusBarItem = this.addStatusBarItem();
-			this.statusBarItem.addClass("mod-clickable");
-			this.statusBarItem.setAttribute(
-				"aria-label",
-				"Syncthing controller"
-			);
-			this.statusBarItem.addEventListener("click", () => {
+			this.statusBarManager = new StatusBarManager(this, () => {
 				void this.forcarSincronizacao();
 			});
+			this.statusBarManager.init();
 		}
 
+		// 6. Interface - Ícone Lateral (Ribbon)
 		if (this.settings.showRibbonIcon) {
 			this.ribbonIconEl = this.addRibbonIcon(
 				"refresh-cw",
 				t("ribbon_tooltip"),
 				() => {
 					void this.activateView();
-				}
+				},
 			);
 		}
 
+		// 7. Eventos
 		this.registerEvent(
 			this.app.vault.on("modify", (abstractFile) => {
-				// Debug: Ver se o evento dispara
-				console.debug(
-					`ST-Debug: Evento 'modify' detectado para: ${abstractFile.path}`
-				);
-
 				if (abstractFile instanceof TFile) {
-					console.debug(
-						`ST-Debug: É um arquivo válido. Chamando TabManager.`
-					);
 					this.tabManager.setPendingSync(abstractFile);
-				} else {
-					console.debug(`ST-Debug: Ignorado (não é TFile).`);
 				}
-			})
+			}),
 		);
 
+		// 8. Comandos
 		this.addCommand({
 			id: "open-syncthing-view",
 			name: t("cmd_open_panel"),
@@ -170,9 +112,11 @@ export default class SyncthingController extends Plugin {
 			},
 		});
 
+		// 9. Monitoramento e Aba de Configurações
 		this.monitor = new SyncthingEventMonitor(this);
 		this.addSettingTab(new SyncthingSettingTab(this.app, this));
 
+		// 10. Inicialização Final
 		this.atualizarTodosVisuais();
 		await this.verificarConexao(false);
 		await this.atualizarContagemDispositivos();
@@ -182,6 +126,7 @@ export default class SyncthingController extends Plugin {
 
 	onunload() {
 		if (this.monitor) this.monitor.stop();
+		if (this.statusBarManager) this.statusBarManager.destroy();
 	}
 
 	// --- View Management ---
@@ -205,60 +150,59 @@ export default class SyncthingController extends Plugin {
 	}
 
 	atualizarTodosVisuais() {
-		this.atualizarStatusBar(this.currentStatus);
+		// Atualiza StatusBar via Manager
+		if (this.statusBarManager && this.settings.showStatusBar) {
+			this.statusBarManager.update(
+				this.currentStatus,
+				this.lastSyncTime,
+				this.connectedDevices,
+			);
+		}
+
+		// Atualiza Ribbon (mantido aqui pois é simples)
+		if (this.ribbonIconEl) {
+			this.ribbonIconEl.empty();
+			const iconContainer = this.ribbonIconEl.createDiv({
+				cls: "ribbon-icon-svg",
+			});
+			const svg = createSyncthingIcon(""); // Ícone padrão
+			iconContainer.appendChild(svg);
+
+			const tooltipInfo = `${t("status_synced")}\n\n${t("info_last_sync")}: ${
+				this.lastSyncTime
+			}\n${t("info_devices")}: ${this.connectedDevices}`;
+
+			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
+		}
+
+		// Atualiza Views Abertas
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
 		leaves.forEach((leaf) => {
 			if (leaf.view instanceof SyncthingView) leaf.view.updateView();
 		});
 	}
 
-	// --- SVG ---
+	// --- Data Persistence ---
 
-	createSyncthingIcon(colorClass: string): SVGSVGElement {
-		const ns = "http://www.w3.org/2000/svg";
-		const svg = document.createElementNS(ns, "svg");
-		svg.setAttribute("viewBox", "0 0 192 192");
-		svg.classList.add("st-icon-svg");
-		if (colorClass) svg.classList.add(colorClass);
-
-		const path1 = document.createElementNS(ns, "path");
-		path1.setAttribute(
-			"d",
-			"M161.785 101.327a66 66 0 0 1-4.462 19.076m-49.314 40.495A66 66 0 0 1 96 162a66 66 0 0 1-45.033-17.75M31.188 83.531A66 66 0 0 1 96 30a66 66 0 0 1 39.522 13.141"
-		);
-		path1.setAttribute("fill", "none");
-		path1.setAttribute("stroke", "currentColor");
-		path1.setAttribute("stroke-width", "12");
-		path1.setAttribute("stroke-linecap", "round");
-		path1.setAttribute("stroke-linejoin", "round");
-		svg.appendChild(path1);
-
-		const path2 = document.createElementNS(ns, "path");
-		path2.setAttribute(
-			"d",
-			"M146.887 147.005a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9zm18.25-78.199a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9zM118.5 105a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9zm-76.248 11.463a9 9 0 0 1-9 9 9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9zm113.885-68.656a21 21 0 0 0-21 21 21 21 0 0 0 1.467 7.564l-14.89 11.555A21 21 0 0 0 109.5 84a21 21 0 0 0-20.791 18.057l-36.45 5.48a21 21 0 0 0-19.007-12.074 21 21 0 0 0-21 21 21 21 0 0 0 21 21 21 21 0 0 0 20.791-18.059l36.463-5.48A21 21 0 0 0 109.5 126a21 21 0 0 0 6.283-.988l5.885 8.707a21 21 0 0 0-4.781 13.287 21 21 0 0 0 21 21 21 21 0 0 0 21-21 21 21 0 0 0-21-21 21 21 0 0 0-6.283.986l-5.883-8.707A21 21 0 0 0 130.5 105a21 21 0 0 0-1.428-7.594l14.885-11.552a21 21 0 0 0 12.18 3.953 21 21 0 0 0 21-21 21 21 0 0 0-21-21z"
-		);
-		path2.setAttribute("fill", "currentColor");
-		path2.setAttribute("fill-rule", "evenodd");
-		svg.appendChild(path2);
-
-		return svg;
+	async saveSettings() {
+		// Delega o salvamento para o Manager
+		await this.settingsManager.saveSettings(this.settings);
 	}
 
-	// --- Business Logic ---
+	// --- Business Logic (API calls & Actions) ---
 
 	async testarApiApenas() {
 		try {
 			new Notice("Ping...");
 			const status = await SyncthingAPI.getStatus(
 				this.apiUrl,
-				this.settings.syncthingApiKey
+				this.settings.syncthingApiKey,
 			);
 			new Notice(
-				`${t("notice_success_conn")} ${status.myID.substring(0, 5)}...`
+				`${t("notice_success_conn")} ${status.myID.substring(0, 5)}...`,
 			);
 		} catch (error) {
-			console.error("Falha no teste de API:", error);
+			Logger.error(LOG_MODULES.MAIN, "Falha no teste de API", error);
 			new Notice(t("notice_fail_conn"));
 		}
 	}
@@ -267,11 +211,11 @@ export default class SyncthingController extends Plugin {
 		try {
 			const connections = await SyncthingAPI.getConnections(
 				this.apiUrl,
-				this.settings.syncthingApiKey
+				this.settings.syncthingApiKey,
 			);
 			const devices = connections.connections || {};
 			const count = Object.values(devices).filter(
-				(d: { connected: boolean }) => d.connected
+				(d: { connected: boolean }) => d.connected,
 			).length;
 			this.connectedDevices = count;
 			this.atualizarTodosVisuais();
@@ -281,7 +225,7 @@ export default class SyncthingController extends Plugin {
 	}
 
 	async forcarSincronizacao() {
-		console.debug("ST-Debug: Iniciando forcarSincronizacao");
+		Logger.debug(LOG_MODULES.MAIN, "Iniciando forcarSincronizacao");
 		if (!this.settings.syncthingApiKey) {
 			new Notice(t("notice_config_first"));
 			return;
@@ -300,12 +244,12 @@ export default class SyncthingController extends Plugin {
 			await SyncthingAPI.forceScan(
 				this.apiUrl,
 				this.settings.syncthingApiKey,
-				this.settings.syncthingFolderId
+				this.settings.syncthingFolderId,
 			);
 			await this.atualizarContagemDispositivos();
 			await this.refreshHistory();
 		} catch (error) {
-			console.warn("Erro ao forçar scan:", error);
+			Logger.warn(LOG_MODULES.MAIN, "Erro ao forçar scan:", error);
 			new Notice("Erro!");
 			this.currentStatus = "erro";
 			this.atualizarTodosVisuais();
@@ -316,14 +260,14 @@ export default class SyncthingController extends Plugin {
 		try {
 			const systemStatus = await SyncthingAPI.getStatus(
 				this.apiUrl,
-				this.settings.syncthingApiKey
+				this.settings.syncthingApiKey,
 			);
 
 			if (this.settings.syncthingFolderId) {
 				const folderStats = await SyncthingAPI.getFolderStats(
 					this.apiUrl,
 					this.settings.syncthingApiKey,
-					this.settings.syncthingFolderId
+					this.settings.syncthingFolderId,
 				);
 				const state = folderStats.state;
 				const needBytes = folderStats.needBytes;
@@ -351,8 +295,8 @@ export default class SyncthingController extends Plugin {
 				if (showNotice)
 					new Notice(
 						`${t(
-							"notice_success_conn"
-						)} ${systemStatus.myID.substring(0, 5)}...`
+							"notice_success_conn",
+						)} ${systemStatus.myID.substring(0, 5)}...`,
 					);
 			}
 			this.atualizarTodosVisuais();
@@ -368,83 +312,21 @@ export default class SyncthingController extends Plugin {
 		}
 	}
 
-	// --- UI Rendering ---
-
-	atualizarStatusBar(status: SyncStatus) {
-		this.currentStatus = status;
-		let text = t("status_unknown");
-		let cssClass = "st-color-muted";
-
-		switch (status) {
-			case "conectado":
-				text = t("status_synced");
-				cssClass = "st-color-success";
-				break;
-			case "sincronizando":
-				text = t("status_syncing");
-				cssClass = "st-color-warning";
-				break;
-			case "desconectado":
-				text = t("status_offline");
-				cssClass = "st-color-muted";
-				break;
-			case "erro":
-				text = t("status_error");
-				cssClass = "st-color-error";
-				break;
-		}
-
-		const tooltipInfo = `${text}\n\n${t("info_last_sync")}: ${
-			this.lastSyncTime
-		}\n${t("info_devices")}: ${this.connectedDevices}`;
-
-		if (this.statusBarItem) {
-			this.statusBarItem.empty();
-			const iconSpan = this.statusBarItem.createSpan({
-				cls: "status-bar-item-icon",
-			});
-			const svg = this.createSyncthingIcon(cssClass);
-			iconSpan.appendChild(svg);
-			this.statusBarItem.setAttribute("aria-label", tooltipInfo);
-		}
-
-		if (this.ribbonIconEl) {
-			this.ribbonIconEl.empty();
-			const iconContainer = this.ribbonIconEl.createDiv({
-				cls: "ribbon-icon-svg",
-			});
-			const svg = this.createSyncthingIcon("");
-			iconContainer.appendChild(svg);
-			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
-		}
-
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
-		leaves.forEach((leaf) => {
-			if (leaf.view instanceof SyncthingView) {
-				leaf.view.updateView();
-			}
-		});
-	}
-
 	async fetchMyDeviceID() {
 		try {
 			const status = await SyncthingAPI.getStatus(
 				this.apiUrl,
-				this.settings.syncthingApiKey
+				this.settings.syncthingApiKey,
 			);
 			this.myDeviceID = status.myID;
-			console.debug("ST-Debug: Meu Device ID é", this.myDeviceID);
 		} catch (e) {
-			console.error("Erro ao buscar Device ID", e);
+			Logger.error(LOG_MODULES.MAIN, "Erro ao buscar Device ID", e);
 		}
 	}
 
 	async refreshHistory() {
 		try {
 			if (!this.settings.syncthingFolderId) {
-				console.warn(
-					"ST-Debug: Nenhuma pasta Syncthing configurada. Pulando histórico."
-				);
 				return;
 			}
 
@@ -456,15 +338,11 @@ export default class SyncthingController extends Plugin {
 				this.settings.syncthingApiKey,
 				this.settings.syncthingFolderId,
 				this.settings.ignoredPaths || defaultIgnores,
-				this.myDeviceID
+				this.myDeviceID,
 			);
-			// Chame a atualização da view se ela existir
+
 			const leaves =
 				this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
-
-			console.debug(
-				`ST-Debug: Found ${leaves.length} active leaves to update`
-			);
 
 			leaves.forEach((leaf) => {
 				if (leaf.view instanceof SyncthingView) {
@@ -472,72 +350,7 @@ export default class SyncthingController extends Plugin {
 				}
 			});
 		} catch (error) {
-			console.error("Failed to fetch history", error);
+			Logger.error(LOG_MODULES.MAIN, "Failed to fetch history", error);
 		}
-	}
-
-	// --- Data Persistence ---
-
-	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as typeof DEFAULT_SETTINGS
-		);
-
-		if (this.settings.syncthingHost === "device-specific")
-			this.settings.syncthingHost = "";
-		if (this.settings.syncthingPort === "device-specific")
-			this.settings.syncthingPort = "";
-
-		const localHost = window.localStorage.getItem(LS_KEY_HOST);
-		const localPort = window.localStorage.getItem(LS_KEY_PORT);
-		const localHttps = window.localStorage.getItem(LS_KEY_HTTPS);
-		const localKey = window.localStorage.getItem(LS_KEY_API);
-		const localFolder = window.localStorage.getItem(LS_KEY_FOLDER);
-		const localFolderLabel =
-			window.localStorage.getItem(LS_KEY_FOLDER_LABEL);
-
-		if (localHost) this.settings.syncthingHost = localHost;
-		if (localPort) this.settings.syncthingPort = localPort;
-		if (localHttps !== null) this.settings.useHttps = localHttps === "true";
-		if (localKey) this.settings.syncthingApiKey = localKey;
-		if (localFolder) this.settings.syncthingFolderId = localFolder;
-		if (localFolderLabel)
-			this.settings.syncthingFolderLabel = localFolderLabel;
-	}
-
-	async saveSettings() {
-		const sharedSettings = {
-			updateInterval: this.settings.updateInterval,
-			showStatusBar: this.settings.showStatusBar,
-			showRibbonIcon: this.settings.showRibbonIcon,
-			language: this.settings.language,
-			modalConflict: this.settings.modalConflict,
-
-			syncthingHost: "device-specific",
-			syncthingPort: "device-specific",
-			useHttps: false,
-			syncthingApiKey: "device-specific",
-			syncthingFolderId: "device-specific",
-			syncthingFolderLabel: "device-specific",
-		};
-		await this.saveData(sharedSettings);
-
-		window.localStorage.setItem(LS_KEY_HOST, this.settings.syncthingHost);
-		window.localStorage.setItem(LS_KEY_PORT, this.settings.syncthingPort);
-		window.localStorage.setItem(
-			LS_KEY_HTTPS,
-			String(this.settings.useHttps)
-		);
-		window.localStorage.setItem(LS_KEY_API, this.settings.syncthingApiKey);
-		window.localStorage.setItem(
-			LS_KEY_FOLDER,
-			this.settings.syncthingFolderId
-		);
-		window.localStorage.setItem(
-			LS_KEY_FOLDER_LABEL,
-			this.settings.syncthingFolderLabel
-		);
 	}
 }
