@@ -152,4 +152,11 @@ export default {
 	// Alerta de Conflito (View)
 	alert_conflict_detected: "Conflito(s) Detectado(s)!",
 	alert_click_to_resolve: "Clique aqui para resolver",
+
+	setting_header_about: "Sobre",
+	setting_version_name: "Versão",
+	setting_version_tooltip: "Ver notas da versão",
+	setting_github_desc: "Acesse o código fonte ou reporte um problema.",
+	btn_github_repo: "Repositório GitHub",
+	btn_report_bug: "Reportar Bug",
 };

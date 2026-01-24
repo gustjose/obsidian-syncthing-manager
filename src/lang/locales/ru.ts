@@ -152,4 +152,11 @@ export default {
 	// Conflict Alert (View)
 	alert_conflict_detected: "Обнаружен конфликт(ы)!",
 	alert_click_to_resolve: "Нажмите здесь, чтобы решить",
+
+	setting_header_about: "О плагине",
+	setting_version_name: "Версия",
+	setting_version_tooltip: "Просмотреть заметки к выпуску",
+	setting_github_desc: "Исходный код или сообщение об ошибке.",
+	btn_github_repo: "Репозиторий GitHub",
+	btn_report_bug: "Сообщить об ошибке",
 };

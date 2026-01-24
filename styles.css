@@ -389,7 +389,9 @@
 	margin-right: 6px;
 	color: var(--text-muted);
 	vertical-align: middle;
-	transition: color 0.3s ease, opacity 0.3s ease; /* Transição suave de cor */
+	transition:
+		color 0.3s ease,
+		opacity 0.3s ease; /* Transição suave de cor */
 }
 
 /* Estado: Sincronizando (Pendente) -> Laranja */

@@ -147,4 +147,11 @@ export default {
 	// Alerts
 	alert_conflict_detected: "Conflict(s) detected!",
 	alert_click_to_resolve: "Click here to resolve",
+
+	setting_header_about: "About",
+	setting_version_name: "Version",
+	setting_version_tooltip: "View release notes",
+	setting_github_desc: "Access source code or report an issue.",
+	btn_github_repo: "GitHub repo",
+	btn_report_bug: "Report bug",
 };

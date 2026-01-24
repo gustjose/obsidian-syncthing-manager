@@ -85,7 +85,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							this.plugin.settings.useHttps = value;
 							await this.plugin.saveSettings();
 						})();
-					})
+					}),
 			);
 
 		const api_key_Setting = new Setting(containerEl)
@@ -116,7 +116,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							console.error(e);
 						}
 					})();
-				})
+				}),
 		);
 
 		// PASTA
@@ -162,7 +162,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							new Notice(t("notice_searching"));
 							const folders = await SyncthingAPI.getFolders(
 								this.plugin.apiUrl,
-								this.plugin.settings.syncthingApiKey
+								this.plugin.settings.syncthingApiKey,
 							);
 
 							const selectEl =
@@ -186,14 +186,14 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							});
 
 							new Notice(
-								`${folders.length} ${t("notice_folders_found")}`
+								`${folders.length} ${t("notice_folders_found")}`,
 							);
 						} catch (error) {
 							new Notice(t("notice_fail_conn"));
 							console.error(error);
 						}
 					})();
-				})
+				}),
 		);
 
 		new Setting(containerEl)
@@ -207,7 +207,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							this.plugin.settings.modalConflict = value;
 							await this.plugin.saveSettings();
 						})();
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -219,7 +219,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 					.setIcon("file-minus")
 					.onClick(() => {
 						new IgnoreModal(this.app).open();
-					})
+					}),
 			);
 
 		// INTERFACE
@@ -238,7 +238,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							this.plugin.settings.showStatusBar = value;
 							await this.plugin.saveSettings();
 						})();
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -252,7 +252,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							this.plugin.settings.showRibbonIcon = value;
 							await this.plugin.saveSettings();
 						})();
-					})
+					}),
 			);
 
 		new Setting(containerEl)
@@ -271,14 +271,13 @@ export class SyncthingSettingTab extends PluginSettingTab {
 								this.plugin.tabManager.clearAllIcons();
 							}
 						})();
-					})
+					}),
 			);
 
 		new Setting(containerEl)
 			.setName(t("setting_history_filter_name"))
 			.setDesc(t("setting_history_filter_desc"))
 			.addText((text) => {
-				// CORREÇÃO ESLINT: Usamos this.app.vault.configDir dinamicamente
 				const configDir = this.app.vault.configDir;
 				text.setPlaceholder(`${configDir}, .DS_Store, desktop.ini`)
 					.setValue(this.plugin.settings.ignoredPaths)
@@ -287,6 +286,48 @@ export class SyncthingSettingTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					});
 				text.inputEl.addClass("st-input-full-width");
+			});
+
+		// --- SEÇÃO SOBRE ---
+		new Setting(containerEl)
+			.setName(t("setting_header_about"))
+			.setHeading();
+
+		const infoContainer = containerEl.createDiv("st-about-info-container");
+
+		// Versão do Plugin
+		new Setting(infoContainer)
+			.setName(t("setting_version_name"))
+			.setDesc(`v${this.plugin.manifest.version}`)
+			.addExtraButton((btn) => {
+				btn.setIcon("info").setTooltip(t("setting_version_tooltip"));
+				btn.onClick(() => {
+					window.open(
+						`https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/${this.plugin.manifest.version}`,
+					);
+				});
+			});
+
+		// Repositório GitHub
+		new Setting(infoContainer)
+			.setName("GitHub")
+			.setDesc(t("setting_github_desc"))
+			.addButton((btn) => {
+				btn.setButtonText(t("btn_github_repo"))
+					.setCta()
+					.setIcon("github")
+					.onClick(() => {
+						window.open(
+							"https://github.com/gustjose/obsidian-syncthing-manager",
+						);
+					});
+			})
+			.addButton((btn) => {
+				btn.setButtonText(t("btn_report_bug")).onClick(() => {
+					window.open(
+						"https://github.com/gustjose/obsidian-syncthing-manager/issues",
+					);
+				});
 			});
 	}
 }
