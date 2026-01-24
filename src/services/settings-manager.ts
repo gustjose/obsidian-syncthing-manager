@@ -6,8 +6,6 @@ import {
 	LS_KEY_PORT,
 	LS_KEY_HTTPS,
 	LS_KEY_API,
-	LS_KEY_FOLDER,
-	LS_KEY_FOLDER_LABEL,
 } from "../types";
 
 export class SettingsManager {
@@ -37,16 +35,11 @@ export class SettingsManager {
 		const localPort = window.localStorage.getItem(LS_KEY_PORT);
 		const localHttps = window.localStorage.getItem(LS_KEY_HTTPS);
 		const localKey = window.localStorage.getItem(LS_KEY_API);
-		const localFolder = window.localStorage.getItem(LS_KEY_FOLDER);
-		const localFolderLabel =
-			window.localStorage.getItem(LS_KEY_FOLDER_LABEL);
 
 		if (localHost) settings.syncthingHost = localHost;
 		if (localPort) settings.syncthingPort = localPort;
 		if (localHttps !== null) settings.useHttps = localHttps === "true";
 		if (localKey) settings.syncthingApiKey = localKey;
-		if (localFolder) settings.syncthingFolderId = localFolder;
-		if (localFolderLabel) settings.syncthingFolderLabel = localFolderLabel;
 
 		return settings;
 	}
@@ -61,13 +54,12 @@ export class SettingsManager {
 			modalConflict: settings.modalConflict,
 			showTabIcon: settings.showTabIcon,
 			ignoredPaths: settings.ignoredPaths,
-			// Placeholders para forçar o uso do localStorage
+			syncthingFolderId: settings.syncthingFolderId,
+			syncthingFolderLabel: settings.syncthingFolderLabel,
 			syncthingHost: "device-specific",
 			syncthingPort: "device-specific",
 			useHttps: false,
 			syncthingApiKey: "device-specific",
-			syncthingFolderId: "device-specific",
-			syncthingFolderLabel: "device-specific",
 		};
 		await this.plugin.saveData(sharedSettings);
 
@@ -76,10 +68,5 @@ export class SettingsManager {
 		window.localStorage.setItem(LS_KEY_PORT, settings.syncthingPort);
 		window.localStorage.setItem(LS_KEY_HTTPS, String(settings.useHttps));
 		window.localStorage.setItem(LS_KEY_API, settings.syncthingApiKey);
-		window.localStorage.setItem(LS_KEY_FOLDER, settings.syncthingFolderId);
-		window.localStorage.setItem(
-			LS_KEY_FOLDER_LABEL,
-			settings.syncthingFolderLabel,
-		);
 	}
 }
