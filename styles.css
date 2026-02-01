@@ -407,3 +407,54 @@
 	color: var(--text-success) !important;
 	opacity: 1;
 }
+
+/* --- Explorer Quick Action Button --- */
+
+.st-explorer-btn {
+	position: absolute;
+	right: 10px;
+	top: 50%;
+	transform: translateY(-50%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+	color: var(--text-muted);
+	padding-left: 10px;
+	padding-right: 2px;
+	z-index: 5;
+	cursor: pointer;
+}
+
+/* Mostra o botão ao passar o mouse no item do arquivo */
+.nav-file-title:hover .st-explorer-btn {
+	opacity: 1;
+}
+
+/* Estilo do botão ao passar o mouse nele */
+.st-explorer-btn:hover {
+	color: var(--text-normal);
+}
+
+.st-explorer-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Estado: Carregando (Girando) */
+.st-explorer-btn.st-loading {
+	opacity: 1 !important;
+	color: var(--text-accent);
+	pointer-events: none;
+}
+
+.st-explorer-btn.st-loading svg {
+	animation: st-spin 1s linear infinite;
+}
+
+/* Estado: Sucesso (Verde) */
+.st-explorer-btn.st-success {
+	color: var(--text-success) !important;
+	opacity: 1 !important;
+}
