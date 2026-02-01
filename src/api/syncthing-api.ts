@@ -65,6 +65,27 @@ export interface SyncthingRecentChange {
 	modified: string;
 }
 
+export interface SyncthingFileEntry {
+	name: string;
+	size: number;
+	modified: string;
+	deleted: boolean;
+	version: string[];
+	sequence: number;
+	numBlocks: number;
+}
+
+export interface SyncthingFileAvailability {
+	id: string;
+	fromTemporary: boolean;
+}
+
+export interface SyncthingFileStatusResponse {
+	global: SyncthingFileEntry;
+	local: SyncthingFileEntry;
+	availability: SyncthingFileAvailability[];
+}
+
 export class SyncthingAPI {
 	// --- System Status & Config ---
 
@@ -269,5 +290,28 @@ export class SyncthingAPI {
 		} else {
 			throw new Error(`HTTP Error ${response.status}: ${endpointPath}`);
 		}
+	}
+
+	/**
+	 * Consulta o banco de dados do Syncthing para um arquivo específico.
+	 * Retorna a versão 'global' (cluster) e 'local' (disco).
+	 */
+	static async getFileInfo(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		filePath: string,
+	): Promise<SyncthingFileStatusResponse> {
+		const params = new URLSearchParams({
+			folder: folderId,
+			file: filePath,
+		});
+
+		// Chama o endpoint /rest/db/file
+		return this.request<SyncthingFileStatusResponse>(
+			url,
+			apiKey,
+			`/rest/db/file?${params.toString()}`,
+		);
 	}
 }

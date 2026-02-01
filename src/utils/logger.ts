@@ -5,18 +5,20 @@ export const LOG_MODULES = {
 	IGNORE: "IgnoreManager",
 	TAB: "TabManager",
 	CONFLICT: "ConflictManager",
+	FILE_STATE: "FileStateManager",
 } as const;
 
 export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
 
 export class Logger {
 	private static activeModules: Set<LogModule> = new Set([
-		// LOG_MODULES.MAIN,
+		LOG_MODULES.MAIN,
 		// LOG_MODULES.API,
 		// LOG_MODULES.EVENT,
 		// LOG_MODULES.TAB,
 		// LOG_MODULES.CONFLICT,
-		// LOG_MODULES.IGNORE
+		// LOG_MODULES.IGNORE,
+		LOG_MODULES.FILE_STATE,
 	]);
 
 	/**

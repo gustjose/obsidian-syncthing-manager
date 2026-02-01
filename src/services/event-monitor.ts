@@ -244,7 +244,7 @@ export class SyncthingEventMonitor {
 					);
 					items.forEach((filename: string) => {
 						if (typeof filename === "string") {
-							this.plugin.tabManager.setSynced(filename);
+							void this.plugin.onFileSyncedEvent(filename);
 						}
 					});
 				}

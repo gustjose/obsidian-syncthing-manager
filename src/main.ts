@@ -8,6 +8,7 @@ import { IgnoreManager } from "./services/ignore-manager";
 import { TabManager } from "./services/tab-manager";
 import { SettingsManager } from "./services/settings-manager";
 import { StatusBarManager } from "./ui/status-bar-manager";
+import { FileStateManager } from "./services/file-state-manager";
 import { Logger, LOG_MODULES } from "./utils/logger";
 import { createSyncthingIcon } from "./ui/icons";
 import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
@@ -16,6 +17,7 @@ export default class SyncthingController extends Plugin {
 	settings: SyncthingPluginSettings;
 	settingsManager: SettingsManager;
 	statusBarManager: StatusBarManager;
+	fileStateManager: FileStateManager;
 
 	ribbonIconEl: HTMLElement | null = null;
 	monitor: SyncthingEventMonitor;
@@ -38,14 +40,22 @@ export default class SyncthingController extends Plugin {
 	// --- Lifecycle ---
 
 	async onload() {
-		// 1. Carrega Configurações (Delegado para SettingsManager)
+		// 1. Carrega Configurações
 		this.settingsManager = new SettingsManager(this);
 		this.settings = await this.settingsManager.loadSettings();
-
 		setLanguage(this.settings.language);
 
 		// 2. Inicializa Gerenciadores
 		this.tabManager = new TabManager(this.app, this);
+
+		// Inicializa o Gerenciador de Estado Persistente
+		// this.manifest.dir é o caminho da pasta do plugin
+		this.fileStateManager = new FileStateManager(
+			this.app,
+			this.manifest.dir || "",
+		);
+		await this.fileStateManager.load();
+
 		const ignoreManager = new IgnoreManager(this.app);
 		await ignoreManager.ensureDefaults();
 
@@ -58,7 +68,7 @@ export default class SyncthingController extends Plugin {
 			(leaf) => new SyncthingView(leaf, this),
 		);
 
-		// 5. Interface - Barra de Status (Delegado para StatusBarManager)
+		// 5. Interface - Barra de Status
 		if (this.settings.showStatusBar) {
 			this.statusBarManager = new StatusBarManager(this, () => {
 				void this.forcarSincronizacao();
@@ -66,7 +76,7 @@ export default class SyncthingController extends Plugin {
 			this.statusBarManager.init();
 		}
 
-		// 6. Interface - Ícone Lateral (Ribbon)
+		// 6. Interface - Ícone Lateral
 		if (this.settings.showRibbonIcon) {
 			this.ribbonIconEl = this.addRibbonIcon(
 				"refresh-cw",
@@ -77,10 +87,13 @@ export default class SyncthingController extends Plugin {
 			);
 		}
 
-		// 7. Eventos
+		// 7. Eventos de Modificação (Gatilho de Estado 'Pending')
 		this.registerEvent(
-			this.app.vault.on("modify", (abstractFile) => {
+			this.app.vault.on("modify", async (abstractFile) => {
 				if (abstractFile instanceof TFile) {
+					// 1. Persistência: Marca como 'sujo' no banco
+					await this.fileStateManager.markAsDirty(abstractFile.path);
+					// 2. Visual: Atualiza a aba imediatamente
 					this.tabManager.setPendingSync(abstractFile);
 				}
 			}),
@@ -112,14 +125,17 @@ export default class SyncthingController extends Plugin {
 			},
 		});
 
-		// 9. Monitoramento e Aba de Configurações
+		// 9. Monitoramento
 		this.monitor = new SyncthingEventMonitor(this);
 		this.addSettingTab(new SyncthingSettingTab(this.app, this));
 
-		// 10. Inicialização Final
+		// 10. Inicialização Final e Reconciliação
 		this.atualizarTodosVisuais();
 		await this.verificarConexao(false);
 		await this.atualizarContagemDispositivos();
+
+		// Verifica se arquivos pendentes foram sincronizados enquanto o plugin estava off
+		await this.reconcileFileStates();
 
 		void this.monitor.start();
 	}
@@ -127,6 +143,77 @@ export default class SyncthingController extends Plugin {
 	onunload() {
 		if (this.monitor) this.monitor.stop();
 		if (this.statusBarManager) this.statusBarManager.destroy();
+	}
+
+	// --- Lógica de Reconciliação e Estado ---
+
+	/**
+	 * Verifica o estado real na API para todos os arquivos marcados como 'pending'
+	 */
+	async reconcileFileStates() {
+		const pendingFiles = this.fileStateManager.getPendingFiles();
+		if (pendingFiles.length === 0) return;
+
+		Logger.debug(
+			LOG_MODULES.MAIN,
+			`Reconciliando ${pendingFiles.length} arquivos pendentes...`,
+		);
+
+		for (const fileState of pendingFiles) {
+			const file = this.app.vault.getAbstractFileByPath(fileState.path);
+
+			// Se o arquivo não existe mais, ignoramos (o GC limpará depois ou tratamos como deletado)
+			if (!(file instanceof TFile)) continue;
+
+			// Restaura o visual de "pendente" inicialmente
+			this.tabManager.setPendingSync(file);
+
+			// Se temos configuração válida, verificamos a API
+			if (
+				this.settings.syncthingApiKey &&
+				this.settings.syncthingFolderId
+			) {
+				try {
+					const info = await SyncthingAPI.getFileInfo(
+						this.apiUrl,
+						this.settings.syncthingApiKey,
+						this.settings.syncthingFolderId,
+						fileState.path,
+					);
+
+					// Comparação de Vetores de Versão
+					// Se local.version == global.version, o arquivo está sincronizado no cluster
+					const isSynced =
+						JSON.stringify(info.local.version) ===
+						JSON.stringify(info.global.version);
+
+					if (isSynced) {
+						Logger.debug(
+							LOG_MODULES.MAIN,
+							`Reconciliado: ${fileState.path} já estava sincronizado.`,
+						);
+						await this.onFileSyncedEvent(fileState.path);
+					}
+				} catch (e) {
+					Logger.warn(
+						LOG_MODULES.MAIN,
+						`Falha ao reconciliar ${fileState.path} via API`,
+						e,
+					);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Método central para registrar que um arquivo foi sincronizado.
+	 * Deve ser chamado pelo EventMonitor.
+	 */
+	async onFileSyncedEvent(path: string) {
+		// 1. Persistência: Marca como 'synced' no banco
+		await this.fileStateManager.markAsSynced(path);
+		// 2. Visual: Atualiza a aba para verde/check
+		this.tabManager.setSynced(path);
 	}
 
 	// --- View Management ---
@@ -150,7 +237,6 @@ export default class SyncthingController extends Plugin {
 	}
 
 	atualizarTodosVisuais() {
-		// Atualiza StatusBar via Manager
 		if (this.statusBarManager && this.settings.showStatusBar) {
 			this.statusBarManager.update(
 				this.currentStatus,
@@ -159,13 +245,12 @@ export default class SyncthingController extends Plugin {
 			);
 		}
 
-		// Atualiza Ribbon (mantido aqui pois é simples)
 		if (this.ribbonIconEl) {
 			this.ribbonIconEl.empty();
 			const iconContainer = this.ribbonIconEl.createDiv({
 				cls: "ribbon-icon-svg",
 			});
-			const svg = createSyncthingIcon(""); // Ícone padrão
+			const svg = createSyncthingIcon("");
 			iconContainer.appendChild(svg);
 
 			const tooltipInfo = `${t("status_synced")}\n\n${t("info_last_sync")}: ${
@@ -175,17 +260,13 @@ export default class SyncthingController extends Plugin {
 			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
 		}
 
-		// Atualiza Views Abertas
 		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
 		leaves.forEach((leaf) => {
 			if (leaf.view instanceof SyncthingView) leaf.view.updateView();
 		});
 	}
 
-	// --- Data Persistence ---
-
 	async saveSettings() {
-		// Delega o salvamento para o Manager
 		await this.settingsManager.saveSettings(this.settings);
 	}
 
