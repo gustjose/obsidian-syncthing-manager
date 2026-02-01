@@ -11,7 +11,6 @@ type SyncState = "pending" | "success";
 export class TabManager {
 	app: App;
 	plugin: SyncthingController;
-	private pendingFiles: Set<string> = new Set();
 
 	constructor(app: App, plugin: SyncthingController) {
 		this.app = app;
@@ -20,43 +19,51 @@ export class TabManager {
 	}
 
 	private setupListeners() {
+		// 1. Ao abrir/focar um arquivo
 		this.plugin.registerEvent(
-			this.app.workspace.on("file-open", () => {
+			this.app.workspace.on("file-open", (file) => {
 				this.cleanupStaleIcons();
+
+				// [NOVO] Verifica se o arquivo aberto está pendente e restaura o ícone
+				if (file instanceof TFile) {
+					const state = this.plugin.fileStateManager.getState(
+						file.path,
+					);
+					if (state && state.status === "pending") {
+						this.updateTabsForFile(file.path, "pending");
+					}
+				}
+			}),
+		);
+
+		// 2. [NOVO] Ao mudar o layout (ex: dividir janelas, restaurar sessão)
+		this.plugin.registerEvent(
+			this.app.workspace.on("layout-change", () => {
+				// Re-aplica ícones em todos os arquivos pendentes visíveis
+				const pendingFiles =
+					this.plugin.fileStateManager.getPendingFiles();
+				pendingFiles.forEach((fileState) => {
+					this.updateTabsForFile(fileState.path, "pending");
+				});
 			}),
 		);
 	}
 
 	public setPendingSync(file: TFile) {
 		if (!file) return;
-		this.pendingFiles.add(file.path);
 		this.updateTabsForFile(file.path, "pending");
 	}
 
 	public setSynced(filenameOrPath: string) {
-		const normalizedIncoming = filenameOrPath.replace(/\\/g, "/");
+		const state = this.plugin.fileStateManager.getState(filenameOrPath);
+		const targetPath = state
+			? state.path
+			: filenameOrPath.replace(/\\/g, "/");
 
-		if (this.pendingFiles.has(normalizedIncoming)) {
-			this.pendingFiles.delete(normalizedIncoming);
-			this.updateTabsForFile(normalizedIncoming, "success");
-			return;
-		}
-
-		for (const storedPath of this.pendingFiles) {
-			const normalizedStored = storedPath.replace(/\\/g, "/");
-			const match =
-				normalizedIncoming.endsWith(normalizedStored) ||
-				normalizedStored.endsWith(normalizedIncoming);
-
-			if (match) {
-				this.pendingFiles.delete(storedPath);
-				this.updateTabsForFile(storedPath, "success");
-			}
-		}
+		this.updateTabsForFile(targetPath, "success");
 	}
 
 	public clearAllIcons() {
-		this.pendingFiles.clear();
 		this.app.workspace.iterateAllLeaves((leaf) => {
 			if (leaf.view instanceof FileView) {
 				this.removeIconFromLeaf(leaf);
@@ -70,7 +77,6 @@ export class TabManager {
 				const viewFile = leaf.view.file;
 				const internalLeaf = leaf as InternalWorkspaceLeaf;
 
-				// Tenta localizar o cabeçalho
 				let headerInner = internalLeaf.tabHeaderInnerEl;
 				if (!headerInner && internalLeaf.tabHeaderEl) {
 					headerInner = internalLeaf.tabHeaderEl.querySelector(
@@ -86,10 +92,15 @@ export class TabManager {
 						iconContainer &&
 						iconContainer.hasClass("st-sync-pending")
 					) {
-						if (
-							!viewFile ||
-							!this.pendingFiles.has(viewFile.path)
-						) {
+						if (!viewFile) {
+							iconContainer.remove();
+							return;
+						}
+
+						const state = this.plugin.fileStateManager.getState(
+							viewFile.path,
+						);
+						if (!state || state.status !== "pending") {
 							iconContainer.remove();
 						}
 					}
@@ -140,21 +151,16 @@ export class TabManager {
 			headerInner.prepend(iconContainer);
 		}
 
-		// LÓGICA DE ESTADOS
 		if (status === "pending") {
 			iconContainer.removeClass("st-sync-success");
 			iconContainer.addClass("st-sync-pending");
-
 			iconContainer.addClass("st-anim-spin");
-
 			setIcon(iconContainer, "refresh-cw");
 			iconContainer.setAttribute("aria-label", "Sincronizando...");
 		} else if (status === "success") {
 			iconContainer.removeClass("st-sync-pending");
 			iconContainer.addClass("st-sync-success");
-
 			iconContainer.removeClass("st-anim-spin");
-
 			setIcon(iconContainer, "check");
 			iconContainer.setAttribute("aria-label", "Sincronizado!");
 

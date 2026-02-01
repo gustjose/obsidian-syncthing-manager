@@ -13,7 +13,7 @@ export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
 export class Logger {
 	private static activeModules: Set<LogModule> = new Set([
 		LOG_MODULES.MAIN,
-		// LOG_MODULES.API,
+		LOG_MODULES.API,
 		// LOG_MODULES.EVENT,
 		// LOG_MODULES.TAB,
 		// LOG_MODULES.CONFLICT,

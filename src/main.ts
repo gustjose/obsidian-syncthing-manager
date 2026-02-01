@@ -1,4 +1,10 @@
-import { Plugin, Notice, WorkspaceLeaf, TFile } from "obsidian";
+import {
+	Plugin,
+	Notice,
+	WorkspaceLeaf,
+	TFile,
+	FileSystemAdapter,
+} from "obsidian";
 import { SyncthingSettingTab } from "./ui/settings";
 import { SyncthingAPI, SyncthingHistoryItem } from "./api/syncthing-api";
 import { SyncthingEventMonitor } from "./services/event-monitor";
@@ -25,6 +31,9 @@ export default class SyncthingController extends Plugin {
 	myDeviceID: string = "";
 	tabManager: TabManager;
 
+	// Prefixo para corrigir caminhos quando o Cofre é uma subpasta
+	private pathPrefix: string = "";
+
 	public lastSyncTime: string = "--:--";
 	public connectedDevices: number = 0;
 	public currentStatus: SyncStatus = "desconhecido";
@@ -49,7 +58,6 @@ export default class SyncthingController extends Plugin {
 		this.tabManager = new TabManager(this.app, this);
 
 		// Inicializa o Gerenciador de Estado Persistente
-		// this.manifest.dir é o caminho da pasta do plugin
 		this.fileStateManager = new FileStateManager(
 			this.app,
 			this.manifest.dir || "",
@@ -87,13 +95,12 @@ export default class SyncthingController extends Plugin {
 			);
 		}
 
-		// 7. Eventos de Modificação (Gatilho de Estado 'Pending')
+		// 7. Eventos de Modificação
 		this.registerEvent(
 			this.app.vault.on("modify", async (abstractFile) => {
 				if (abstractFile instanceof TFile) {
-					// 1. Persistência: Marca como 'sujo' no banco
+					// Marca como pendente no banco e na UI
 					await this.fileStateManager.markAsDirty(abstractFile.path);
-					// 2. Visual: Atualiza a aba imediatamente
 					this.tabManager.setPendingSync(abstractFile);
 				}
 			}),
@@ -129,15 +136,20 @@ export default class SyncthingController extends Plugin {
 		this.monitor = new SyncthingEventMonitor(this);
 		this.addSettingTab(new SyncthingSettingTab(this.app, this));
 
-		// 10. Inicialização Final e Reconciliação
+		// 10. Inicialização Final
 		this.atualizarTodosVisuais();
-		await this.verificarConexao(false);
-		await this.atualizarContagemDispositivos();
 
-		// Verifica se arquivos pendentes foram sincronizados enquanto o plugin estava off
-		await this.reconcileFileStates();
+		// Aguarda o Obsidian estar totalmente pronto antes de verificar arquivos e conexão
+		this.app.workspace.onLayoutReady(async () => {
+			await this.verificarConexao(false);
 
-		void this.monitor.start();
+			// Detecta se estamos em uma subpasta
+			await this.detectPathPrefix();
+
+			await this.atualizarContagemDispositivos();
+			await this.reconcileFileStates();
+			void this.monitor.start();
+		});
 	}
 
 	onunload() {
@@ -145,10 +157,68 @@ export default class SyncthingController extends Plugin {
 		if (this.statusBarManager) this.statusBarManager.destroy();
 	}
 
+	// --- Lógica de Prefixo ---
+
+	/**
+	 * Detecta se o Cofre Obsidian é uma subpasta dentro da pasta do Syncthing.
+	 */
+	async detectPathPrefix() {
+		if (!this.settings.syncthingApiKey || !this.settings.syncthingFolderId)
+			return;
+
+		try {
+			// 1. Obtém pastas do Syncthing
+			const folders = await SyncthingAPI.getFolders(
+				this.apiUrl,
+				this.settings.syncthingApiKey,
+			);
+			const currentSyncFolder = folders.find(
+				(f) => f.id === this.settings.syncthingFolderId,
+			);
+
+			if (!currentSyncFolder) return;
+
+			// 2. Obtém caminho do Cofre
+			const adapter = this.app.vault.adapter;
+			if (adapter instanceof FileSystemAdapter) {
+				const vaultPath = adapter.getBasePath().replace(/\\/g, "/");
+				const syncPath = currentSyncFolder.path
+					.replace(/\\/g, "/")
+					.replace(/\/$/, "");
+
+				// 3. Verifica se é subpasta
+				if (vaultPath.startsWith(syncPath) && vaultPath !== syncPath) {
+					// Extrai a parte relativa (ex: "/dev-obsidian")
+					let relative = vaultPath.substring(syncPath.length);
+					if (relative.startsWith("/"))
+						relative = relative.substring(1);
+
+					// Adiciona barra final se necessário
+					if (relative && !relative.endsWith("/")) relative += "/";
+
+					this.pathPrefix = relative;
+					Logger.debug(
+						LOG_MODULES.MAIN,
+						`Prefixo detectado: "${this.pathPrefix}"`,
+					);
+				} else {
+					this.pathPrefix = "";
+				}
+			}
+		} catch (e) {
+			Logger.warn(
+				LOG_MODULES.MAIN,
+				"Falha ao detectar prefixo de pasta",
+				e,
+			);
+		}
+	}
+
 	// --- Lógica de Reconciliação e Estado ---
 
 	/**
-	 * Verifica o estado real na API para todos os arquivos marcados como 'pending'
+	 * Verifica o estado real na API para todos os arquivos marcados como 'pending'.
+	 * Inclui lógica de Retry (tentativas) para aguardar o Scan do Syncthing terminar.
 	 */
 	async reconcileFileStates() {
 		const pendingFiles = this.fileStateManager.getPendingFiles();
@@ -162,57 +232,119 @@ export default class SyncthingController extends Plugin {
 		for (const fileState of pendingFiles) {
 			const file = this.app.vault.getAbstractFileByPath(fileState.path);
 
-			// Se o arquivo não existe mais, ignoramos (o GC limpará depois ou tratamos como deletado)
 			if (!(file instanceof TFile)) continue;
 
-			// Restaura o visual de "pendente" inicialmente
 			this.tabManager.setPendingSync(file);
 
-			// Se temos configuração válida, verificamos a API
 			if (
 				this.settings.syncthingApiKey &&
 				this.settings.syncthingFolderId
 			) {
 				try {
-					const info = await SyncthingAPI.getFileInfo(
-						this.apiUrl,
-						this.settings.syncthingApiKey,
-						this.settings.syncthingFolderId,
-						fileState.path,
-					);
+					await this.checkFileStatus(fileState.path);
+				} catch (e) {
+					// Se der 404 (ainda não indexado), iniciamos o processo de Scan + Polling
+					if (e instanceof Error && e.message.includes("404")) {
+						// Aplica o prefixo para o scan
+						const fullPath = this.pathPrefix + fileState.path;
 
-					// Comparação de Vetores de Versão
-					// Se local.version == global.version, o arquivo está sincronizado no cluster
-					const isSynced =
-						JSON.stringify(info.local.version) ===
-						JSON.stringify(info.global.version);
-
-					if (isSynced) {
 						Logger.debug(
 							LOG_MODULES.MAIN,
-							`Reconciliado: ${fileState.path} já estava sincronizado.`,
+							`[404] Arquivo não indexado: ${fullPath}. Iniciando Scan...`,
 						);
-						await this.onFileSyncedEvent(fileState.path);
+
+						try {
+							// 1. Solicita o Scan
+							await SyncthingAPI.forceScan(
+								this.apiUrl,
+								this.settings.syncthingApiKey,
+								this.settings.syncthingFolderId,
+								fullPath,
+							);
+
+							// 2. Loop de Tentativas (Polling)
+							let success = false;
+							for (let i = 1; i <= 3; i++) {
+								await new Promise((resolve) =>
+									setTimeout(resolve, 2000),
+								); // Espera 2s
+
+								try {
+									await this.checkFileStatus(fileState.path);
+									success = true;
+									Logger.debug(
+										LOG_MODULES.MAIN,
+										`[Sucesso] Arquivo recuperado na tentativa ${i}: ${fileState.path}`,
+									);
+									break;
+								} catch (retryError) {
+									if (
+										retryError instanceof Error &&
+										!retryError.message.includes("404")
+									) {
+										throw retryError;
+									}
+								}
+							}
+
+							if (!success) {
+								Logger.warn(
+									LOG_MODULES.MAIN,
+									`Timeout: Syncthing não indexou ${fileState.path} após várias tentativas. Ele continuará como pendente.`,
+								);
+							}
+						} catch (scanError) {
+							Logger.warn(
+								LOG_MODULES.MAIN,
+								`Erro crítico no processo de scan: ${fileState.path}`,
+								scanError,
+							);
+						}
+					} else {
+						Logger.warn(
+							LOG_MODULES.MAIN,
+							`Erro de API ao reconciliar ${fileState.path}`,
+							e,
+						);
 					}
-				} catch (e) {
-					Logger.warn(
-						LOG_MODULES.MAIN,
-						`Falha ao reconciliar ${fileState.path} via API`,
-						e,
-					);
 				}
 			}
 		}
 	}
 
 	/**
+	 * Helper para verificar o status de um arquivo via API e atualizar se sincronizado.
+	 */
+	private async checkFileStatus(obsidianPath: string) {
+		// Aplica o prefixo antes de chamar a API
+		const fullPath = this.pathPrefix + obsidianPath;
+
+		const info = await SyncthingAPI.getFileInfo(
+			this.apiUrl,
+			this.settings.syncthingApiKey,
+			this.settings.syncthingFolderId,
+			fullPath,
+		);
+
+		const localVer = info.local?.version || [];
+		const globalVer = info.global?.version || [];
+
+		// Ordenação essencial para comparação de arrays
+		localVer.sort();
+		globalVer.sort();
+
+		const isSynced = JSON.stringify(localVer) === JSON.stringify(globalVer);
+
+		if (isSynced) {
+			await this.onFileSyncedEvent(obsidianPath);
+		}
+	}
+
+	/**
 	 * Método central para registrar que um arquivo foi sincronizado.
-	 * Deve ser chamado pelo EventMonitor.
 	 */
 	async onFileSyncedEvent(path: string) {
-		// 1. Persistência: Marca como 'synced' no banco
 		await this.fileStateManager.markAsSynced(path);
-		// 2. Visual: Atualiza a aba para verde/check
 		this.tabManager.setSynced(path);
 	}
 
@@ -253,9 +385,11 @@ export default class SyncthingController extends Plugin {
 			const svg = createSyncthingIcon("");
 			iconContainer.appendChild(svg);
 
-			const tooltipInfo = `${t("status_synced")}\n\n${t("info_last_sync")}: ${
-				this.lastSyncTime
-			}\n${t("info_devices")}: ${this.connectedDevices}`;
+			const tooltipInfo = `${t("status_synced")}\n\n${t(
+				"info_last_sync",
+			)}: ${this.lastSyncTime}\n${t("info_devices")}: ${
+				this.connectedDevices
+			}`;
 
 			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
 		}

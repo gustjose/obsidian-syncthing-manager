@@ -137,18 +137,33 @@ export class SyncthingAPI {
 		);
 	}
 
+	/**
+	 * Força o escaneamento de uma pasta ou de um arquivo específico.
+	 * @param path Caminho relativo do arquivo (opcional). Se omitido, escaneia a pasta toda.
+	 */
 	static async forceScan(
 		url: string,
 		apiKey: string,
 		folderId?: string,
+		path?: string,
 	): Promise<void> {
-		let endpoint = "/rest/db/scan";
+		const params = new URLSearchParams();
+		if (folderId) params.append("folder", folderId);
+		if (path) params.append("sub", path);
 
-		if (folderId) {
-			endpoint += `?folder=${folderId}`;
-		}
+		// --- LOG DIAGNÓSTICO 1: Ver a URL final ---
+		const queryString = params.toString();
+		Logger.debug(
+			LOG_MODULES.API,
+			`[DEBUG forceScan] Enviando scan. Folder: ${folderId}, Sub: ${path}, Query: ${queryString}`,
+		);
 
-		await this.request<void>(url, apiKey, endpoint, "POST");
+		await this.request<void>(
+			url,
+			apiKey,
+			`/rest/db/scan?${queryString}`,
+			"POST",
+		);
 	}
 
 	static async getHistory(
@@ -188,16 +203,15 @@ export class SyncthingAPI {
 				// Verifica ignorados usando o caminho completo (mais seguro)
 				if (patterns.some((p) => fullPath.includes(p))) return;
 
-				// Extrai apenas o nome do arquivo (suporta barras / ou invertidas \)
+				// Extrai apenas o nome do arquivo
 				const displayName = fullPath.split(/[/\\]/).pop() || fullPath;
 
 				const actionType: "deleted" | "updated" | "added" =
 					e.data.action === "delete" ? "deleted" : "updated";
 
 				historyMap.set(fullPath, {
-					// Chave continua sendo o caminho completo
 					id: e.id,
-					filename: displayName, // Exibição limpa
+					filename: displayName,
 					direction: "in",
 					action: actionType,
 					timestamp: timestamp,
@@ -218,7 +232,6 @@ export class SyncthingAPI {
 					if (typeof fullPath !== "string") return;
 					if (patterns.some((p) => fullPath.includes(p))) return;
 
-					// Extrai apenas o nome do arquivo
 					const displayName =
 						fullPath.split(/[/\\]/).pop() || fullPath;
 
@@ -231,7 +244,6 @@ export class SyncthingAPI {
 							lastInId = prev.lastRealInId;
 							const diff = e.id - lastInId;
 
-							// Tolerância de 5 eventos
 							if (diff < 5) {
 								direction = "in";
 							}
@@ -239,9 +251,8 @@ export class SyncthingAPI {
 					}
 
 					historyMap.set(fullPath, {
-						// Chave continua sendo o caminho completo
 						id: e.id,
-						filename: displayName, // Exibição limpa
+						filename: displayName,
 						direction: direction,
 						action: "updated",
 						timestamp: timestamp,
@@ -255,6 +266,29 @@ export class SyncthingAPI {
 			.sort((a, b) => b.id - a.id)
 			.slice(0, 10)
 			.map(({ lastRealInId, ...item }) => item);
+	}
+
+	/**
+	 * Consulta o banco de dados do Syncthing para um arquivo específico.
+	 * Retorna a versão 'global' (cluster) e 'local' (disco).
+	 */
+	static async getFileInfo(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		filePath: string,
+	): Promise<SyncthingFileStatusResponse> {
+		const params = new URLSearchParams({
+			folder: folderId,
+			file: filePath,
+		});
+
+		// Chama o endpoint /rest/db/file
+		return this.request<SyncthingFileStatusResponse>(
+			url,
+			apiKey,
+			`/rest/db/file?${params.toString()}`,
+		);
 	}
 
 	// --- HTTP Helper ---
@@ -288,30 +322,11 @@ export class SyncthingAPI {
 			}
 			return {} as T;
 		} else {
+			Logger.error(
+				LOG_MODULES.API,
+				`[DEBUG Request Error] Falha em ${endpoint}. Status: ${response.status}. Body: ${response.text}`,
+			);
 			throw new Error(`HTTP Error ${response.status}: ${endpointPath}`);
 		}
-	}
-
-	/**
-	 * Consulta o banco de dados do Syncthing para um arquivo específico.
-	 * Retorna a versão 'global' (cluster) e 'local' (disco).
-	 */
-	static async getFileInfo(
-		url: string,
-		apiKey: string,
-		folderId: string,
-		filePath: string,
-	): Promise<SyncthingFileStatusResponse> {
-		const params = new URLSearchParams({
-			folder: folderId,
-			file: filePath,
-		});
-
-		// Chama o endpoint /rest/db/file
-		return this.request<SyncthingFileStatusResponse>(
-			url,
-			apiKey,
-			`/rest/db/file?${params.toString()}`,
-		);
 	}
 }
