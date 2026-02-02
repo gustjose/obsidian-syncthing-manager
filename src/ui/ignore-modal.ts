@@ -7,15 +7,19 @@ import {
 	ButtonComponent,
 } from "obsidian";
 import { IgnoreManager } from "../services/ignore-manager";
+import SyncthingController from "../main";
 import { t } from "../lang/lang";
+import { Logger, LOG_MODULES } from "../utils/logger";
 
 export class IgnoreModal extends Modal {
+	plugin: SyncthingController;
 	manager: IgnoreManager;
 	content: string = "";
 
-	constructor(app: App) {
+	constructor(app: App, plugin: SyncthingController) {
 		super(app);
-		this.manager = new IgnoreManager(app);
+		this.plugin = plugin;
+		this.manager = new IgnoreManager(app, plugin);
 	}
 
 	async onOpen() {
@@ -27,7 +31,14 @@ export class IgnoreModal extends Modal {
 		contentEl.createEl("h2", { text: t("modal_ignore_title") });
 		contentEl.createEl("p", { text: t("modal_ignore_desc") });
 
-		this.content = await this.manager.readIgnoreFile();
+		// [MODIFICADO] Usa o método da API
+		try {
+			this.content = await this.manager.loadRules();
+		} catch (e) {
+			this.content = "";
+			new Notice("Erro ao carregar regras da API");
+			Logger.debug(LOG_MODULES.MAIN, `Erro: ${e}.`);
+		}
 
 		const container = contentEl.createDiv();
 
@@ -53,7 +64,6 @@ export class IgnoreModal extends Modal {
 			cls: "st-details-content",
 		});
 
-		// [MODIFICADO] Usando tradução
 		suggestionsContainer.createEl("p", {
 			text: t("ignore_help_text"),
 			cls: "setting-item-description",
@@ -62,7 +72,6 @@ export class IgnoreModal extends Modal {
 
 		const configDir = this.app.vault.configDir;
 
-		// [MODIFICADO] Usando tradução para Labels e Descrições
 		const patterns = [
 			{
 				label: t("ignore_pattern_workspace_label"),
@@ -103,12 +112,11 @@ export class IgnoreModal extends Modal {
 							this.content =
 								this.content.trim() + prefix + p.rule;
 							textArea.setValue(this.content);
-							// [MODIFICADO] Concatenação com tradução
 							new Notice(t("notice_ignore_added") + p.label);
 						} else {
 							new Notice(t("notice_ignore_exists"));
 						}
-					})
+					}),
 			);
 		});
 
@@ -118,15 +126,15 @@ export class IgnoreModal extends Modal {
 			.setButtonText(t("btn_save_ignore"))
 			.setCta()
 			.onClick(() => {
+				// [MODIFICADO] Usa o método da API (saveRules)
 				this.manager
-					.saveIgnoreFile(this.content)
+					.saveRules(this.content)
 					.then(() => {
 						new Notice(t("notice_ignore_saved"));
 						this.close();
 					})
 					.catch((err) => {
 						console.error(err);
-						// [MODIFICADO] Usando tradução de erro
 						new Notice(t("notice_ignore_error"));
 					});
 			});

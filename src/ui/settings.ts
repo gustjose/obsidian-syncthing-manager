@@ -218,7 +218,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 					.setButtonText(t("btn_edit_ignore"))
 					.setIcon("file-minus")
 					.onClick(() => {
-						new IgnoreModal(this.app).open();
+						new IgnoreModal(this.app, this.plugin).open();
 					}),
 			);
 

@@ -86,6 +86,11 @@ export interface SyncthingFileStatusResponse {
 	availability: SyncthingFileAvailability[];
 }
 
+export interface SyncthingIgnores {
+	ignore: string[];
+	expanded: string[];
+}
+
 export class SyncthingAPI {
 	// --- System Status & Config ---
 
@@ -291,6 +296,36 @@ export class SyncthingAPI {
 		);
 	}
 
+	static async getIgnores(
+		url: string,
+		apiKey: string,
+		folderId: string,
+	): Promise<SyncthingIgnores> {
+		return this.request<SyncthingIgnores>(
+			url,
+			apiKey,
+			`/rest/db/ignores?folder=${folderId}`,
+		);
+	}
+
+	static async setIgnores(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		lines: string[],
+	): Promise<void> {
+		// A API espera o corpo como JSON: { ignore: ["padrao1", "padrao2"] }
+		const body = JSON.stringify({ ignore: lines });
+
+		await this.request<void>(
+			url,
+			apiKey,
+			`/rest/db/ignores?folder=${folderId}`,
+			"POST",
+			body, // Passamos o corpo aqui (precisa ajustar o método request abaixo)
+		);
+	}
+
 	// --- HTTP Helper ---
 
 	private static async request<T>(
@@ -298,6 +333,7 @@ export class SyncthingAPI {
 		apiKey: string,
 		endpointPath: string,
 		method: string = "GET",
+		body?: string,
 	): Promise<T> {
 		const baseUrl = url.replace(/\/$/, "");
 		const endpoint = `${baseUrl}${endpointPath}`;
@@ -308,6 +344,7 @@ export class SyncthingAPI {
 			url: endpoint,
 			method: method,
 			headers: { "X-API-Key": apiKey },
+			body: body,
 		};
 
 		const response = await requestUrl(params);

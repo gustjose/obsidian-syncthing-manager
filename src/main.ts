@@ -15,7 +15,7 @@ import { TabManager } from "./services/tab-manager";
 import { SettingsManager } from "./services/settings-manager";
 import { StatusBarManager } from "./ui/status-bar-manager";
 import { FileStateManager } from "./services/file-state-manager";
-import { ExplorerManager } from "./services/explorer-manager"; // [NOVO]
+import { ExplorerManager } from "./services/explorer-manager";
 import { Logger, LOG_MODULES } from "./utils/logger";
 import { createSyncthingIcon } from "./ui/icons";
 import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
@@ -33,7 +33,7 @@ export default class SyncthingController extends Plugin {
 	myDeviceID: string = "";
 	tabManager: TabManager;
 
-	private pathPrefix: string = "";
+	public pathPrefix: string = "";
 
 	public lastSyncTime: string = "--:--";
 	public connectedDevices: number = 0;
@@ -62,8 +62,7 @@ export default class SyncthingController extends Plugin {
 		);
 		await this.fileStateManager.load();
 
-		const ignoreManager = new IgnoreManager(this.app);
-		await ignoreManager.ensureDefaults();
+		const ignoreManager = new IgnoreManager(this.app, this);
 
 		await this.fetchMyDeviceID();
 
@@ -135,6 +134,7 @@ export default class SyncthingController extends Plugin {
 		this.app.workspace.onLayoutReady(async () => {
 			await this.verificarConexao(false);
 			await this.detectPathPrefix();
+			await ignoreManager.ensureDefaults();
 			await this.atualizarContagemDispositivos();
 			await this.reconcileFileStates();
 			void this.monitor.start();
