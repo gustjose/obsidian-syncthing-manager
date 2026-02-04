@@ -19,6 +19,7 @@ export interface SyncthingPluginSettings {
 	modalConflict: boolean;
 	showTabIcon: boolean;
 	ignoredPaths: string;
+	showExplorerIcon: boolean;
 }
 
 export type SyncStatus =
@@ -44,6 +45,7 @@ export const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	language: "auto",
 	modalConflict: true,
 	showTabIcon: true,
+	showExplorerIcon: true,
 	ignoredPaths: "",
 };
 

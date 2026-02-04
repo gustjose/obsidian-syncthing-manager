@@ -1,6 +1,7 @@
 import { App, TFile, setIcon } from "obsidian";
 import SyncthingController from "../main";
 import { Logger, LOG_MODULES } from "../utils/logger";
+import { t } from "../lang/lang";
 
 export class ExplorerManager {
 	app: App;
@@ -17,18 +18,19 @@ export class ExplorerManager {
 			LOG_MODULES.MAIN,
 			"[Explorer] Inicializando ExplorerManager...",
 		);
-		this.app.workspace.onLayoutReady(() => {
-			this.registerObserver();
-			this.refreshAll();
-		});
+
+		if (this.plugin.settings.showExplorerIcon) {
+			this.app.workspace.onLayoutReady(() => {
+				this.registerObserver();
+				this.refreshAll();
+			});
+		}
 
 		this.plugin.registerEvent(
 			this.app.workspace.on("layout-change", () => {
-				Logger.debug(
-					LOG_MODULES.MAIN,
-					"[Explorer] Layout mudou, reconectando observer...",
-				);
-				this.registerObserver();
+				if (this.plugin.settings.showExplorerIcon) {
+					this.registerObserver();
+				}
 			}),
 		);
 	}
@@ -44,8 +46,22 @@ export class ExplorerManager {
 		);
 	}
 
+	public start() {
+		this.registerObserver();
+		this.refreshAll();
+	}
+
+	public stop() {
+		if (this.observer) this.observer.disconnect();
+		document
+			.querySelectorAll(".st-explorer-btn")
+			.forEach((el) => el.remove());
+	}
+
 	private registerObserver() {
 		if (this.observer) this.observer.disconnect();
+
+		if (!this.plugin.settings.showExplorerIcon) return;
 
 		const leaves = this.app.workspace.getLeavesOfType("file-explorer");
 		if (leaves.length === 0) {
@@ -107,7 +123,7 @@ export class ExplorerManager {
 
 			const btn = item.createDiv({ cls: "st-explorer-btn" });
 			setIcon(btn, "refresh-cw");
-			btn.setAttribute("aria-label", "Sincronizar este arquivo");
+			btn.setAttribute("aria-label", t("explorer_sync_tooltip"));
 
 			this.plugin.registerDomEvent(btn, "click", async (e) => {
 				e.stopPropagation();

@@ -76,8 +76,11 @@ export default {
 	setting_tab_icon_name: "Mostrar status de sync nas abas",
 	setting_tab_icon_desc:
 		"Exibe um ícone na aba do arquivo enquanto ele está sendo sincronizado.",
+	setting_explorer_icon_name: "Ícone no Gerenciador de Arquivos",
+	setting_explorer_icon_desc:
+		"Exibe um botão de sincronização ao passar o mouse sobre os arquivos na barra lateral.",
 
-	// --- NEW: History Filter ---
+	// --- History Filter ---
 	setting_history_filter_name: "Filtro de Histórico",
 	setting_history_filter_desc:
 		"Arquivos ou pastas para esconder do painel de histórico (separados por vírgula, ex: .Obsidian, .DS_Store).",
@@ -153,6 +156,10 @@ export default {
 	alert_conflict_detected: "Conflito(s) Detectado(s)!",
 	alert_click_to_resolve: "Clique aqui para resolver",
 
+	// Placeholders
+	explorer_sync_tooltip: "Sincronizar este arquivo",
+
+	// About
 	setting_header_about: "Sobre",
 	setting_version_name: "Versão",
 	setting_version_tooltip: "Ver notas da versão",

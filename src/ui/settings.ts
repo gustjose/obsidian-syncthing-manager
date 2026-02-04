@@ -288,6 +288,26 @@ export class SyncthingSettingTab extends PluginSettingTab {
 				text.inputEl.addClass("st-input-full-width");
 			});
 
+		new Setting(containerEl)
+			.setName(t("setting_explorer_icon_name"))
+			.setDesc(t("setting_explorer_icon_desc"))
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.showExplorerIcon)
+					.onChange((value) => {
+						void (async () => {
+							this.plugin.settings.showExplorerIcon = value;
+							await this.plugin.saveSettings();
+
+							if (value) {
+								this.plugin.explorerManager.start();
+							} else {
+								this.plugin.explorerManager.stop();
+							}
+						})();
+					}),
+			);
+
 		// --- SEÇÃO SOBRE ---
 		new Setting(containerEl)
 			.setName(t("setting_header_about"))

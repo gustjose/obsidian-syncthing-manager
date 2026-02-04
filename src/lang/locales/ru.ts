@@ -76,8 +76,11 @@ export default {
 	setting_tab_icon_name: "Показывать статус синхронизации во вкладках",
 	setting_tab_icon_desc:
 		"Отображает иконку во вкладке файла во время его синхронизации.",
+	setting_explorer_icon_name: "Иконка в проводнике файлов",
+	setting_explorer_icon_desc:
+		"Показывать кнопку синхронизации при наведении на файлы в боковой панели.",
 
-	// --- NEW: History Filter ---
+	// --- History Filter ---
 	setting_history_filter_name: "Фильтр истории",
 	setting_history_filter_desc:
 		"Файлы или папки, которые нужно скрыть из панели истории (через запятую, например .Obsidian, .ds_store).",
@@ -153,6 +156,10 @@ export default {
 	alert_conflict_detected: "Обнаружен конфликт(ы)!",
 	alert_click_to_resolve: "Нажмите здесь, чтобы решить",
 
+	// Placeholders
+	explorer_sync_tooltip: "Синхронизировать этот файл",
+
+	// About
 	setting_header_about: "О плагине",
 	setting_version_name: "Версия",
 	setting_version_tooltip: "Просмотреть заметки к выпуску",

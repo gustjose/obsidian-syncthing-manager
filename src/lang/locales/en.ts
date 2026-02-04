@@ -75,8 +75,11 @@ export default {
 		"Displays the icon in the left sidebar ribbon to quickly open the controller panel.",
 	setting_tab_icon_name: "Show sync status in tabs",
 	setting_tab_icon_desc: "Displays a icon in the file tab when syncing.",
+	setting_explorer_icon_name: "File explorer icon",
+	setting_explorer_icon_desc:
+		"Show a sync button on hover next to files in the sidebar.",
 
-	// --- NEW: History Filter ---
+	// --- History Filter ---
 	setting_history_filter_name: "History filter",
 	setting_history_filter_desc:
 		"Files or folders to hide from the history panel (comma separated, e.g. .Obsidian, .ds_store).",
@@ -148,6 +151,10 @@ export default {
 	alert_conflict_detected: "Conflict(s) detected!",
 	alert_click_to_resolve: "Click here to resolve",
 
+	// Placeholders
+	explorer_sync_tooltip: "Sync this file",
+
+	// About
 	setting_header_about: "About",
 	setting_version_name: "Version",
 	setting_version_tooltip: "View release notes",

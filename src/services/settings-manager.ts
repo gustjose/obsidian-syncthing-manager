@@ -16,12 +16,9 @@ export class SettingsManager {
 	}
 
 	async loadSettings(): Promise<SyncthingPluginSettings> {
-		// CORREÇÃO: Cast para unknown primeiro para remover o 'any',
-		// depois para Partial<SyncthingPluginSettings>
 		const rawData = (await this.plugin.loadData()) as unknown;
 		const loadedData = rawData as Partial<SyncthingPluginSettings>;
 
-		// Object.assign agora infere corretamente que o resultado é SyncthingPluginSettings
 		const settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
 		// Limpa placeholders antigos se existirem
@@ -53,6 +50,7 @@ export class SettingsManager {
 			language: settings.language,
 			modalConflict: settings.modalConflict,
 			showTabIcon: settings.showTabIcon,
+			showExplorerIcon: settings.showExplorerIcon,
 			ignoredPaths: settings.ignoredPaths,
 			syncthingFolderId: settings.syncthingFolderId,
 			syncthingFolderLabel: settings.syncthingFolderLabel,
