@@ -37,8 +37,11 @@ Now you can see exactly what is happening with your files without leaving the ed
 ## 🚀 Features
 
 - **Real-Time Monitoring:** View your vault status (Synced, Syncing, Disconnected) via the Status Bar or a dedicated Side Panel.
+- **Visual Sync:** Tabs show specific icons when files are syncing (🟠) or fully synced (🟢).
+- **Control Center:** Pause/Resume specific folders and see connected devices by name directly in the plugin view.
+- **File Versioning:** Configure versioning strategies (Trashcan, Simple, Staggered) and **restore previous versions** of files directly within Obsidian.
 - **Conflict Resolver:** Intelligent detection of `.sync-conflict` files with a **side-by-side diff view** for safe resolution.
-- **Visual File Status:** Watch your tabs update in real-time as Syncthing processes your files.
+- **Context Menu Integration:** Right-click any file to force a sync or view its version history.
 - **.stignore Editor:** Manage ignored files (like `workspace.json` or `.DS_Store`) directly within Obsidian using built-in templates.
 - **History Filter:** Keep your activity log clean by hiding system files from the history view.
 - **Mobile Optimized:** Responsive design built to work perfectly on Android.
