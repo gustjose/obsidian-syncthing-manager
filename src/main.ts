@@ -105,7 +105,7 @@ export default class SyncthingController extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("modify", async (abstractFile) => {
 				if (abstractFile instanceof TFile) {
-					await this.fileStateManager.markAsDirty(abstractFile.path);
+					this.fileStateManager.markAsDirty(abstractFile.path);
 					this.tabManager.setPendingSync(abstractFile);
 				}
 			}),
@@ -417,7 +417,7 @@ export default class SyncthingController extends Plugin {
 	}
 
 	async onFileSyncedEvent(path: string) {
-		await this.fileStateManager.markAsSynced(path);
+		this.fileStateManager.markAsSynced(path);
 		this.tabManager.setSynced(path);
 	}
 

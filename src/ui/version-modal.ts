@@ -85,10 +85,7 @@ export class VersionModal extends Modal {
 						btn
 							.setButtonText(t("btn_restore") || "Restore")
 							.onClick(async () => {
-								await this.restoreVersion(
-									version,
-									relativePath,
-								);
+								this.restoreVersion(version, relativePath);
 							}),
 					);
 			});
@@ -98,7 +95,7 @@ export class VersionModal extends Modal {
 		}
 	}
 
-	async restoreVersion(version: SyncthingVersion, relativePath: string) {
+	restoreVersion(version: SyncthingVersion, relativePath: string) {
 		const dateStr = new Date(version.modTime).toLocaleString();
 		// Replace {date} in the translation string
 		const message = (

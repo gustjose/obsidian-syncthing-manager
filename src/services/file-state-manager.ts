@@ -68,7 +68,7 @@ export class FileStateManager {
 	/**
 	 * Regista uma edição local (Marca como 'pending')
 	 */
-	async markAsDirty(path: string) {
+	markAsDirty(path: string) {
 		// Normaliza para garantir consistência interna (sempre /)
 		const normalizedPath = path.replace(/\\/g, "/");
 		const now = Date.now();
@@ -85,7 +85,7 @@ export class FileStateManager {
 	 * Regista uma sincronização confirmada (Marca como 'synced')
 	 * Agora com busca inteligente para resolver diferenças de caminho (Windows/Linux/Prefixos)
 	 */
-	async markAsSynced(incomingPath: string) {
+	markAsSynced(incomingPath: string) {
 		// Tenta encontrar a chave correspondente no banco
 		const matchedKey = this.findMatchingKey(incomingPath);
 
