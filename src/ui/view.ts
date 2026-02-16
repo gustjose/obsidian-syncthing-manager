@@ -206,17 +206,17 @@ export class SyncthingView extends ItemView {
 		});
 
 		// 5. Seção de Histórico
-		const historyTitleKey = "info_history";
-		container.createEl("h4", {
-			text: t(historyTitleKey as never) || "Recent Activity",
-			cls: "st-history-title",
-		});
+		if (this.plugin.history.length > 0) {
+			const historyTitleKey = "info_history";
+			container.createEl("h4", {
+				text: t(historyTitleKey as never) || "Recent Activity",
+				cls: "st-history-title",
+			});
 
-		const historyContainer = container.createDiv({
-			cls: "st-history-container",
-		});
+			const historyContainer = container.createDiv({
+				cls: "st-history-container",
+			});
 
-		if (this.plugin.history.length != 0) {
 			this.plugin.history.forEach((item: SyncthingHistoryItem) => {
 				const itemEl = historyContainer.createDiv({
 					cls: "st-history-item",
