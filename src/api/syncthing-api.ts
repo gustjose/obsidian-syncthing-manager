@@ -16,8 +16,16 @@ export interface SyncthingFolder {
 	paused?: boolean;
 }
 
+export interface SyncthingDevice {
+	deviceID: string;
+	name: string;
+	address: string[];
+	paused: boolean;
+}
+
 export interface SyncthingConfig {
 	folders: SyncthingFolder[];
+	devices: SyncthingDevice[];
 }
 
 export interface SyncthingFolderStats {
@@ -134,6 +142,18 @@ export class SyncthingAPI {
 			"/rest/config",
 		);
 		return config.folders;
+	}
+
+	static async getDevices(
+		url: string,
+		apiKey: string,
+	): Promise<SyncthingDevice[]> {
+		const config = await this.request<SyncthingConfig>(
+			url,
+			apiKey,
+			"/rest/config",
+		);
+		return config.devices;
 	}
 
 	// --- Folder Operations ---

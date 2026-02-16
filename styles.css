@@ -257,7 +257,7 @@
 }
 
 .st-history-container {
-	max-height: 200px;
+	max-height: 50vh;
 	overflow-y: auto;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
@@ -471,4 +471,23 @@
 .st-explorer-btn.st-success {
 	color: var(--text-success) !important;
 	opacity: 1 !important;
+}
+
+/* --- Badges de Dispositivos --- */
+.st-badges-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	justify-content: flex-end; /* Alinha badges à direita */
+	max-width: 60%; /* Evita ocupar toda a linha se o label for longo */
+}
+
+.st-device-badge {
+	font-size: 0.75em;
+	background-color: var(--background-modifier-border);
+	color: var(--text-normal);
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border-hover);
+	white-space: nowrap;
 }

@@ -117,12 +117,35 @@ export class SyncthingView extends ItemView {
 			t("info_last_sync"),
 			this.plugin.lastSyncTime,
 		);
+		// 3.1 Devices Row (Badges)
 		this.createRow(
 			infoContainer,
 			"monitor",
 			t("info_devices"),
-			this.plugin.connectedDevices.toString(),
+			"", // Value empty, we will append badges
 		);
+		// Get the last row's value container to append badges
+		const rows = infoContainer.querySelectorAll(".st-info-row");
+		const lastRow = rows[rows.length - 1];
+		const valueDiv = lastRow.querySelector(".st-info-value");
+
+		if (valueDiv) {
+			valueDiv.empty(); // Clear text
+			// Ensure flex wrap for multiple badges
+			valueDiv.addClass("st-badges-container");
+
+			const deviceNames = this.plugin.connectedDeviceNames;
+			if (deviceNames.length === 0) {
+				valueDiv.setText("0");
+			} else {
+				deviceNames.forEach((name) => {
+					valueDiv.createSpan({
+						cls: "st-device-badge",
+						text: name,
+					});
+				});
+			}
+		}
 
 		const folderDisplay =
 			this.plugin.settings.syncthingFolderLabel || "Default";

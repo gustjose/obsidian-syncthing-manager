@@ -42,6 +42,8 @@ export default class SyncthingController extends Plugin {
 	public connectedDevices: number = 0;
 	public currentStatus: SyncStatus = "desconhecido";
 	public isPaused: boolean = false;
+	public deviceMap: Map<string, string> = new Map();
+	public connectedDeviceNames: string[] = [];
 
 	get apiUrl(): string {
 		const protocol = this.settings.useHttps ? "https://" : "http://";
@@ -487,17 +489,48 @@ export default class SyncthingController extends Plugin {
 		}
 	}
 
+	async fetchDeviceMap() {
+		try {
+			const devices = await SyncthingAPI.getDevices(
+				this.apiUrl,
+				this.settings.syncthingApiKey,
+			);
+			this.deviceMap.clear();
+			devices.forEach((device) => {
+				// Use label/name if available, otherwise fallback to ID
+				const name = device.name || device.deviceID.substring(0, 7);
+				this.deviceMap.set(device.deviceID, name);
+			});
+		} catch (e) {
+			Logger.error(
+				LOG_MODULES.MAIN,
+				"Erro ao buscar mapa de dispositivos",
+				e,
+			);
+		}
+	}
+
 	async atualizarContagemDispositivos() {
 		try {
+			// Ensure map is populated/updated
+			if (this.deviceMap.size === 0) {
+				await this.fetchDeviceMap();
+			}
+
 			const connections = await SyncthingAPI.getConnections(
 				this.apiUrl,
 				this.settings.syncthingApiKey,
 			);
 			const devices = connections.connections || {};
-			const count = Object.values(devices).filter(
-				(d: { connected: boolean }) => d.connected,
-			).length;
-			this.connectedDevices = count;
+			const connectedIDs = Object.keys(devices).filter(
+				(id) => devices[id].connected,
+			);
+
+			this.connectedDevices = connectedIDs.length;
+			this.connectedDeviceNames = connectedIDs.map((id) => {
+				return this.deviceMap.get(id) || id.substring(0, 7);
+			});
+
 			this.atualizarTodosVisuais();
 		} catch {
 			// Fail silently
