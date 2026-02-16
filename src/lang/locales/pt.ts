@@ -197,4 +197,38 @@ export default {
 	tooltip_configure_modules: "Configurar módulos",
 	modal_debug_title: "Configuração de Depuração",
 	modal_debug_desc: "Selecione quais módulos devem exibir logs no console.",
+
+	// Versioning
+	modal_versioning_title: "Versionamento de Arquivos",
+	versioning_type: "Estratégia de versionamento",
+	versioning_type_desc:
+		"Selecione o método usado para manter versões anteriores dos arquivos.",
+	versioning_none: "Sem versionamento",
+	versioning_trashcan: "Lixeira (Trash can)",
+	versioning_simple: "Simples (Simple)",
+	versioning_staggered: "Escalonado (Staggered)",
+	versioning_external: "Externo (External)",
+
+	versioning_cleanout_days: "Limpar após (dias)",
+	versioning_cleanout_days_desc:
+		"Dias para manter arquivos na lixeira. 0 significa para sempre.",
+	versioning_keep: "Manter versões",
+	versioning_keep_desc: "Número de versões a manter.",
+	versioning_max_age: "Idade máxima (dias)",
+	versioning_max_age_desc: "Idade máxima das versões a manter.",
+	versioning_clean_interval: "Intervalo de limpeza (segundos)",
+	versioning_clean_interval_desc:
+		"Intervalo entre a limpeza de versões antigas.",
+	versioning_command: "Comando",
+	versioning_command_desc: "Comando externo para executar o versionamento.",
+
+	btn_save: "Salvar",
+	notice_versioning_saved: "Configuração de versionamento salva.",
+	notice_versioning_error: "Falha ao salvar configuração de versionamento.",
+	setting_file_versioning_name: "Versionamento de Arquivos",
+	setting_file_versioning_desc:
+		"Configure como o Syncthing mantém versões anteriores dos seus arquivos.",
+
+	// General
+	btn_configure: "Configurar",
 };

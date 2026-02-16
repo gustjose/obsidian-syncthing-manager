@@ -8,12 +8,18 @@ export interface SyncthingStatus {
 	cpuPerf: number;
 }
 
+export interface SyncthingVersioning {
+	type: "trashcan" | "simple" | "staggered" | "external" | "";
+	params: Record<string, string>;
+}
+
 export interface SyncthingFolder {
 	id: string;
 	label: string;
 	path: string;
 	type: string;
 	paused?: boolean;
+	versioning: SyncthingVersioning;
 }
 
 export interface SyncthingDevice {
@@ -226,6 +232,37 @@ export class SyncthingAPI {
 			`/rest/config/folders/${folderId}`,
 			"PATCH",
 			body,
+		);
+	}
+
+	static async setFolderVersioning(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		versioning: SyncthingVersioning,
+	): Promise<void> {
+		// 1. Get current config
+		const config = await this.request<SyncthingConfig>(
+			url,
+			apiKey,
+			"/rest/config",
+		);
+
+		// 2. Find folder and update versioning
+		const folderIndex = config.folders.findIndex((f) => f.id === folderId);
+		if (folderIndex === -1) {
+			throw new Error(`Folder with ID ${folderId} not found.`);
+		}
+
+		config.folders[folderIndex].versioning = versioning;
+
+		// 3. Post updated config
+		await this.request<void>(
+			url,
+			apiKey,
+			"/rest/config",
+			"PUT",
+			JSON.stringify(config),
 		);
 	}
 

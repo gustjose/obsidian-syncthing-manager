@@ -197,4 +197,38 @@ export default {
 	tooltip_configure_modules: "Настроить модули",
 	modal_debug_title: "Конфигурация отладки",
 	modal_debug_desc: "Выберите модули, которые будут выводить логи в консоль.",
+
+	// Versioning
+	modal_versioning_title: "Версионирование файлов",
+	versioning_type: "Стратегия версионирования",
+	versioning_type_desc:
+		"Выберите метод для сохранения предыдущих версий файлов.",
+	versioning_none: "Без версионирования",
+	versioning_trashcan: "Корзина (Trash can)",
+	versioning_simple: "Простое (Simple)",
+	versioning_staggered: "Поэтапное (Staggered)",
+	versioning_external: "Внешнее (External)",
+
+	versioning_cleanout_days: "Очищать через (дней)",
+	versioning_cleanout_days_desc:
+		"Дней хранить файлы в корзине. 0 означает вечно.",
+	versioning_keep: "Хранить версий",
+	versioning_keep_desc: "Количество версий для хранения.",
+	versioning_max_age: "Максимальный возраст (дней)",
+	versioning_max_age_desc: "Максимальный возраст версий для хранения.",
+	versioning_clean_interval: "Интервал очистки (секунды)",
+	versioning_clean_interval_desc: "Интервал между очисткой старых версий.",
+	versioning_command: "Команда",
+	versioning_command_desc: "Внешняя команда для выполнения версионирования.",
+
+	btn_save: "Сохранить",
+	notice_versioning_saved: "Конфигурация версионирования сохранена.",
+	notice_versioning_error:
+		"Не удалось сохранить конфигурацию версионирования.",
+	setting_file_versioning_name: "Версионирование файлов",
+	setting_file_versioning_desc:
+		"Настройте, как Syncthing сохраняет предыдущие версии ваших файлов.",
+
+	// General
+	btn_configure: "Настроить",
 };

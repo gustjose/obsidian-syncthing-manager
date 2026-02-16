@@ -6,6 +6,7 @@ import { t, setLanguage, LANGUAGE_LIST } from "../lang/lang";
 import { IgnoreModal } from "./ignore-modal";
 import { ContextMenuModal } from "./context-menu-modal";
 import { DebugModal } from "./debug-modal";
+import { VersioningModal } from "./versioning-modal";
 
 export class SyncthingSettingTab extends PluginSettingTab {
 	plugin: SyncthingController;
@@ -224,6 +225,27 @@ export class SyncthingSettingTab extends PluginSettingTab {
 						new IgnoreModal(this.app, this.plugin).open();
 					}),
 			);
+
+		// VERSIONING
+		const versioningSetting = new Setting(containerEl)
+			.setName(t("setting_file_versioning_name"))
+			.setDesc(t("setting_file_versioning_desc"));
+
+		versioningSetting.addExtraButton((btn) => {
+			btn.setIcon("settings")
+				.setTooltip(t("btn_configure"))
+				.onClick(() => {
+					if (!this.plugin.settings.syncthingFolderId) {
+						new Notice(t("notice_config_first"));
+						return;
+					}
+					new VersioningModal(
+						this.app,
+						this.plugin,
+						this.plugin.settings.syncthingFolderId,
+					).open();
+				});
+		});
 
 		// INTERFACE
 		new Setting(containerEl)

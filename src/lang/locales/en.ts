@@ -193,4 +193,37 @@ export default {
 	modal_debug_title: "Debug configuration",
 	modal_debug_desc:
 		"Select which modules should output debug logs to the console.",
+	// Versioning
+	modal_versioning_title: "File versioning",
+	versioning_type: "Versioning strategy",
+	versioning_type_desc:
+		"Select the method used to keep previous versions of files.",
+	versioning_none: "No versioning",
+	versioning_trashcan: "Trash can",
+	versioning_simple: "Simple file versioning",
+	versioning_staggered: "Staggered file versioning",
+	versioning_external: "External file versioning",
+
+	versioning_cleanout_days: "Clean out after (days)",
+	versioning_cleanout_days_desc:
+		"The number of days to keep files in the trash can. Zero means forever.",
+	versioning_keep: "Keep versions",
+	versioning_keep_desc: "The number of versions to keep.",
+	versioning_max_age: "Maximum age (days)",
+	versioning_max_age_desc: "The maximum age of versions to keep.",
+	versioning_clean_interval: "Clean interval (seconds)",
+	versioning_clean_interval_desc:
+		"The interval between running the cleanup process.",
+	versioning_command: "Command",
+	versioning_command_desc: "External command to execute for versioning.",
+
+	btn_save: "Save",
+	notice_versioning_saved: "Versioning configuration saved.",
+	notice_versioning_error: "Failed to save versioning configuration.",
+	setting_file_versioning_name: "File versioning",
+	setting_file_versioning_desc:
+		"Configure how syncthing keeps previous versions of your files.",
+
+	// General
+	btn_configure: "Configure",
 };
