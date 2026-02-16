@@ -166,4 +166,26 @@ export default {
 	setting_github_desc: "Исходный код или сообщение об ошибке.",
 	btn_github_repo: "Репозиторий GitHub",
 	btn_report_bug: "Сообщить об ошибке",
+
+	// Versions
+	modal_versions_title: "Версии файла",
+	modal_versions_empty: "Предыдущие версии не найдены.",
+	btn_restore: "Восстановить",
+	notice_version_restored: "Версия успешно восстановлена.",
+	notice_restore_fail: "Не удалось восстановить версию.",
+	confirm_restore:
+		"Вы уверены, что хотите восстановить версию от {date}? Текущее содержимое будет перезаписано.",
+	cmd_view_versions: "Версии файла",
+	btn_cancel: "Отмена",
+	modal_confirm_title: "Подтверждение",
+
+	// Context Menu
+	modal_context_menu_title: "Контекстное меню",
+	btn_manage_context_menu: "Управление контекстным меню",
+	setting_group_context_menu_name: "Группировка элементов",
+	setting_group_context_menu_desc:
+		"Группировать все элементы syncthing в одно подменю.",
+	header_context_menu_items: "Элементы",
+	btn_view_version: "Просмотр содержимого",
+	cmd_sync_file: "Синхронизировать файл",
 };

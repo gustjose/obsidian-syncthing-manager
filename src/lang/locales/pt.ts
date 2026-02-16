@@ -175,11 +175,17 @@ export default {
 	notice_restore_fail: "Falha ao restaurar versão.",
 	confirm_restore:
 		"Tem certeza que deseja restaurar a versão de {date}? O conteúdo atual será sobrescrito.",
-	cmd_view_versions: "Ver Versões de Arquivo",
+	cmd_view_versions: "Versões de Arquivo",
 	btn_cancel: "Cancelar",
 	modal_confirm_title: "Confirmar Ação",
 
 	// Menu de Contexto
 	modal_context_menu_title: "Menu de Contexto",
 	btn_manage_context_menu: "Gerenciar itens do menu de contexto",
+	setting_group_context_menu_name: "Agrupar itens",
+	setting_group_context_menu_desc:
+		"Agrupa todos os itens do syncthing em um único submenu.",
+	header_context_menu_items: "Itens",
+	btn_view_version: "Ver conteúdo",
+	cmd_sync_file: "Sincronizar arquivo",
 };

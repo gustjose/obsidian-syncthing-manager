@@ -177,4 +177,10 @@ export default {
 	// Context Menu
 	modal_context_menu_title: "Context menu",
 	btn_manage_context_menu: "Manage context menu items",
+	setting_group_context_menu_name: "Group items",
+	setting_group_context_menu_desc:
+		"Group all syncthing items under a single submenu.",
+	header_context_menu_items: "Items",
+	btn_view_version: "View content",
+	cmd_sync_file: "Sync file",
 };

@@ -18,10 +18,33 @@ export class ContextMenuModal extends Modal {
 			text: t("modal_context_menu_title") || "Manage Context Menu Items",
 		});
 
+		new Setting(contentEl)
+			.setName(t("setting_group_context_menu_name") || "Group items")
+			.setDesc(
+				t("setting_group_context_menu_desc") ||
+					"Group all Syncthing items under a single submenu.",
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.groupContextMenuItems)
+					.onChange(async (value) => {
+						this.plugin.settings.groupContextMenuItems = value;
+						await this.plugin.saveSettings();
+					}),
+			);
+
+		contentEl.createEl("h3", {
+			text: t("header_context_menu_items") || "Items",
+		});
+
 		const items = [
 			{
 				id: "view_file_versions",
 				label: t("cmd_view_versions") || "View File Versions",
+			},
+			{
+				id: "sync_file",
+				label: t("cmd_sync_file") || "Sync File",
 			},
 		];
 

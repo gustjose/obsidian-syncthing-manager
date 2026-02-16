@@ -4,6 +4,8 @@ import {
 	WorkspaceLeaf,
 	TFile,
 	FileSystemAdapter,
+	Menu,
+	MenuItem,
 } from "obsidian";
 import { SyncthingSettingTab } from "./ui/settings";
 import { SyncthingAPI, SyncthingHistoryItem } from "./api/syncthing-api";
@@ -107,21 +109,80 @@ export default class SyncthingController extends Plugin {
 				if (file instanceof TFile) {
 					// FEATURE: Context Menu Configuration
 					// Only show if enabled in settings
-					if (
-						this.settings.enabledContextMenuItems.includes(
-							"view_file_versions",
-						)
-					) {
+					// Context Menu Items
+					const enabledItems = this.settings.enabledContextMenuItems;
+					const shouldGroup = this.settings.groupContextMenuItems;
+
+					// Define available items with their logic
+					const availableItems: Record<
+						string,
+						{
+							title: string;
+							icon: string;
+							action: () => void | Promise<void>;
+						}
+					> = {
+						view_file_versions: {
+							title: t("cmd_view_versions") || "File versions",
+							icon: "history",
+							action: () => {
+								new VersionModal(
+									this.app,
+									this,
+									file.path,
+								).open();
+							},
+						},
+						sync_file: {
+							title: t("cmd_sync_file") || "Sync file",
+							icon: "refresh-cw",
+							action: async () => {
+								await this.syncSpecificFile(file.path);
+							},
+						},
+					};
+
+					if (shouldGroup) {
+						// Create a parent item
 						menu.addItem((item) => {
-							item.setTitle(t("cmd_view_versions"))
-								.setIcon("history")
-								.onClick(() => {
-									new VersionModal(
-										this.app,
-										this,
-										file.path,
-									).open();
+							item.setTitle("Syncthing")
+								.setIcon("refresh-cw") // Use a standard icon for now
+								.setSection("syncthing");
+
+							// Create submenu
+							const itemWithSubmenu = item as MenuItem & {
+								setSubmenu: () => Menu;
+							};
+
+							if (
+								typeof itemWithSubmenu.setSubmenu === "function"
+							) {
+								const submenu = itemWithSubmenu.setSubmenu();
+
+								enabledItems.forEach((id) => {
+									const def = availableItems[id];
+									if (def) {
+										submenu.addItem((subItem) => {
+											subItem
+												.setTitle(def.title)
+												.setIcon(def.icon)
+												.onClick(def.action);
+										});
+									}
 								});
+							}
+						});
+					} else {
+						// Add items directly to root menu
+						enabledItems.forEach((id) => {
+							const def = availableItems[id];
+							if (def) {
+								menu.addItem((item) => {
+									item.setTitle(def.title)
+										.setIcon(def.icon)
+										.onClick(def.action);
+								});
+							}
 						});
 					}
 				}
