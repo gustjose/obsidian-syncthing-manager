@@ -10,9 +10,10 @@ export default {
 	// Status / View
 	status_synced: "Synced",
 	status_syncing: "Syncing...",
-	status_offline: "Offline",
 	status_error: "Error",
+	status_offline: "Offline",
 	status_unknown: "Unknown",
+	status_paused: "Paused",
 
 	info_last_sync: "Last sync",
 	info_devices: "Online devices",
@@ -26,6 +27,8 @@ export default {
 
 	btn_sync_now: "Sync now",
 	btn_requesting: "Requesting...",
+	tooltip_pause: "Pause sync",
+	tooltip_resume: "Resume sync",
 
 	// Settings - Headers
 	setting_header_conn: "Connection settings",

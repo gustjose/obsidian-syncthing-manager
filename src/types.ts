@@ -28,6 +28,7 @@ export type SyncStatus =
 	| "conectado"
 	| "sincronizando"
 	| "escutando"
+	| "pausado"
 	| "desconectado"
 	| "erro"
 	| "desconhecido";

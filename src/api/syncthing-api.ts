@@ -13,6 +13,7 @@ export interface SyncthingFolder {
 	label: string;
 	path: string;
 	type: string;
+	paused?: boolean;
 }
 
 export interface SyncthingConfig {
@@ -175,6 +176,36 @@ export class SyncthingAPI {
 			apiKey,
 			`/rest/db/scan?${queryString}`,
 			"POST",
+		);
+	}
+
+	static async pauseFolder(
+		url: string,
+		apiKey: string,
+		folderId: string,
+	): Promise<void> {
+		const body = JSON.stringify({ paused: true });
+		await this.request<void>(
+			url,
+			apiKey,
+			`/rest/config/folders/${folderId}`,
+			"PATCH",
+			body,
+		);
+	}
+
+	static async resumeFolder(
+		url: string,
+		apiKey: string,
+		folderId: string,
+	): Promise<void> {
+		const body = JSON.stringify({ paused: false });
+		await this.request<void>(
+			url,
+			apiKey,
+			`/rest/config/folders/${folderId}`,
+			"PATCH",
+			body,
 		);
 	}
 

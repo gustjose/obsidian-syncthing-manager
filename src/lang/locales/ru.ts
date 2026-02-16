@@ -13,6 +13,7 @@ export default {
 	status_offline: "Не в сети",
 	status_error: "Ошибка",
 	status_unknown: "Неизвестно",
+	status_paused: "Пауза",
 
 	info_last_sync: "Последняя синхронизация",
 	info_devices: "Устройств в сети",
@@ -26,6 +27,8 @@ export default {
 
 	btn_sync_now: "Синхронизировать сейчас",
 	btn_requesting: "Запрашивается...",
+	tooltip_pause: "Приостановить синхронизацию",
+	tooltip_resume: "Возобновить синхронизацию",
 
 	// Settings - Headers
 	setting_header_conn: "Настройки соединения",

@@ -50,7 +50,7 @@ export class SyncthingView extends ItemView {
 				setIcon(iconSpan, "alert-octagon");
 				alertBox.createSpan({
 					text: ` ${conflicts.length} ${t(
-						"alert_conflict_detected"
+						"alert_conflict_detected",
 					)}`,
 				});
 
@@ -97,6 +97,11 @@ export class SyncthingView extends ItemView {
 				statusText = t("status_error");
 				setIcon(iconDiv, "alert-triangle");
 				break;
+			case "pausado":
+				cssClass = "st-color-muted";
+				statusText = t("status_paused");
+				setIcon(iconDiv, "pause-circle");
+				break;
 		}
 
 		iconDiv.addClass(cssClass);
@@ -110,13 +115,13 @@ export class SyncthingView extends ItemView {
 			infoContainer,
 			"clock",
 			t("info_last_sync"),
-			this.plugin.lastSyncTime
+			this.plugin.lastSyncTime,
 		);
 		this.createRow(
 			infoContainer,
 			"monitor",
 			t("info_devices"),
-			this.plugin.connectedDevices.toString()
+			this.plugin.connectedDevices.toString(),
 		);
 
 		const folderDisplay =
@@ -125,7 +130,7 @@ export class SyncthingView extends ItemView {
 			infoContainer,
 			"folder",
 			t("info_folder"),
-			folderDisplay
+			folderDisplay,
 		);
 
 		// 4. Botão
@@ -143,7 +148,7 @@ export class SyncthingView extends ItemView {
 
 		btn.addEventListener("click", () => {
 			// Alteramos apenas o span de texto, preservando o ícone
-			btnText.setText(t("btn_requesting"));
+			btnText.setText(t("btn_requesting") || "Requesting...");
 			btn.disabled = true;
 
 			// Opcional: Adiciona uma animação de rotação ao ícone durante o clique
@@ -154,6 +159,27 @@ export class SyncthingView extends ItemView {
 				.catch((err) => console.error(err));
 			// Nota: O botão permanece desabilitado até a view recarregar
 			// pelo evento do monitor, o que é o comportamento correto.
+		});
+
+		// 4.1 Botão Pause/Resume
+		const btnPause = btnContainer.createEl("button", {
+			cls: "st-pause-button",
+			attr: {
+				"aria-label": this.plugin.isPaused
+					? t("tooltip_resume") || "Resume sync"
+					: t("tooltip_pause") || "Pause sync",
+			},
+		});
+		// Remove mod-cta to differentiate? Or keep it? keeping consistent style.
+		// Maybe remove mod-cta and just use st-pause-button for specific styling if needed.
+		// Let's use mod-cta for consistency but maybe change color via CSS later if needed.
+		// Actually, let's keep it simple.
+
+		const pauseIcon = this.plugin.isPaused ? "play-circle" : "pause-circle";
+		setIcon(btnPause, pauseIcon);
+
+		btnPause.addEventListener("click", () => {
+			this.plugin.togglePause().catch((err) => console.error(err));
 		});
 
 		// 5. Seção de Histórico
@@ -192,7 +218,7 @@ export class SyncthingView extends ItemView {
 				// Dica: Adicionamos um tooltip simples para explicar a seta ao passar o mouse
 				arrowSpan.setAttribute(
 					"aria-label",
-					isIncoming ? "Recebido (Remoto)" : "Enviado (Local)"
+					isIncoming ? "Recebido (Remoto)" : "Enviado (Local)",
 				);
 				setIcon(arrowSpan, arrowIcon);
 				// ------------------------------------------
@@ -202,8 +228,8 @@ export class SyncthingView extends ItemView {
 					item.action === "deleted"
 						? { icon: "trash", class: "st-color-error" }
 						: item.action === "added"
-						? { icon: "plus-circle", class: "st-color-success" }
-						: { icon: "file-text", class: "st-color-muted" };
+							? { icon: "plus-circle", class: "st-color-success" }
+							: { icon: "file-text", class: "st-color-muted" };
 
 				const iconSpan = leftSide.createSpan({
 					cls: `st-history-icon ${iconInfo.class}`,
@@ -229,7 +255,7 @@ export class SyncthingView extends ItemView {
 		container: HTMLElement,
 		icon: string,
 		label: string,
-		value: string
+		value: string,
 	) {
 		const row = container.createDiv({ cls: "st-info-row" });
 		const left = row.createDiv({ cls: "st-info-left" });

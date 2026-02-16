@@ -41,6 +41,7 @@ export default class SyncthingController extends Plugin {
 	public lastSyncTime: string = "--:--";
 	public connectedDevices: number = 0;
 	public currentStatus: SyncStatus = "desconhecido";
+	public isPaused: boolean = false;
 
 	get apiUrl(): string {
 		const protocol = this.settings.useHttps ? "https://" : "http://";
@@ -535,6 +536,74 @@ export default class SyncthingController extends Plugin {
 		}
 	}
 
+	async checkPauseStatus() {
+		if (!this.settings.syncthingFolderId || !this.settings.syncthingApiKey)
+			return;
+
+		try {
+			const folders = await SyncthingAPI.getFolders(
+				this.apiUrl,
+				this.settings.syncthingApiKey,
+			);
+			const currentFolder = folders.find(
+				(f) => f.id === this.settings.syncthingFolderId,
+			);
+			if (currentFolder) {
+				this.isPaused = !!currentFolder.paused;
+				// Update status if paused
+				if (this.isPaused) {
+					this.currentStatus = "pausado";
+				}
+			}
+		} catch (e) {
+			Logger.error(
+				LOG_MODULES.MAIN,
+				"Erro ao verificar status de pausa",
+				e,
+			);
+		}
+	}
+
+	async togglePause() {
+		if (
+			!this.settings.syncthingFolderId ||
+			!this.settings.syncthingApiKey
+		) {
+			new Notice(t("notice_config_first"));
+			return;
+		}
+
+		try {
+			// Update status first to be sure
+			await this.checkPauseStatus();
+
+			if (this.isPaused) {
+				await SyncthingAPI.resumeFolder(
+					this.apiUrl,
+					this.settings.syncthingApiKey,
+					this.settings.syncthingFolderId,
+				);
+				new Notice("Resuming sync...");
+				this.isPaused = false;
+				// Force check connection to update status from 'pausado' to 'conectado'/'syncing'
+				await this.verificarConexao(false);
+			} else {
+				await SyncthingAPI.pauseFolder(
+					this.apiUrl,
+					this.settings.syncthingApiKey,
+					this.settings.syncthingFolderId,
+				);
+				new Notice("Pausing sync...");
+				this.isPaused = true;
+				this.currentStatus = "pausado";
+			}
+			this.atualizarTodosVisuais();
+		} catch (error) {
+			Logger.error(LOG_MODULES.MAIN, "Erro ao alternar pausa", error);
+			new Notice(t("status_error"));
+		}
+	}
+
 	async verificarConexao(showNotice: boolean = false) {
 		try {
 			const systemStatus = await SyncthingAPI.getStatus(
@@ -578,6 +647,12 @@ export default class SyncthingController extends Plugin {
 						)} ${systemStatus.myID.substring(0, 5)}...`,
 					);
 			}
+			await this.checkPauseStatus(); // checkPauseStatus sets 'pausado' if true, overwriting 'conectado' or others if needed.
+			// However, checkPauseStatus is async and might run after verified connection.
+			// Let's make sure checkPauseStatus logic prevails if paused.
+			// Actually checkPauseStatus explicitly sets this.currentStatus = "pausado" if paused.
+			// So calling it LAST in this try block is correct.
+
 			this.atualizarTodosVisuais();
 		} catch (error) {
 			if (error instanceof Error && error.message.includes("403")) {

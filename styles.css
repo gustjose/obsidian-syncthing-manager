@@ -161,11 +161,25 @@
 }
 
 /* Botões */
-.st-btn-container button {
-	width: 100%;
+.st-btn-container {
+	display: flex;
+	gap: 10px;
 	margin-top: 15px;
+	width: 100%;
+}
+
+.st-btn-container button {
 	height: 40px;
 	font-weight: 700;
+	margin-top: 0;
+}
+
+.st-sync-button {
+	width: 100%;
+}
+
+.st-pause-button {
+	flex: 0 0 50px;
 }
 
 /* --- MODAL DE CONFLITOS --- */

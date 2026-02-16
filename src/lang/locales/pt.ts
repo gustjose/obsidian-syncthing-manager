@@ -13,6 +13,7 @@ export default {
 	status_offline: "Desconectado",
 	status_error: "Erro",
 	status_unknown: "Desconhecido",
+	status_paused: "Pausado",
 
 	info_last_sync: "Último Sync",
 	info_devices: "Dispositivos Online",
@@ -26,6 +27,8 @@ export default {
 
 	btn_sync_now: "Sincronizar Agora",
 	btn_requesting: "Solicitando...",
+	tooltip_pause: "Pausar sincronização",
+	tooltip_resume: "Retomar sincronização",
 
 	// Settings - Headers
 	setting_header_conn: "Configurações de Conexão",
