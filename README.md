@@ -19,6 +19,10 @@
 
 This plugin acts as a bridge to your local Syncthing API, providing real-time file status, a powerful conflict resolver, and tools to keep your vault healthy across Desktop and Mobile devices.
 
+## 📚 Documentation
+
+For full usage guides, installation instructions, and troubleshooting, visit the **[Official Documentation](https://gustjose.github.io/obsidian-syncthing-manager/)**.
+
 ---
 
 ## ✨ New in v1.1: Visual Sync

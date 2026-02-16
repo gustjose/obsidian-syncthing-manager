@@ -1,0 +1,21 @@
+/* Custom CSS for Syncthing Manager Docs */
+:root {
+	/* Syncthing Manager Blue Brand Color */
+	--md-primary-fg-color: #0890c2;
+	--md-primary-fg-color--light: #3ac0f2;
+	--md-primary-fg-color--dark: #056a8e;
+	--md-accent-fg-color: #0890c2;
+}
+
+/* Adjustments for images */
+img[src$="#center"] {
+	display: block;
+	margin: 0 auto;
+}
+
+/* Smooth transitions */
+body {
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}

@@ -10,7 +10,10 @@
 		"sync-conflict": "node scripts/create-conflict.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node scripts/esbuild.config.mjs production",
 		"release": "node scripts/version-bump.mjs",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"docs:serve": "mkdocs serve",
+		"docs:build": "mkdocs build",
+		"docs:deploy": "mkdocs gh-deploy"
 	},
 	"keywords": [
 		"obsidian",
