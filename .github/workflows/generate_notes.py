@@ -17,9 +17,9 @@ def generate_test_notes():
         Version: {os.environ["TAG_NAME"]}
         
         Structure:
-        ## 🚀 Features
-        ## 🐛 Bug Fixes
-        ## ⚙️ Technical Changes
+        ## Features
+        ## Bug Fixes
+        ## Technical Changes
 
         COMMITS:
         {commits}

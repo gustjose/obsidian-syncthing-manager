@@ -57,7 +57,7 @@ jobs:
               uses: softprops/action-gh-release@v1
               with:
                   body_path: gemini_notes.md
-                  name: Release ${{ github.ref_name }}
+                  name: ${{ github.ref_name }}
                   draft: true
                   prerelease: false
                   files: |
