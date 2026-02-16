@@ -91,6 +91,13 @@ export interface SyncthingIgnores {
 	expanded: string[];
 }
 
+export interface SyncthingVersion {
+	versionTime: string; // The time when the version was archived (Identifier)
+	modTime: string; // The modification time of the file content
+	size: number;
+	version: string[];
+}
+
 export class SyncthingAPI {
 	// --- System Status & Config ---
 
@@ -326,6 +333,84 @@ export class SyncthingAPI {
 		);
 	}
 
+	static async getVersions(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		path: string,
+	): Promise<SyncthingVersion[]> {
+		const params = new URLSearchParams({
+			folder: folderId,
+		});
+
+		try {
+			// The endpoint is /rest/folder/versions?folder=...
+			// It returns a Map<string, Version[]> (Record<string, SyncthingVersion[]>)
+			// We must fetch all and filter by path because the API does not support path filtering (SERVER SIDE).
+			const response = await this.request<
+				Record<string, SyncthingVersion[]>
+			>(
+				url,
+				apiKey,
+				`/rest/folder/versions?${params.toString()}`,
+				"GET",
+				undefined,
+				[500], // Allow 500 (No versions/Versioning disabled)
+			);
+
+			// Normalize path to match Syncthing's format (forward slashes)
+			const normalizedPath = path.replace(/\\/g, "/");
+
+			// Syncthing response keys are relative paths with forward slashes
+			return response?.[normalizedPath] || [];
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			if (errorMessage.includes("500")) {
+				Logger.debug(
+					LOG_MODULES.API,
+					`[getVersions] No versions found or versioning disabled (500) for ${folderId}`,
+				);
+				return [];
+			}
+			Logger.error(
+				LOG_MODULES.API,
+				`Failed to get versions for ${path}`,
+				error,
+			);
+			return [];
+		}
+	}
+
+	static async restoreVersion(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		path: string,
+		versionTime: string,
+	): Promise<void> {
+		const params = new URLSearchParams({
+			folder: folderId,
+		});
+
+		// Normalize path to use forward slashes
+		const normalizedPath = path.replace(/\\/g, "/");
+
+		// The endpoint is POST /rest/folder/versions?folder=...
+		// Body should be: { "path/to/file": "versionTime" }
+		const body = JSON.stringify({
+			[normalizedPath]: versionTime,
+		});
+
+		await this.request<void>(
+			url,
+			apiKey,
+			`/rest/folder/versions?${params.toString()}`,
+			"POST",
+			body,
+		);
+	}
+
 	// --- HTTP Helper ---
 
 	private static async request<T>(
@@ -334,6 +419,7 @@ export class SyncthingAPI {
 		endpointPath: string,
 		method: string = "GET",
 		body?: string,
+		allowErrors: number[] = [],
 	): Promise<T> {
 		const baseUrl = url.replace(/\/$/, "");
 		const endpoint = `${baseUrl}${endpointPath}`;
@@ -359,10 +445,12 @@ export class SyncthingAPI {
 			}
 			return {} as T;
 		} else {
-			Logger.error(
-				LOG_MODULES.API,
-				`[DEBUG Request Error] Falha em ${endpoint}. Status: ${response.status}. Body: ${response.text}`,
-			);
+			if (!allowErrors.includes(response.status)) {
+				Logger.error(
+					LOG_MODULES.API,
+					`[DEBUG Request Error] Falha em ${endpoint}. Status: ${response.status}. Body: ${response.text}`,
+				);
+			}
 			throw new Error(`HTTP Error ${response.status}: ${endpointPath}`);
 		}
 	}

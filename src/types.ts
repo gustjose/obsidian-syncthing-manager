@@ -20,6 +20,7 @@ export interface SyncthingPluginSettings {
 	showTabIcon: boolean;
 	ignoredPaths: string;
 	showExplorerIcon: boolean;
+	enabledContextMenuItems: string[];
 }
 
 export type SyncStatus =
@@ -47,6 +48,7 @@ export const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	showTabIcon: true,
 	showExplorerIcon: true,
 	ignoredPaths: "",
+	enabledContextMenuItems: ["view_file_versions"],
 };
 
 // Local Storage Keys

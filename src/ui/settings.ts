@@ -3,6 +3,7 @@ import SyncthingController from "../main";
 import { SyncthingAPI, SyncthingFolder } from "../api/syncthing-api";
 import { t, setLanguage, LANGUAGE_LIST } from "../lang/lang";
 import { IgnoreModal } from "./ignore-modal";
+import { ContextMenuModal } from "./context-menu-modal";
 
 export class SyncthingSettingTab extends PluginSettingTab {
 	plugin: SyncthingController;
@@ -305,6 +306,18 @@ export class SyncthingSettingTab extends PluginSettingTab {
 								this.plugin.explorerManager.stop();
 							}
 						})();
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName(t("modal_context_menu_title"))
+			.setDesc(t("btn_manage_context_menu"))
+			.addButton((btn) =>
+				btn
+					.setIcon("list-plus")
+					.setTooltip(t("btn_manage_context_menu"))
+					.onClick(() => {
+						new ContextMenuModal(this.app, this.plugin).open();
 					}),
 			);
 

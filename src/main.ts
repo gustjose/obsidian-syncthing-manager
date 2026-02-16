@@ -9,6 +9,7 @@ import { SyncthingSettingTab } from "./ui/settings";
 import { SyncthingAPI, SyncthingHistoryItem } from "./api/syncthing-api";
 import { SyncthingEventMonitor } from "./services/event-monitor";
 import { SyncthingView, VIEW_TYPE_SYNCTHING } from "./ui/view";
+import { VersionModal } from "./ui/version-modal";
 import { t, setLanguage } from "./lang/lang";
 import { IgnoreManager } from "./services/ignore-manager";
 import { TabManager } from "./services/tab-manager";
@@ -100,6 +101,47 @@ export default class SyncthingController extends Plugin {
 				}
 			}),
 		);
+
+		this.registerEvent(
+			this.app.workspace.on("file-menu", (menu, file) => {
+				if (file instanceof TFile) {
+					// FEATURE: Context Menu Configuration
+					// Only show if enabled in settings
+					if (
+						this.settings.enabledContextMenuItems.includes(
+							"view_file_versions",
+						)
+					) {
+						menu.addItem((item) => {
+							item.setTitle(t("cmd_view_versions"))
+								.setIcon("history")
+								.onClick(() => {
+									new VersionModal(
+										this.app,
+										this,
+										file.path,
+									).open();
+								});
+						});
+					}
+				}
+			}),
+		);
+
+		this.addCommand({
+			id: "view-file-versions",
+			name: t("cmd_view_versions"),
+			checkCallback: (checking: boolean) => {
+				const file = this.app.workspace.getActiveFile();
+				if (file) {
+					if (!checking) {
+						new VersionModal(this.app, this, file.path).open();
+					}
+					return true;
+				}
+				return false;
+			},
+		});
 
 		this.addCommand({
 			id: "open-syncthing-view",

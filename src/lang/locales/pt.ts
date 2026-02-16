@@ -166,4 +166,20 @@ export default {
 	setting_github_desc: "Acesse o código fonte ou reporte um problema.",
 	btn_github_repo: "Repositório GitHub",
 	btn_report_bug: "Reportar Bug",
+
+	// Versões
+	modal_versions_title: "Versões do Arquivo",
+	modal_versions_empty: "Nenhuma versão anterior encontrada.",
+	btn_restore: "Restaurar",
+	notice_version_restored: "Versão restaurada com sucesso.",
+	notice_restore_fail: "Falha ao restaurar versão.",
+	confirm_restore:
+		"Tem certeza que deseja restaurar a versão de {date}? O conteúdo atual será sobrescrito.",
+	cmd_view_versions: "Ver Versões de Arquivo",
+	btn_cancel: "Cancelar",
+	modal_confirm_title: "Confirmar Ação",
+
+	// Menu de Contexto
+	modal_context_menu_title: "Menu de Contexto",
+	btn_manage_context_menu: "Gerenciar itens do menu de contexto",
 };

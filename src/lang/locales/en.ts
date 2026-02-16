@@ -161,4 +161,20 @@ export default {
 	setting_github_desc: "Access source code or report an issue.",
 	btn_github_repo: "GitHub repo",
 	btn_report_bug: "Report bug",
+
+	// Versions
+	modal_versions_title: "File versions",
+	modal_versions_empty: "No previous versions found.",
+	btn_restore: "Restore",
+	notice_version_restored: "Version restored successfully.",
+	notice_restore_fail: "Failed to restore version.",
+	confirm_restore:
+		"Are you sure you want to restore the version from {date}? Current content will be overwritten.",
+	cmd_view_versions: "File versions",
+	btn_cancel: "Cancel",
+	modal_confirm_title: "Confirm action",
+
+	// Context Menu
+	modal_context_menu_title: "Context menu",
+	btn_manage_context_menu: "Manage context menu items",
 };
