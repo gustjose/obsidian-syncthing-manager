@@ -25,24 +25,24 @@ This plugin acts as a bridge to your local Syncthing API, providing real-time fi
 
 Now you can see exactly what is happening with your files without leaving the editor.
 
--   **Tab Status Icons:** Instant feedback on the file you are editing.
-    -   🟠 **Syncing:** Spinning icon indicates the file is being uploaded/downloaded.
-    -   🟢 **Synced:** A checkmark appears briefly when synchronization is complete.
--   **Smart History:** Know the direction of your data.
-    -   ↙️ **Incoming:** Changes received from a remote device.
-    -   ↗️ **Outgoing:** Local changes sent to other devices.
+- **Tab Status Icons:** Instant feedback on the file you are editing.
+    - 🟠 **Syncing:** Spinning icon indicates the file is being uploaded/downloaded.
+    - 🟢 **Synced:** A checkmark appears briefly when synchronization is complete.
+- **Smart History:** Know the direction of your data.
+    - ↙️ **Incoming:** Changes received from a remote device.
+    - ↗️ **Outgoing:** Local changes sent to other devices.
 
 ---
 
 ## 🚀 Features
 
--   **Real-Time Monitoring:** View your vault status (Synced, Syncing, Disconnected) via the Status Bar or a dedicated Side Panel.
--   **Conflict Resolver:** Intelligent detection of `.sync-conflict` files with a **side-by-side diff view** for safe resolution.
--   **Visual File Status:** Watch your tabs update in real-time as Syncthing processes your files.
--   **.stignore Editor:** Manage ignored files (like `workspace.json` or `.DS_Store`) directly within Obsidian using built-in templates.
--   **History Filter:** Keep your activity log clean by hiding system files from the history view.
--   **Mobile Optimized:** Responsive design built to work perfectly on Android.
--   **Localization:** Fully translated into 🇺🇸 English, 🇧🇷 Portuguese (BR), and 🇷🇺 Russian.
+- **Real-Time Monitoring:** View your vault status (Synced, Syncing, Disconnected) via the Status Bar or a dedicated Side Panel.
+- **Conflict Resolver:** Intelligent detection of `.sync-conflict` files with a **side-by-side diff view** for safe resolution.
+- **Visual File Status:** Watch your tabs update in real-time as Syncthing processes your files.
+- **.stignore Editor:** Manage ignored files (like `workspace.json` or `.DS_Store`) directly within Obsidian using built-in templates.
+- **History Filter:** Keep your activity log clean by hiding system files from the history view.
+- **Mobile Optimized:** Responsive design built to work perfectly on Android.
+- **Localization:** Fully translated into 🇺🇸 English, 🇧🇷 Portuguese (BR), and 🇷🇺 Russian.
 
 ---
 
@@ -68,6 +68,20 @@ To use this plugin on Android (via _Syncthing-Fork_ or the official app), you mu
     - _Note: Ensure you have cleared "GUI Authentication User/Password" fields, otherwise the app may enforce HTTPS._
 4. Restart the Syncthing App.
 5. In Obsidian Plugin Settings, ensure **Use HTTPS** is toggled **OFF**.
+
+### Alternative: Force HTTP (Environment Variable)
+
+If the above method resets or fails, you can force Syncthing to use HTTP using an environment variable.
+
+> [!CAUTION]
+> **Side Effect:** This may cause the Syncthing Android App's native UI to stop loading (showing a blank screen or loading spinner). However, the **background service will still run**, and you can access the full Web UI via your browser at `http://127.0.0.1:8384`.
+
+1. Go to **Settings** > **Troubleshooting** > **Environment Variables**.
+2. Add the following variable:
+    - **Key:** `STGUIADDRESS`
+    - **Value:** `http://127.0.0.1:8384`
+3. Restart the App.
+4. If you need to revert, simply delete this variable.
 
 ---
 
@@ -98,17 +112,17 @@ Prevent layout issues by ignoring workspace configuration files.
 
 **Q: The tab icon is spinning but never turns green.**
 
--   This usually means Syncthing is still scanning or the file is large. Check the Syncthing GUI web panel for detailed progress.
+- This usually means Syncthing is still scanning or the file is large. Check the Syncthing GUI web panel for detailed progress.
 
 **Q: Plugin status shows "Disconnected".**
 
--   Verify that the Syncthing service is running.
--   Ensure the API Key matches exactly.
--   On Android, double-check that HTTPS is disabled in the Syncthing App.
+- Verify that the Syncthing service is running.
+- Ensure the API Key matches exactly.
+- On Android, double-check that HTTPS is disabled in the Syncthing App.
 
 **Q: Is it secure to disable HTTPS on Android?**
 
--   Yes. By setting the **GUI Listen Address** to `127.0.0.1`, access is restricted exclusively to applications running locally on that specific device.
+- Yes. By setting the **GUI Listen Address** to `127.0.0.1`, access is restricted exclusively to applications running locally on that specific device.
 
 ---
 
@@ -126,8 +140,8 @@ Prevent layout issues by ignoring workspace configuration files.
 
 Contributions are welcome! If you encounter bugs or have feature requests, please open an issue.
 
--   **Build:** `npm run build`
--   **Dev:** `npm run dev`
+- **Build:** `npm run build`
+- **Dev:** `npm run dev`
 
 ---
 
