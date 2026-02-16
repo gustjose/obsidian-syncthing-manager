@@ -1,9 +1,11 @@
 import { App, PluginSettingTab, Setting, Notice } from "obsidian";
 import SyncthingController from "../main";
 import { SyncthingAPI, SyncthingFolder } from "../api/syncthing-api";
+import { Logger } from "../utils/logger";
 import { t, setLanguage, LANGUAGE_LIST } from "../lang/lang";
 import { IgnoreModal } from "./ignore-modal";
 import { ContextMenuModal } from "./context-menu-modal";
+import { DebugModal } from "./debug-modal";
 
 export class SyncthingSettingTab extends PluginSettingTab {
 	plugin: SyncthingController;
@@ -338,6 +340,28 @@ export class SyncthingSettingTab extends PluginSettingTab {
 					window.open(
 						`https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/${this.plugin.manifest.version}`,
 					);
+				});
+			});
+
+		// Debug Mode Toggle
+		new Setting(infoContainer)
+			.setName(t("setting_debug_mode_name"))
+			.setDesc(t("setting_debug_mode_desc"))
+			.addToggle((toggle) => {
+				toggle
+					.setValue(this.plugin.settings.debugMode)
+					.onChange(async (value) => {
+						this.plugin.settings.debugMode = value;
+						await this.plugin.saveSettings();
+						Logger.setDebugMode(value);
+					});
+			})
+			.addExtraButton((btn) => {
+				btn.setIcon("settings").setTooltip(
+					t("tooltip_configure_modules"),
+				);
+				btn.onClick(() => {
+					new DebugModal(this.app, this.plugin).open();
 				});
 			});
 

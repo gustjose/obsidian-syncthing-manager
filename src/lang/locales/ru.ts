@@ -191,4 +191,10 @@ export default {
 	header_context_menu_items: "Элементы",
 	btn_view_version: "Просмотр содержимого",
 	cmd_sync_file: "Синхронизировать файл",
+	// Debug
+	setting_debug_mode_name: "Режим отладки",
+	setting_debug_mode_desc: "Включить подробное логирование в консоли (dev).",
+	tooltip_configure_modules: "Настроить модули",
+	modal_debug_title: "Конфигурация отладки",
+	modal_debug_desc: "Выберите модули, которые будут выводить логи в консоль.",
 };

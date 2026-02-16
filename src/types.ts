@@ -22,6 +22,8 @@ export interface SyncthingPluginSettings {
 	showExplorerIcon: boolean;
 	enabledContextMenuItems: string[];
 	groupContextMenuItems: boolean;
+	debugMode: boolean;
+	debugModules: string[];
 }
 
 export type SyncStatus =
@@ -52,6 +54,8 @@ export const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	ignoredPaths: "",
 	enabledContextMenuItems: ["view_file_versions", "sync_file"],
 	groupContextMenuItems: false,
+	debugMode: false,
+	debugModules: ["Main", "API", "FileStateManager"],
 };
 
 // Local Storage Keys

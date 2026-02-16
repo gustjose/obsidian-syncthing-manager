@@ -60,6 +60,10 @@ export default class SyncthingController extends Plugin {
 		this.settings = await this.settingsManager.loadSettings();
 		setLanguage(this.settings.language);
 
+		// Initialize Logger Debug Mode
+		Logger.setDebugMode(this.settings.debugMode);
+		Logger.setActiveModules(this.settings.debugModules);
+
 		this.tabManager = new TabManager(this.app, this);
 
 		this.fileStateManager = new FileStateManager(

@@ -186,4 +186,11 @@ export default {
 	header_context_menu_items: "Items",
 	btn_view_version: "View content",
 	cmd_sync_file: "Sync file",
+	// Debug
+	setting_debug_mode_name: "Debug mode",
+	setting_debug_mode_desc: "Enable verbose logging to console (dev).",
+	tooltip_configure_modules: "Configure debug modules",
+	modal_debug_title: "Debug configuration",
+	modal_debug_desc:
+		"Select which modules should output debug logs to the console.",
 };

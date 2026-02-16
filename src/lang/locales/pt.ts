@@ -191,4 +191,10 @@ export default {
 	header_context_menu_items: "Itens",
 	btn_view_version: "Ver conteúdo",
 	cmd_sync_file: "Sincronizar arquivo",
+	// Debug
+	setting_debug_mode_name: "Modo de Depuração",
+	setting_debug_mode_desc: "Habilita logs detalhados no console (dev).",
+	tooltip_configure_modules: "Configurar módulos",
+	modal_debug_title: "Configuração de Depuração",
+	modal_debug_desc: "Selecione quais módulos devem exibir logs no console.",
 };

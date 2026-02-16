@@ -11,21 +11,23 @@ export const LOG_MODULES = {
 export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
 
 export class Logger {
-	private static activeModules: Set<LogModule> = new Set([
-		LOG_MODULES.MAIN,
-		LOG_MODULES.API,
-		// LOG_MODULES.EVENT,
-		// LOG_MODULES.TAB,
-		// LOG_MODULES.CONFLICT,
-		// LOG_MODULES.IGNORE,
-		LOG_MODULES.FILE_STATE,
-	]);
+	private static isDebugMode: boolean = false;
+
+	private static activeModules: Set<string> = new Set();
+
+	static setDebugMode(enabled: boolean) {
+		this.isDebugMode = enabled;
+	}
+
+	static setActiveModules(modules: string[]) {
+		this.activeModules = new Set(modules);
+	}
 
 	/**
-	 * Log de Debug: Só aparece se o módulo estiver ativo na lista acima.
+	 * Log de Debug: Só aparece se o módulo estiver ativo na lista acima E o modo debug estiver ligado.
 	 */
 	static debug(module: LogModule, message: string, ...args: unknown[]) {
-		if (this.activeModules.has(module)) {
+		if (this.isDebugMode && this.activeModules.has(module)) {
 			console.debug(`[ST-${module}] ${message}`, ...args);
 		}
 	}
