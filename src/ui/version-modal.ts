@@ -84,7 +84,7 @@ export class VersionModal extends Modal {
 					.addButton((btn) =>
 						btn
 							.setButtonText(t("btn_restore") || "Restore")
-							.onClick(async () => {
+							.onClick(() => {
 								this.restoreVersion(version, relativePath);
 							}),
 					);

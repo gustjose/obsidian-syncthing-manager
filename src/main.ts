@@ -103,7 +103,7 @@ export default class SyncthingController extends Plugin {
 		this.explorerManager.onload();
 
 		this.registerEvent(
-			this.app.vault.on("modify", async (abstractFile) => {
+			this.app.vault.on("modify", (abstractFile) => {
 				if (abstractFile instanceof TFile) {
 					this.fileStateManager.markAsDirty(abstractFile.path);
 					this.tabManager.setPendingSync(abstractFile);
@@ -412,11 +412,11 @@ export default class SyncthingController extends Plugin {
 		const isSynced = JSON.stringify(localVer) === JSON.stringify(globalVer);
 
 		if (isSynced) {
-			await this.onFileSyncedEvent(obsidianPath);
+			this.onFileSyncedEvent(obsidianPath);
 		}
 	}
 
-	async onFileSyncedEvent(path: string) {
+	onFileSyncedEvent(path: string) {
 		this.fileStateManager.markAsSynced(path);
 		this.tabManager.setSynced(path);
 	}
