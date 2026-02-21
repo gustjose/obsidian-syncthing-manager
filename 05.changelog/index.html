@@ -8,6 +8,8 @@
       
       
       
+        <link rel="canonical" href="https://gustjose.github.io/obsidian-syncthing-manager/05.changelog/">
+      
       
         <link rel="prev" href="../04.troubleshooting/">
       
@@ -465,24 +467,51 @@
 
 
 <h1 id="changelog">Changelog</h1>
+<h1 id="130"><a href="https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/1.3.0">1.3.0</a></h1>
+<p><em>Released at 2026-02-21T13:21:59+00:00</em>
+</p>
+<h2 id="version-130">Version 1.3.0</h2>
+<p>This release introduces significant new features, including advanced file versioning, enhanced control over synchronization, and a more robust user interface. We've also addressed several bug fixes and made important technical improvements to improve stability and performance.
+</p>
+<h2 id="features">Features</h2>
+<p>*   <strong>File Versioning and Restoration</strong>: Introducing full support for Syncthing's file versioning. You can now configure versioning strategies (Trashcan, Simple, Staggered) and retrieve/restore previous versions of files directly within Obsidian.
+*   <strong>Synchronization Control Center</strong>:
+    *   <strong>Pause and Resume Synchronization</strong>: Gain direct control over your synchronization by pausing and resuming individual folders from within the plugin.
+    *   <strong>Online Devices List</strong>: View a comprehensive list of all connected Syncthing devices, providing better oversight of your sync network.
+*   <strong>Enhanced Context Menu Management</strong>: A new modal allows you to manage and configure custom context menu items for files and folders, complete with new translations for improved accessibility.
+*   <strong>Debug Mode</strong>: A new debug mode has been added to assist with troubleshooting and development.
+*   <strong>Documentation Improvements</strong>: Significant updates to the plugin's documentation, including a dedicated documentation link and an updated <code>README.md</code> with new features and troubleshooting guides.
+*   <strong>Settings for Explorer Icon</strong>: Added new settings related to the explorer icon, likely tied to context menu functionality and translation.
+</p>
+<h2 id="bug-fixes">Bug Fixes</h2>
+<p>*   <strong>Asynchronous Operation Stability</strong>: Addressed and fixed issues related to <code>async</code> and <code>await</code> operations, improving overall plugin stability.
+*   <strong>Recent Activity Container</strong>: Resolved bugs impacting the display and functionality of the Recent Activity Container.
+</p>
+<h2 id="technical-changes">Technical Changes</h2>
+<p>*   <strong>Internal Manager Modules</strong>: Introduced new internal modules such as <code>Explorer-Manager</code> and updated <code>Ignore-Manager</code>, <code>Tab-Manager</code>, and <code>Syncthing-API</code> for better modularity and future enhancements.
+*   <strong>File State Management</strong>: Added <code>File_State</code> for more robust internal tracking of file synchronization states.
+*   <strong>Ignore System Updates</strong>: Updated the internal ignore system, including changes to the <code>.gitignore</code> file (e.g., adding <code>.aiexclude</code>).
+*   <strong>Script Updates</strong>: Internal scripts have been updated for maintenance and improved build processes.
+*   <strong>Code Refactoring</strong>: General code improvements and refactoring to enhance performance and maintainability.
+</p>
 <h1 id="release-120"><a href="https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/1.2.0">Release 1.2.0</a></h1>
 <p><em>Released at 2026-01-24T15:56:40+00:00</em>
 </p>
 <h2 id="version-120">Version 1.2.0</h2>
-<h3 id="features">🚀 Features</h3>
+<h3 id="features_1">🚀 Features</h3>
 <p>-   <strong>New About Section:</strong> Added a dedicated "About" section to the settings, displaying the current plugin version and providing quick links to the GitHub repository for source code or reporting issues.
 -   <strong>Improved Settings Persistence:</strong> Folder settings are now stored in <code>data.json</code> instead of <code>localStorage</code>, enhancing data integrity and consistency.
 </p>
-<h3 id="bug-fixes">🐛 Bug Fixes</h3>
+<h3 id="bug-fixes_1">🐛 Bug Fixes</h3>
 <p>-   Fixed an issue where stale synchronization icons would persist when switching between different files.
 </p>
-<h3 id="technical-changes">⚙️ Technical Changes</h3>
+<h3 id="technical-changes_1">⚙️ Technical Changes</h3>
 <p>-   <strong>Code Refactoring:</strong> Significant refactoring of the main code and integration of a new logging system across the plugin for better debugging and maintainability.
 </p>
 <h1 id="release-110"><a href="https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/1.1.0">Release 1.1.0</a></h1>
 <p><em>Released at 2026-01-15T01:50:20+00:00</em>
 </p>
-<h2 id="features_1">🚀 Features</h2>
+<h2 id="features_2">🚀 Features</h2>
 <ul>
 <li><strong>Visual Sync &amp; Real-Time File Status:</strong> Get instant feedback on your synchronization status directly within Obsidian.<ul>
 <li><strong>Tab Status Icons:</strong> See icons directly on your file tabs indicating if a file is 🟠 syncing or 🟢 synced.</li>
@@ -493,13 +522,13 @@
 <li><strong>Improved Localization:</strong> Added and updated translations for English, Portuguese (BR), and Russian.
 </li>
 </ul>
-<h2 id="bug-fixes_1">🐛 Bug Fixes</h2>
+<h2 id="bug-fixes_2">🐛 Bug Fixes</h2>
 <ul>
 <li>Fixed an issue where the Side Panel icon might not update as expected.</li>
 <li>Resolved a bug affecting the color display of the Sync Icon in the ribbon.
 </li>
 </ul>
-<h2 id="technical-changes_1">⚙️ Technical Changes</h2>
+<h2 id="technical-changes_2">⚙️ Technical Changes</h2>
 <ul>
 <li>Introduced a new TabManager for better integration of file status updates.</li>
 <li>Updated the styling and functionality of the History Panel.</li>
