@@ -514,11 +514,17 @@ export class SyncthingAPI {
 
 		Logger.debug(LOG_MODULES.API, `Requesting [${method}] ${endpoint}`);
 
+		const headers: Record<string, string> = { "X-API-Key": apiKey };
+		if (body) {
+			headers["Content-Type"] = "application/json";
+		}
+
 		const params: RequestUrlParam = {
 			url: endpoint,
 			method: method,
-			headers: { "X-API-Key": apiKey },
+			headers: headers,
 			body: body,
+			throw: false,
 		};
 
 		const response = await requestUrl(params);
