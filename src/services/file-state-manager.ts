@@ -50,6 +50,14 @@ export class FileStateManager {
 			try {
 				const content = await adapter.read(filePath);
 				this.data = JSON.parse(content) as StateData;
+
+				// Limpa arquivos temporários do Syncthing salvos acidentalmente em versões anteriores
+				for (const key in this.data.activeFiles) {
+					if (key.includes("~syncthing~")) {
+						delete this.data.activeFiles[key];
+					}
+				}
+
 				Logger.debug(
 					LOG_MODULES.FILE_STATE,
 					`Estado carregado: ${Object.keys(this.data.activeFiles).length} arquivos ativos.`,

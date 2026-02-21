@@ -33,6 +33,7 @@ export type SyncStatus =
 	| "pausado"
 	| "desconectado"
 	| "erro"
+	| "configurando"
 	| "desconhecido";
 
 // --- Constants & Defaults ---

@@ -14,6 +14,7 @@ export default {
 	status_offline: "Offline",
 	status_unknown: "Unknown",
 	status_paused: "Paused",
+	status_config: "Pending config",
 
 	info_last_sync: "Last sync",
 	info_devices: "Online devices",
@@ -95,7 +96,7 @@ export default {
 	notice_error_auth: "Authentication failed. Please check your API key.",
 	notice_offline: "Syncthing is unreachable. Is it running?",
 	notice_folders_found: "Folders found.",
-	notice_config_first: "Please configure the API key and URL first.",
+	notice_config_first: "Please configure the API key, URL and folder first",
 	notice_searching: "Connecting to syncthing...",
 
 	// Conflict Modal
@@ -226,4 +227,8 @@ export default {
 
 	// General
 	btn_configure: "Configure",
+
+	// Connection Check
+	notice_folder_missing:
+		"Syncthing folder not found. Please reselect it in the settings.",
 };

@@ -105,6 +105,9 @@ export default class SyncthingController extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("modify", (abstractFile) => {
 				if (abstractFile instanceof TFile) {
+					// Ignora arquivos temporários criados pelo próprio Syncthing
+					if (abstractFile.name.includes("~syncthing~")) return;
+
 					this.fileStateManager.markAsDirty(abstractFile.path);
 					this.tabManager.setPendingSync(abstractFile);
 				}
@@ -242,12 +245,20 @@ export default class SyncthingController extends Plugin {
 		this.atualizarTodosVisuais();
 
 		this.app.workspace.onLayoutReady(async () => {
-			await this.verificarConexao(false);
-			await this.detectPathPrefix();
-			await ignoreManager.ensureDefaults();
-			await this.atualizarContagemDispositivos();
-			await this.reconcileFileStates();
-			void this.monitor.start();
+			const conexaoValida = await this.verificarConexao(false);
+
+			// Só prosseguimos carregando dados e históricos se a conexão existir E a
+			// pasta configurada for confirmadamente válida no servidor.
+			if (conexaoValida) {
+				await this.detectPathPrefix();
+				await ignoreManager.ensureDefaults();
+				await this.atualizarContagemDispositivos();
+				await this.reconcileFileStates();
+				void this.monitor.start();
+			} else {
+				// Carrega interface visual e contador zerado apenas para informar offline/erro
+				await this.atualizarContagemDispositivos();
+			}
 		});
 	}
 
@@ -382,14 +393,25 @@ export default class SyncthingController extends Plugin {
 			`Reconciliando ${pendingFiles.length} arquivos pendentes...`,
 		);
 
+		// Passo 1: Aplica rapidamente a indicação visual a todos os arquivos listados.
 		for (const fileState of pendingFiles) {
 			const file = this.app.vault.getAbstractFileByPath(fileState.path);
-			if (!(file instanceof TFile)) continue;
+			if (file instanceof TFile) {
+				this.tabManager.setPendingSync(file);
+			}
+		}
 
-			this.tabManager.setPendingSync(file);
-
-			// Reutiliza a lógica unificada
-			await this.syncSpecificFile(fileState.path);
+		// Passo 2: Executa as operações de API e checagem de sincronização (bloqueante)
+		for (const fileState of pendingFiles) {
+			try {
+				await this.syncSpecificFile(fileState.path);
+			} catch (e) {
+				Logger.warn(
+					LOG_MODULES.MAIN,
+					`Falha ao tentar reconciliar estado pendente do arquivo ${fileState.path}`,
+					e,
+				);
+			}
 		}
 	}
 
@@ -548,6 +570,15 @@ export default class SyncthingController extends Plugin {
 			return;
 		}
 
+		// Valida se a pasta ainda existe no servidor. Mostra os erros (true).
+		const isConexaoValida = await this.verificarConexao(true);
+
+		if (!isConexaoValida || !this.settings.syncthingFolderId) {
+			// Não continua se o servidor estiver offline, se a api key for invalida
+			// ou se a pasta não existir mais (verificarConexao limpa o FolderId nesse caso).
+			return;
+		}
+
 		const app = this.app as unknown as AppWithCommands;
 		if (app.commands) {
 			app.commands.executeCommandById("editor:save-file");
@@ -593,6 +624,11 @@ export default class SyncthingController extends Plugin {
 				}
 			}
 		} catch (e) {
+			if (e && typeof e === "object" && "message" in e) {
+				const msg = (e as Error).message;
+				if (msg.includes("403") || msg.includes("Failed to fetch"))
+					return;
+			}
 			Logger.error(
 				LOG_MODULES.MAIN,
 				"Erro ao verificar status de pausa",
@@ -641,14 +677,29 @@ export default class SyncthingController extends Plugin {
 		}
 	}
 
-	async verificarConexao(showNotice: boolean = false) {
+	async verificarConexao(showNotice: boolean = false): Promise<boolean> {
 		try {
-			const systemStatus = await SyncthingAPI.getStatus(
-				this.apiUrl,
-				this.settings.syncthingApiKey,
-			);
-
 			if (this.settings.syncthingFolderId) {
+				// Validação prévia de existência da pasta na API (evita falhas massivas 404 e 500 no background)
+				const isFolderValid = await SyncthingAPI.isFolderValid(
+					this.apiUrl,
+					this.settings.syncthingApiKey,
+					this.settings.syncthingFolderId,
+				);
+
+				if (!isFolderValid) {
+					this.currentStatus = "erro";
+					new Notice(t("notice_folder_missing"));
+					// Limpa a configuração falha imediatamente para não insistir no erro
+					this.settings.syncthingFolderId = "";
+					this.settings.syncthingFolderLabel = "";
+					await this.saveSettings();
+
+					// Finalizamos aqui o verificarConexao para não propagar erros
+					this.atualizarTodosVisuais();
+					return false;
+				}
+
 				const folderStats = await SyncthingAPI.getFolderStats(
 					this.apiUrl,
 					this.settings.syncthingApiKey,
@@ -676,21 +727,22 @@ export default class SyncthingController extends Plugin {
 					if (showNotice) new Notice(`Status: ${state}`);
 				}
 			} else {
-				this.currentStatus = "conectado";
-				if (showNotice)
-					new Notice(
-						`${t(
-							"notice_success_conn",
-						)} ${systemStatus.myID.substring(0, 5)}...`,
-					);
+				// Cenário onde não há pasta configurada (ou ela acabou de ser limpa por erro)
+				if (showNotice) {
+					new Notice(t("notice_config_first"));
+				}
+				// Para evitar que a tela de status do histórico diga falsamente "Sincronizado/Conectado" quando tudo está vazio,
+				// retornamos "configurando" que assume uma UI mais precisa (Cinza - Settings).
+				this.currentStatus = "configurando";
 			}
 			await this.checkPauseStatus(); // checkPauseStatus sets 'pausado' if true, overwriting 'conectado' or others if needed.
-			// However, checkPauseStatus is async and might run after verified connection.
-			// Let's make sure checkPauseStatus logic prevails if paused.
-			// Actually checkPauseStatus explicitly sets this.currentStatus = "pausado" if paused.
-			// So calling it LAST in this try block is correct.
 
 			this.atualizarTodosVisuais();
+			// Retornamos sucesso APENAS se houver pasta ativa. Se a pasta for falsa/limpa, é um "false" operacional para o resto.
+			return (
+				this.currentStatus !== "erro" &&
+				!!this.settings.syncthingFolderId
+			);
 		} catch (error) {
 			if (error instanceof Error && error.message.includes("403")) {
 				this.currentStatus = "erro";
@@ -700,6 +752,7 @@ export default class SyncthingController extends Plugin {
 				if (showNotice) new Notice(t("notice_offline"));
 			}
 			this.atualizarTodosVisuais();
+			return false;
 		}
 	}
 

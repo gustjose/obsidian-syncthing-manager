@@ -102,6 +102,11 @@ export class SyncthingView extends ItemView {
 				statusText = t("status_paused");
 				setIcon(iconDiv, "pause-circle");
 				break;
+			case "configurando":
+				cssClass = "st-color-muted";
+				statusText = t("status_config");
+				setIcon(iconDiv, "settings");
+				break;
 		}
 
 		iconDiv.addClass(cssClass);

@@ -97,7 +97,7 @@ export default {
 		"Не удалось выполнить авторизацию. Пожалуйста, проверьте Ваш API Ключ.",
 	notice_offline: "Syncthing недоступен. Запущен ли он?",
 	notice_folders_found: "папки(ок) найдено.",
-	notice_config_first: "Пожалуйста, сначала настройте API Ключ и Ссылку.",
+	notice_config_first: "Пожалуйста, сначала настройте API Ключ, URL и папку.",
 	notice_searching: "Подключение к Syncthing...",
 
 	// Conflict Modal
@@ -229,6 +229,9 @@ export default {
 	setting_file_versioning_desc:
 		"Настройте, как Syncthing сохраняет предыдущие версии ваших файлов.",
 
-	// General
 	btn_configure: "Настроить",
+
+	// Connection Check
+	notice_folder_missing:
+		"Папка Syncthing не найдена. Пожалуйста, выберите её заново в настройках.",
 };

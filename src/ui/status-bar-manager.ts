@@ -43,6 +43,10 @@ export class StatusBarManager {
 				text = t("status_error");
 				cssClass = "st-color-error";
 				break;
+			case "configurando":
+				text = t("status_config");
+				cssClass = "st-color-muted";
+				break;
 		}
 
 		const tooltipInfo = `${text}\n\n${t("info_last_sync")}: ${lastSyncTime}\n${t("info_devices")}: ${connectedDevices}`;

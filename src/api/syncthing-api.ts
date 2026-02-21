@@ -173,7 +173,33 @@ export class SyncthingAPI {
 			url,
 			apiKey,
 			`/rest/db/status?folder=${folderId}`,
+			"GET",
+			undefined,
+			[404, 500], // Ignora log vermelhos no console caso a pasta não esteja disponível
 		);
+	}
+
+	/**
+	 * Valida proativamente se um dado folderId consta na lista atualizada de pastas do servidor.
+	 */
+	static async isFolderValid(
+		url: string,
+		apiKey: string,
+		folderId: string,
+	): Promise<boolean> {
+		try {
+			const serverFolders = await this.getFolders(url, apiKey);
+			return serverFolders.some((f) => f.id === folderId);
+		} catch (error) {
+			Logger.error(
+				LOG_MODULES.API,
+				"Erro de verificação da validade da pasta: falha de contato com o servidor.",
+				error,
+			);
+			// Em caso de falha grave na comunicação com a API de Listagem,
+			// não podemos assumir com convicção que a pasta foi apagada. Assumimos true/pendente.
+			throw error;
+		}
 	}
 
 	/**
@@ -400,6 +426,9 @@ export class SyncthingAPI {
 			url,
 			apiKey,
 			`/rest/db/ignores?folder=${folderId}`,
+			"GET",
+			undefined,
+			[404, 500],
 		);
 	}
 
@@ -417,7 +446,8 @@ export class SyncthingAPI {
 			apiKey,
 			`/rest/db/ignores?folder=${folderId}`,
 			"POST",
-			body, // Passamos o corpo aqui (precisa ajustar o método request abaixo)
+			body,
+			[404, 500],
 		);
 	}
 
@@ -527,7 +557,15 @@ export class SyncthingAPI {
 			throw: false,
 		};
 
-		const response = await requestUrl(params);
+		let response;
+		try {
+			response = await requestUrl(params);
+		} catch (error) {
+			// A requisição falhou antes mesmo de ter uma resposta (DNS, Offline, Timeout)
+			const errDesc =
+				error instanceof Error ? error.message : String(error);
+			throw new Error(`Failed to fetch: ${errDesc}`);
+		}
 
 		if (response.status >= 200 && response.status < 300) {
 			if (response.text && response.text.length > 0) {

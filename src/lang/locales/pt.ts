@@ -96,7 +96,8 @@ export default {
 	notice_error_auth: "Erro de Autenticação. Verifique sua API Key.",
 	notice_offline: "Syncthing inacessível. O aplicativo está rodando?",
 	notice_folders_found: "pastas encontradas.",
-	notice_config_first: "Por favor, configure a API Key e a URL primeiro.",
+	notice_config_first:
+		"Por favor, configure a API Key, a URL e a pasta primeiro.",
 	notice_searching: "Conectando ao Syncthing...",
 
 	// Modal de Conflitos
@@ -229,6 +230,9 @@ export default {
 	setting_file_versioning_desc:
 		"Configure como o Syncthing mantém versões anteriores dos seus arquivos.",
 
-	// General
 	btn_configure: "Configurar",
+
+	// Connection Check
+	notice_folder_missing:
+		"Pasta do Syncthing não encontrada. Por favor, reconfigure nas opções.",
 };
