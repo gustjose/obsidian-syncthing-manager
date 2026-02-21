@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
+import { execSync } from "child_process";
 import readline from "readline";
 
 const pkgPath = "package.json";
@@ -20,7 +21,7 @@ rl.question("👉 Digite a nova versão: ", (targetVersion) => {
 		process.exit(1);
 	}
 
-	console.log(`\n� Aplicando versão: ${targetVersion}...\n`);
+	console.log(`\n⚙️ Aplicando versão: ${targetVersion}...\n`);
 
 	// --- BLOCO 1: ATUALIZAR MANIFEST.JSON ---
 	if (existsSync("manifest.json")) {
@@ -86,5 +87,40 @@ rl.question("👉 Digite a nova versão: ", (targetVersion) => {
 		}
 	}
 
-	console.log("\n✨ Versionamento concluído com sucesso!");
+	console.log("\n✨ Arquivos atualizados com sucesso!");
+
+	// --- BLOCO 5: COMMIT, TAG E PUSH NO GIT ---
+	try {
+		console.log("\n🚀 Criando commit e tag no Git...");
+
+		// Adiciona apenas os arquivos que o script modificou
+		execSync(
+			"git add package.json package-lock.json manifest.json versions.json",
+			{ stdio: "inherit" },
+		);
+
+		// Cria o commit
+		execSync(`git commit -m "chore: release ${targetVersion}"`, {
+			stdio: "inherit",
+		});
+
+		// Cria a tag usando exatamente a string digitada (ex: 1.3.0)
+		execSync(`git tag ${targetVersion}`, { stdio: "inherit" });
+
+		// Faz o push do commit e da tag para o repositório remoto
+		console.log("\n⬆️ Enviando para o GitHub...");
+		execSync("git push origin HEAD", { stdio: "inherit" });
+		execSync(`git push origin ${targetVersion}`, { stdio: "inherit" });
+
+		console.log(
+			"\n🎉 Release publicado com sucesso! O GitHub Actions já deve estar rodando.",
+		);
+	} catch (error) {
+		console.error(
+			`\n❌ Ocorreu um erro ao executar os comandos do Git. Erro: ${error}`,
+		);
+		console.error(
+			"Verifique se há arquivos em conflito ou problemas de conexão.",
+		);
+	}
 });
