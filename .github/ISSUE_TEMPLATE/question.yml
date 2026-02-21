@@ -1,0 +1,12 @@
+name: Question & Support
+description: Ask a question about how to configure or use the plugin
+title: "[QUESTION] <Short description>"
+labels: ["Question", "Triage"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: Please describe what you are trying to achieve or what you need help with.
+    validations:
+      required: true

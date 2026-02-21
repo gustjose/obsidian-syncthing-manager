@@ -1,0 +1,66 @@
+name: Translation
+description: "Fix a translation error or request a new language"
+title: "[LANG] <Short description>"
+labels: ["Localization", "Triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping to translate the Syncthing Manager!
+        Please fill out the details below so I know exactly where the text is located.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: "Where is the translation needed?"
+      description: "Is this text inside the Obsidian plugin itself, or on the documentation website?"
+      options:
+        - "Obsidian Plugin (Interface, Modals, Settings)"
+        - "Documentation Website (MkDocs)"
+        - "Both"
+    validations:
+      required: true
+
+  - type: input
+    id: language
+    attributes:
+      label: "Target Language"
+      description: "Which language is this about? (e.g., Spanish, Russian, French, etc.)"
+      placeholder: "e.g., Spanish (es)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: "Type of Request"
+      options:
+        - "Fix a typo or incorrect translation"
+        - "Missing translation (shows in English instead)"
+        - "Request a completely new language"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_text
+    attributes:
+      label: "Current Text (If applicable)"
+      description: "What does it currently say?"
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed_text
+    attributes:
+      label: "Suggested Translation"
+      description: "How should it be translated?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: "Additional Context"
+      description: "Where exactly did you see this? Add screenshots if it helps!"
+    validations:
+      required: false

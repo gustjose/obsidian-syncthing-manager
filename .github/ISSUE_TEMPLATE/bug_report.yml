@@ -1,0 +1,61 @@
+name: Bug Report
+description: Report a bug to help improve the plugin
+title: "[BUG] <Short description>"
+labels: ["Bug", "Triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please provide as much detail as possible.
+  - type: input
+    id: obsidian_version
+    attributes:
+      label: Obsidian Version
+      placeholder: e.g., 1.5.3
+    validations:
+      required: true
+  - type: input
+    id: syncthing_version
+    attributes:
+      label: Syncthing Version
+      placeholder: e.g., v1.27.2
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Android
+        - iOS
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What happened? What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can I reproduce this bug?
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console Logs
+      description: Press Ctrl+Shift+I (or Cmd+Option+I on Mac) to open the developer tools and paste any red errors here.
+      render: shell
+    validations:
+      required: false

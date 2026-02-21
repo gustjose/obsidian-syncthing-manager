@@ -1,0 +1,66 @@
+name: Issue Manager Bot
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  auto-triage-and-greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze and classify issue
+        uses: actions/github-script@v7
+        with:
+          # github-token: ${{ secrets.CUSTOM_BOT_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const title = issue.title.toLowerCase();
+
+            // 1. Initial labels
+            let labelsToAdd = ['triage'];
+
+            // 2. Classification by Type
+            if (title.includes('[bug]')) labelsToAdd.push('bug');
+            if (title.includes('[feature]')) labelsToAdd.push('enhancement');
+            if (title.includes('[question]')) labelsToAdd.push('question');
+            if (title.includes('[lang]')) labelsToAdd.push('localization');
+
+            // 3. Add labels to the issue
+            if (labelsToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labelsToAdd
+              });
+            }
+
+            // 4. Assign the issue to the repository owner
+            await github.rest.issues.addAssignees({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              assignees: [context.repo.owner]
+            });
+
+            // 5. Build the welcome message
+            const commentBody = `
+            👋 Hello @${issue.user.login}!
+
+            Thank you for opening this issue! The **Syncthing Manager** is maintained in my free time, so it might take a little while for me to analyze this and reply. 
+
+            In the meantime, I have assigned this to the maintainer and added some tags to help organize the queue. If you have any additional logs or screenshots, feel free to drop them below.
+
+            *(Automated message)* 🤖
+            `;
+
+            // 6. Send the comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
