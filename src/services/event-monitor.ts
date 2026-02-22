@@ -133,7 +133,17 @@ export class SyncthingEventMonitor {
 					"Loop tick error (timeout?)",
 					error,
 				);
-				await this.sleep(2000);
+
+				const msg = String(error).toLowerCase();
+				// Se for timeout normal, apenas continuamos aguardando.
+				// Para erros de conexão (refused, 400, etc), o Syncthing pode
+				// ter reiniciado. Resetamos o lastEventId para resincronizar os IDs.
+				if (!msg.includes("timeout")) {
+					this.lastEventId = 0;
+					if (this.running) await this.sleep(5000);
+				} else {
+					if (this.running) await this.sleep(2000);
+				}
 			}
 		}
 	}

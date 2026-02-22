@@ -35,6 +35,7 @@ export default class SyncthingController extends Plugin {
 	history: SyncthingHistoryItem[] = [];
 	myDeviceID: string = "";
 	tabManager: TabManager;
+	private _ignoreManager: IgnoreManager | null = null;
 
 	public pathPrefix: string = "";
 
@@ -73,8 +74,6 @@ export default class SyncthingController extends Plugin {
 		await this.fileStateManager.load();
 
 		const ignoreManager = new IgnoreManager(this.app, this);
-
-		await this.fetchMyDeviceID();
 
 		this.registerView(
 			VIEW_TYPE_SYNCTHING,
@@ -245,21 +244,44 @@ export default class SyncthingController extends Plugin {
 		this.atualizarTodosVisuais();
 
 		this.app.workspace.onLayoutReady(async () => {
-			const conexaoValida = await this.verificarConexao(false);
-
-			// Só prosseguimos carregando dados e históricos se a conexão existir E a
-			// pasta configurada for confirmadamente válida no servidor.
-			if (conexaoValida) {
-				await this.detectPathPrefix();
-				await ignoreManager.ensureDefaults();
-				await this.atualizarContagemDispositivos();
-				await this.reconcileFileStates();
-				void this.monitor.start();
-			} else {
-				// Carrega interface visual e contador zerado apenas para informar offline/erro
-				await this.atualizarContagemDispositivos();
-			}
+			await this.initializeConnection(ignoreManager);
 		});
+	}
+
+	/**
+	 * Inicializa ou reinicializa a conexão com o Syncthing.
+	 * Chamado no boot e pode ser chamado após reconexão.
+	 */
+	async initializeConnection(
+		ignoreManager?: IgnoreManager,
+		showNotice: boolean = false,
+	): Promise<boolean> {
+		// Salva referência para reconexões futuras
+		if (ignoreManager) {
+			this._ignoreManager = ignoreManager;
+		}
+
+		const conexaoValida = await this.verificarConexao(showNotice);
+
+		if (conexaoValida) {
+			await this.fetchMyDeviceID();
+			await this.detectPathPrefix();
+			if (this._ignoreManager) {
+				await this._ignoreManager.ensureDefaults();
+			}
+			await this.atualizarContagemDispositivos();
+			await this.reconcileFileStates();
+
+			// Reinicia o monitor se ele não estiver rodando
+			if (!this.monitor.running) {
+				void this.monitor.start();
+			}
+		} else {
+			// Carrega interface visual e contador zerado
+			await this.atualizarContagemDispositivos();
+		}
+
+		return conexaoValida;
 	}
 
 	onunload() {
@@ -428,10 +450,12 @@ export default class SyncthingController extends Plugin {
 		const localVer = info.local?.version || [];
 		const globalVer = info.global?.version || [];
 
-		localVer.sort();
-		globalVer.sort();
+		const sortedLocal = [...localVer].sort();
+		const sortedGlobal = [...globalVer].sort();
 
-		const isSynced = JSON.stringify(localVer) === JSON.stringify(globalVer);
+		const isSynced =
+			sortedLocal.length === sortedGlobal.length &&
+			sortedLocal.every((v, i) => sortedGlobal[i] === v);
 
 		if (isSynced) {
 			this.onFileSyncedEvent(obsidianPath);
@@ -574,8 +598,11 @@ export default class SyncthingController extends Plugin {
 			return;
 		}
 
-		// Valida se a pasta ainda existe no servidor. Mostra os erros (true).
-		const isConexaoValida = await this.verificarConexao(true);
+		// Valida se a pasta ainda existe no servidor e reinicializa módulos
+		const isConexaoValida = await this.initializeConnection(
+			this._ignoreManager || undefined,
+			true,
+		);
 
 		if (!isConexaoValida || !this.settings.syncthingFolderId) {
 			// Não continua se o servidor estiver offline, se a api key for invalida
@@ -600,6 +627,13 @@ export default class SyncthingController extends Plugin {
 			);
 			await this.atualizarContagemDispositivos();
 			await this.refreshHistory();
+
+			this.currentStatus = "conectado";
+			this.lastSyncTime = new Date().toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+			this.atualizarTodosVisuais();
 		} catch (error) {
 			Logger.warn(LOG_MODULES.MAIN, "Erro ao forçar scan:", error);
 			new Notice("Erro!");

@@ -299,7 +299,7 @@ export class SyncthingAPI {
 		ignoredPaths: string,
 		myDeviceID: string,
 	): Promise<SyncthingHistoryItem[]> {
-		const endpoint = `/rest/events?limit=100&events=ItemFinished,LocalIndexUpdated`;
+		const endpoint = `/rest/events?limit=100&events=ItemFinished,LocalIndexUpdated&timeout=0`;
 
 		const events = await this.request<SyncthingEvent[]>(
 			url,
