@@ -21,6 +21,7 @@ import { FileStateManager } from "./services/file-state-manager";
 import { ExplorerManager } from "./services/explorer-manager";
 import { Logger, LOG_MODULES } from "./utils/logger";
 import { createSyncthingIcon } from "./ui/icons";
+import { DebugReportModal } from "./ui/debug-report-modal";
 import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
 
 export default class SyncthingController extends Plugin {
@@ -235,6 +236,14 @@ export default class SyncthingController extends Plugin {
 			name: t("cmd_debug_connect"),
 			callback: async () => {
 				await this.verificarConexao(true);
+			},
+		});
+
+		this.addCommand({
+			id: "copy-debug-info",
+			name: t("cmd_copy_debug"),
+			callback: () => {
+				new DebugReportModal(this.app, this).open();
 			},
 		});
 

@@ -3,6 +3,7 @@ export default {
 	cmd_open_panel: "Open side panel",
 	cmd_force_sync: "Force sync now",
 	cmd_debug_connect: "Debug: test connection",
+	cmd_copy_debug: "Copy debug info",
 
 	// Ribbon Icon
 	ribbon_tooltip: "Open syncthing manager",
@@ -194,6 +195,16 @@ export default {
 	modal_debug_title: "Debug configuration",
 	modal_debug_desc:
 		"Select which modules should output debug logs to the console.",
+
+	// Debug Report
+	debug_report_title: "Debug report",
+	debug_report_desc:
+		"Copy the information below and paste it in a bug report.",
+	debug_report_copy: "Copy to clipboard",
+	debug_report_copied: "Debug info copied!",
+	debug_report_open_issue: "Open issue on GitHub",
+	debug_report_no_errors: "No recent errors or warnings.",
+	btn_debug_report: "Debug report",
 	// Versioning
 	modal_versioning_title: "File versioning",
 	versioning_type: "Versioning strategy",

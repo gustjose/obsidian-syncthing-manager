@@ -491,3 +491,18 @@
 	border: 1px solid var(--background-modifier-border-hover);
 	white-space: nowrap;
 }
+
+/* --- Debug Report Modal --- */
+
+.st-debug-report-textarea {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: 12px;
+	resize: vertical;
+}
+
+.st-debug-report-buttons {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+}

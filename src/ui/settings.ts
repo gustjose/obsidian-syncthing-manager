@@ -6,6 +6,7 @@ import { t, setLanguage, LANGUAGE_LIST } from "../lang/lang";
 import { IgnoreModal } from "./ignore-modal";
 import { ContextMenuModal } from "./context-menu-modal";
 import { DebugModal } from "./debug-modal";
+import { DebugReportModal } from "./debug-report-modal";
 import { VersioningModal } from "./versioning-modal";
 
 export class SyncthingSettingTab extends PluginSettingTab {
@@ -403,9 +404,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			})
 			.addButton((btn) => {
 				btn.setButtonText(t("btn_report_bug")).onClick(() => {
-					window.open(
-						"https://github.com/gustjose/obsidian-syncthing-manager/issues",
-					);
+					new DebugReportModal(this.app, this.plugin).open();
 				});
 			});
 	}

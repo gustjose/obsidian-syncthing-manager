@@ -3,6 +3,7 @@ export default {
 	cmd_open_panel: "Abrir Painel Lateral",
 	cmd_force_sync: "Forçar Sincronização Agora",
 	cmd_debug_connect: "Debug: Testar Conexão",
+	cmd_copy_debug: "Copiar informações de depuração",
 
 	// Ribbon
 	ribbon_tooltip: "Abrir Syncthing Controller",
@@ -198,6 +199,16 @@ export default {
 	tooltip_configure_modules: "Configurar módulos",
 	modal_debug_title: "Configuração de Depuração",
 	modal_debug_desc: "Selecione quais módulos devem exibir logs no console.",
+
+	// Relatório de Depuração
+	debug_report_title: "Relatório de depuração",
+	debug_report_desc:
+		"Copie as informações abaixo e cole em um relatório de bug.",
+	debug_report_copy: "Copiar para área de transferência",
+	debug_report_copied: "Informações copiadas!",
+	debug_report_open_issue: "Abrir Issue no GitHub",
+	debug_report_no_errors: "Nenhum erro ou aviso recente.",
+	btn_debug_report: "Relatório de depuração",
 
 	// Versioning
 	modal_versioning_title: "Versionamento de Arquivos",

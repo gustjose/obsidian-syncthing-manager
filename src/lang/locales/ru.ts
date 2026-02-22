@@ -2,7 +2,8 @@ export default {
 	// Commands
 	cmd_open_panel: "Открыть Боковую Панель",
 	cmd_force_sync: "Принудительно синхронизировать сейчас",
-	cmd_debug_connect: "Отладка: Проверить Соединение",
+	cmd_debug_connect: "Отладка: Тест подключения",
+	cmd_copy_debug: "Скопировать отладочную информацию",
 
 	// Ribbon Icon
 	ribbon_tooltip: "Открыть контроллер Syncthing",
@@ -197,6 +198,16 @@ export default {
 	tooltip_configure_modules: "Настроить модули",
 	modal_debug_title: "Конфигурация отладки",
 	modal_debug_desc: "Выберите модули, которые будут выводить логи в консоль.",
+
+	// Отчёт об отладке
+	debug_report_title: "Отчёт об отладке",
+	debug_report_desc:
+		"Скопируйте информацию ниже и вставьте в отчёт об ошибке.",
+	debug_report_copy: "Копировать в буфер обмена",
+	debug_report_copied: "Информация скопирована!",
+	debug_report_open_issue: "Открыть Issue на GitHub",
+	debug_report_no_errors: "Нет недавних ошибок или предупреждений.",
+	btn_debug_report: "Отчёт об отладке",
 
 	// Versioning
 	modal_versioning_title: "Версионирование файлов",
