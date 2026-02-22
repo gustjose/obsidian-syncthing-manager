@@ -85,69 +85,71 @@ export class VersioningModal extends Modal {
 			new Setting(contentEl)
 				.setName(t("versioning_cleanout_days"))
 				.setDesc(t("versioning_cleanout_days_desc"))
-				.addText((text) =>
-					text
-						.setValue(
-							this.currentVersioning.params["cleanoutDays"] ||
-								"0",
-						)
-						.onChange((value) => {
-							this.currentVersioning.params["cleanoutDays"] =
-								value;
-						}),
-				);
+				.addText((text) => {
+					text.setValue(
+						this.currentVersioning.params["cleanoutDays"] || "0",
+					).onChange((value) => {
+						this.currentVersioning.params["cleanoutDays"] = value;
+					});
+					text.inputEl.type = "number";
+					text.inputEl.min = "0";
+					return text;
+				});
 		} else if (this.currentVersioning.type === "simple") {
 			new Setting(contentEl)
 				.setName(t("versioning_keep"))
 				.setDesc(t("versioning_keep_desc"))
-				.addText((text) =>
-					text
-						.setValue(this.currentVersioning.params["keep"] || "5")
-						.onChange((value) => {
-							this.currentVersioning.params["keep"] = value;
-						}),
-				);
+				.addText((text) => {
+					text.setValue(
+						this.currentVersioning.params["keep"] || "5",
+					).onChange((value) => {
+						this.currentVersioning.params["keep"] = value;
+					});
+					text.inputEl.type = "number";
+					text.inputEl.min = "1";
+					return text;
+				});
 			new Setting(contentEl)
 				.setName(t("versioning_cleanout_days")) // Recycling translation
 				.setDesc(t("versioning_cleanout_days_desc"))
-				.addText((text) =>
-					text
-						.setValue(
-							this.currentVersioning.params["cleanoutDays"] ||
-								"0",
-						)
-						.onChange((value) => {
-							this.currentVersioning.params["cleanoutDays"] =
-								value;
-						}),
-				);
+				.addText((text) => {
+					text.setValue(
+						this.currentVersioning.params["cleanoutDays"] || "0",
+					).onChange((value) => {
+						this.currentVersioning.params["cleanoutDays"] = value;
+					});
+					text.inputEl.type = "number";
+					text.inputEl.min = "0";
+					return text;
+				});
 		} else if (this.currentVersioning.type === "staggered") {
 			new Setting(contentEl)
 				.setName(t("versioning_max_age"))
 				.setDesc(t("versioning_max_age_desc"))
-				.addText((text) =>
-					text
-						.setValue(
-							this.currentVersioning.params["maxAge"] || "365",
-						) // Days
-						.onChange((value) => {
-							this.currentVersioning.params["maxAge"] = value;
-						}),
-				);
+				.addText((text) => {
+					text.setValue(
+						this.currentVersioning.params["maxAge"] || "365",
+					).onChange((value) => {
+						this.currentVersioning.params["maxAge"] = value;
+					});
+					text.inputEl.type = "number";
+					text.inputEl.min = "0";
+					return text;
+				});
 			new Setting(contentEl)
 				.setName(t("versioning_clean_interval"))
 				.setDesc(t("versioning_clean_interval_desc"))
-				.addText((text) =>
-					text
-						.setValue(
-							this.currentVersioning.params["cleanInterval"] ||
-								"3600",
-						) // Seconds
-						.onChange((value) => {
-							this.currentVersioning.params["cleanInterval"] =
-								value;
-						}),
-				);
+				.addText((text) => {
+					text.setValue(
+						this.currentVersioning.params["cleanInterval"] ||
+							"3600",
+					).onChange((value) => {
+						this.currentVersioning.params["cleanInterval"] = value;
+					});
+					text.inputEl.type = "number";
+					text.inputEl.min = "0";
+					return text;
+				});
 		} else if (this.currentVersioning.type === "external") {
 			new Setting(contentEl)
 				.setName(t("versioning_command"))

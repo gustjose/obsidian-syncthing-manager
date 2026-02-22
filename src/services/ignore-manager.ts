@@ -144,11 +144,8 @@ export class IgnoreManager {
 			throw new Error("Configuração do Syncthing incompleta.");
 		}
 
-		// Quebra as linhas e remove vazias
-		const lines = content
-			.split("\n")
-			.map((line) => line.trim())
-			.filter((line) => line.length > 0);
+		// Quebra as linhas e remove espacos do final, mas preserva linhas em branco originais
+		const lines = content.split("\n").map((line) => line.trimEnd());
 
 		await SyncthingAPI.setIgnores(
 			this.plugin.apiUrl,
