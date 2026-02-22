@@ -6,6 +6,8 @@
 	"main": "main.js",
 	"scripts": {
 		"dev": "node scripts/esbuild.config.mjs",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"test-cofre": "node scripts/install-vault.mjs",
 		"sync-conflict": "node scripts/create-conflict.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node scripts/esbuild.config.mjs production",
@@ -30,8 +32,10 @@
 		"eslint": "^9.39.1",
 		"eslint-plugin-obsidianmd": "^0.1.9",
 		"globals": "^16.5.0",
+		"jsdom": "^28.1.0",
 		"obsidian": "latest",
 		"tslib": "2.4.0",
-		"typescript": "^4.8.4"
+		"typescript": "^4.8.4",
+		"vitest": "^4.0.18"
 	}
 }

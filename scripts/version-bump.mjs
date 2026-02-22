@@ -21,6 +21,33 @@ rl.question("👉 Digite a nova versão: ", (targetVersion) => {
 		process.exit(1);
 	}
 
+	// --- GATE 1: LINT ---
+	console.clear();
+	console.log("🔍 Executando lint...\n");
+	try {
+		execSync("npm run lint", { stdio: "inherit" });
+		console.log("\n✅ Lint passou!\n");
+	} catch {
+		console.error(
+			"\n❌ Lint falhou. Corrija os erros antes de fazer o release.",
+		);
+		process.exit(1);
+	}
+
+	// --- GATE 2: TESTES ---
+	console.clear();
+	console.log("🧪 Executando testes...\n");
+	try {
+		execSync("npm test", { stdio: "inherit" });
+		console.log("\n✅ Testes passaram!\n");
+	} catch {
+		console.error(
+			"\n❌ Testes falharam. Corrija os erros antes de fazer o release.",
+		);
+		process.exit(1);
+	}
+
+	console.clear();
 	console.log(`\n⚙️ Aplicando versão: ${targetVersion}...\n`);
 
 	// --- BLOCO 1: ATUALIZAR MANIFEST.JSON ---
