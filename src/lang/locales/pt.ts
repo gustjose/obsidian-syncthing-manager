@@ -241,6 +241,7 @@ export default {
 	// Dynamic UI Strings
 	notice_resuming: "Retomando sincronização...",
 	notice_pausing: "Pausando sincronização...",
+	notice_is_paused: "Sincronização pausada.",
 	loading_versions: "Carregando versões...",
 	loading_config: "Carregando configuração...",
 	error_folder_not_found: "Pasta não encontrada na configuração.",

@@ -610,6 +610,11 @@ export default class SyncthingController extends Plugin {
 			return;
 		}
 
+		if (this.isPaused) {
+			new Notice(t("notice_is_paused") || "Sync is Paused");
+			return;
+		}
+
 		const app = this.app as unknown as AppWithCommands;
 		if (app.commands) {
 			app.commands.executeCommandById("editor:save-file");

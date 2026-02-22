@@ -240,6 +240,7 @@ export default {
 	// Dynamic UI Strings
 	notice_resuming: "Возобновление синхронизации...",
 	notice_pausing: "Приостановка синхронизации...",
+	notice_is_paused: "Синхронизация приостановлена.",
 	loading_versions: "Загрузка версий...",
 	loading_config: "Загрузка конфигурации...",
 	error_folder_not_found: "Папка не найдена в конфигурации.",

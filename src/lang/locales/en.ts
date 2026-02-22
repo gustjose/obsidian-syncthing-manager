@@ -19,8 +19,8 @@ export default {
 	info_last_sync: "Last sync",
 	info_devices: "Online devices",
 	info_folder: "Vault folder",
-	info_history: "Recent activity", // Garanti que esta chave existe para o título
-	history_empty: "No recent activity", // Garanti que esta chave existe para lista vazia
+	info_history: "Recent activity",
+	history_empty: "No recent activity",
 
 	// History Directions (Tooltips for arrows)
 	history_incoming: "Incoming (remote)",
@@ -237,6 +237,7 @@ export default {
 	// Dynamic UI Strings
 	notice_resuming: "Resuming sync...",
 	notice_pausing: "Pausing sync...",
+	notice_is_paused: "Sync is paused.",
 	loading_versions: "Loading versions...",
 	loading_config: "Loading configuration...",
 	error_folder_not_found: "Folder not found in configuration.",
