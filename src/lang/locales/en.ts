@@ -233,4 +233,17 @@ export default {
 		"Syncthing folder not found. Please reselect it in the settings.",
 	notice_folder_migration:
 		"Folder config needs update. Please reselect your vault folder in syncthing settings.",
+
+	// Dynamic UI Strings
+	notice_resuming: "Resuming sync...",
+	notice_pausing: "Pausing sync...",
+	loading_versions: "Loading versions...",
+	loading_config: "Loading configuration...",
+	error_folder_not_found: "Folder not found in configuration.",
+	saving: "Saving...",
+	error_loading_versions: "Error loading versions. Check console.",
+	tab_syncing: "Syncing...",
+	tab_synced: "Synced!",
+	conflict_delete_error: "Error deleting file.",
+	conflict_restore_error: "Error restoring conflict.",
 };

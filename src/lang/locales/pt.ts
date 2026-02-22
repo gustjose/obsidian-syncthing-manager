@@ -237,4 +237,17 @@ export default {
 		"Pasta do Syncthing não encontrada. Por favor, reconfigure nas opções.",
 	notice_folder_migration:
 		"Configuração de pasta desatualizada. Por favor, selecione novamente a pasta do cofre nas configurações do Syncthing.",
+
+	// Dynamic UI Strings
+	notice_resuming: "Retomando sincronização...",
+	notice_pausing: "Pausando sincronização...",
+	loading_versions: "Carregando versões...",
+	loading_config: "Carregando configuração...",
+	error_folder_not_found: "Pasta não encontrada na configuração.",
+	saving: "Salvando...",
+	error_loading_versions: "Erro ao carregar versões. Verifique o console.",
+	tab_syncing: "Sincronizando...",
+	tab_synced: "Sincronizado!",
+	conflict_delete_error: "Erro ao deletar arquivo.",
+	conflict_restore_error: "Erro ao restaurar conflito.",
 };

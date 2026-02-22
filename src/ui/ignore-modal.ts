@@ -134,7 +134,11 @@ export class IgnoreModal extends Modal {
 						this.close();
 					})
 					.catch((err) => {
-						console.error(err);
+						Logger.error(
+							LOG_MODULES.MAIN,
+							"Erro ao salvar .stignore",
+							err,
+						);
 						new Notice(t("notice_ignore_error"));
 					});
 			});

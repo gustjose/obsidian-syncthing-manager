@@ -21,7 +21,7 @@ export class VersioningModal extends Modal {
 		contentEl.createEl("h2", { text: t("modal_versioning_title") });
 
 		contentEl.createEl("div", {
-			text: "Loading configuration...",
+			text: t("loading_config"),
 			cls: "st-loading-indicator",
 		});
 
@@ -33,7 +33,7 @@ export class VersioningModal extends Modal {
 			const folder = folders.find((f) => f.id === this.folderId);
 
 			if (!folder) {
-				new Notice("Folder not found in configuration.");
+				new Notice(t("error_folder_not_found"));
 				this.close();
 				return;
 			}
@@ -113,7 +113,8 @@ export class VersioningModal extends Modal {
 				.addText((text) =>
 					text
 						.setValue(
-							this.currentVersioning.params["cleanoutDays"] || "0",
+							this.currentVersioning.params["cleanoutDays"] ||
+								"0",
 						)
 						.onChange((value) => {
 							this.currentVersioning.params["cleanoutDays"] =
@@ -169,7 +170,7 @@ export class VersioningModal extends Modal {
 				.setCta()
 				.onClick(async () => {
 					try {
-						btn.setButtonText("Saving...").setDisabled(true);
+						btn.setButtonText(t("saving")).setDisabled(true);
 						await SyncthingAPI.setFolderVersioning(
 							this.plugin.apiUrl,
 							this.plugin.settings.syncthingApiKey,

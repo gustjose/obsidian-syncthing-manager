@@ -236,4 +236,17 @@ export default {
 		"Папка Syncthing не найдена. Пожалуйста, выберите её заново в настройках.",
 	notice_folder_migration:
 		"Конфигурация папки устарела. Пожалуйста, выберите папку хранилища заново в настройках Syncthing.",
+
+	// Dynamic UI Strings
+	notice_resuming: "Возобновление синхронизации...",
+	notice_pausing: "Приостановка синхронизации...",
+	loading_versions: "Загрузка версий...",
+	loading_config: "Загрузка конфигурации...",
+	error_folder_not_found: "Папка не найдена в конфигурации.",
+	saving: "Сохранение...",
+	error_loading_versions: "Ошибка загрузки версий. Проверьте консоль.",
+	tab_syncing: "Синхронизация...",
+	tab_synced: "Синхронизировано!",
+	conflict_delete_error: "Ошибка удаления файла.",
+	conflict_restore_error: "Ошибка восстановления конфликта.",
 };

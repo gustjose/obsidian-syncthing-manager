@@ -23,7 +23,7 @@ export class VersionModal extends Modal {
 			text: t("modal_versions_title") || "File Versions",
 		});
 
-		const loadingEl = contentEl.createDiv({ text: "Loading versions..." });
+		const loadingEl = contentEl.createDiv({ text: t("loading_versions") });
 
 		try {
 			// Ensure we have the folder ID and API key
@@ -90,7 +90,7 @@ export class VersionModal extends Modal {
 					);
 			});
 		} catch (error) {
-			loadingEl.setText("Error loading versions. Check console.");
+			loadingEl.setText(t("error_loading_versions"));
 			Logger.error(LOG_MODULES.MAIN, "Failed to load versions", error);
 		}
 	}

@@ -5,6 +5,7 @@ import { ConflictManager } from "../services/conflict-manager";
 import { ConflictModal } from "../ui/conflict-modal";
 import { SyncthingHistoryItem } from "../api/syncthing-api";
 import { getStatusDisplay } from "./status-utils";
+import { Logger, LOG_MODULES } from "../utils/logger";
 
 export const VIEW_TYPE_SYNCTHING = "syncthing-view";
 
@@ -177,7 +178,11 @@ export class SyncthingView extends ItemView {
 		setIcon(btnPause, pauseIcon);
 
 		btnPause.addEventListener("click", () => {
-			this.plugin.togglePause().catch((err) => console.error(err));
+			this.plugin
+				.togglePause()
+				.catch((err) =>
+					Logger.error(LOG_MODULES.MAIN, "Erro no togglePause", err),
+				);
 		});
 
 		// 5. Seção de Histórico
@@ -215,7 +220,9 @@ export class SyncthingView extends ItemView {
 				// Dica: Adicionamos um tooltip simples para explicar a seta ao passar o mouse
 				arrowSpan.setAttribute(
 					"aria-label",
-					isIncoming ? "Recebido (Remoto)" : "Enviado (Local)",
+					isIncoming
+						? t("history_incoming") || "Recebido (Remoto)"
+						: t("history_outgoing") || "Enviado (Local)",
 				);
 				setIcon(arrowSpan, arrowIcon);
 				// ------------------------------------------

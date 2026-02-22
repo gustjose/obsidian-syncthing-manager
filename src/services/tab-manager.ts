@@ -1,5 +1,6 @@
-import { App, WorkspaceLeaf, setIcon, TFile, FileView } from "obsidian";
-import SyncthingController from "../main";
+import { App, setIcon, WorkspaceLeaf, TFile, FileView } from "obsidian";
+import type SyncthingController from "../main";
+import { t } from "../lang/lang";
 
 interface InternalWorkspaceLeaf extends WorkspaceLeaf {
 	tabHeaderInnerEl?: HTMLElement;
@@ -156,13 +157,13 @@ export class TabManager {
 			iconContainer.addClass("st-sync-pending");
 			iconContainer.addClass("st-anim-spin");
 			setIcon(iconContainer, "refresh-cw");
-			iconContainer.setAttribute("aria-label", "Sincronizando...");
+			iconContainer.setAttribute("aria-label", t("tab_syncing"));
 		} else if (status === "success") {
 			iconContainer.removeClass("st-sync-pending");
 			iconContainer.addClass("st-sync-success");
 			iconContainer.removeClass("st-anim-spin");
 			setIcon(iconContainer, "check");
-			iconContainer.setAttribute("aria-label", "Sincronizado!");
+			iconContainer.setAttribute("aria-label", t("tab_synced"));
 
 			setTimeout(() => {
 				if (
