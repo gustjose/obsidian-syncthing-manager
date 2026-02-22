@@ -138,15 +138,43 @@ export class SyncthingAPI {
 		);
 	}
 
-	static async getFolders(
+	private static configCache: {
+		data: SyncthingConfig;
+		timestamp: number;
+	} | null = null;
+	private static CONFIG_TTL = 5000; // 5 segundos
+
+	static async getConfig(
 		url: string,
 		apiKey: string,
-	): Promise<SyncthingFolder[]> {
+	): Promise<SyncthingConfig> {
+		const now = Date.now();
+		if (
+			this.configCache &&
+			now - this.configCache.timestamp < this.CONFIG_TTL
+		) {
+			return this.configCache.data;
+		}
+
 		const config = await this.request<SyncthingConfig>(
 			url,
 			apiKey,
 			"/rest/config",
 		);
+
+		this.configCache = { data: config, timestamp: now };
+		return config;
+	}
+
+	static invalidateConfigCache() {
+		this.configCache = null;
+	}
+
+	static async getFolders(
+		url: string,
+		apiKey: string,
+	): Promise<SyncthingFolder[]> {
+		const config = await this.getConfig(url, apiKey);
 		return config.folders;
 	}
 
@@ -154,11 +182,7 @@ export class SyncthingAPI {
 		url: string,
 		apiKey: string,
 	): Promise<SyncthingDevice[]> {
-		const config = await this.request<SyncthingConfig>(
-			url,
-			apiKey,
-			"/rest/config",
-		);
+		const config = await this.getConfig(url, apiKey);
 		return config.devices;
 	}
 
@@ -244,6 +268,7 @@ export class SyncthingAPI {
 			"PATCH",
 			body,
 		);
+		this.invalidateConfigCache();
 	}
 
 	static async resumeFolder(
@@ -259,6 +284,7 @@ export class SyncthingAPI {
 			"PATCH",
 			body,
 		);
+		this.invalidateConfigCache();
 	}
 
 	static async setFolderVersioning(
@@ -267,29 +293,15 @@ export class SyncthingAPI {
 		folderId: string,
 		versioning: SyncthingVersioning,
 	): Promise<void> {
-		// 1. Get current config
-		const config = await this.request<SyncthingConfig>(
-			url,
-			apiKey,
-			"/rest/config",
-		);
-
-		// 2. Find folder and update versioning
-		const folderIndex = config.folders.findIndex((f) => f.id === folderId);
-		if (folderIndex === -1) {
-			throw new Error(`Folder with ID ${folderId} not found.`);
-		}
-
-		config.folders[folderIndex].versioning = versioning;
-
-		// 3. Post updated config
+		const body = JSON.stringify({ versioning });
 		await this.request<void>(
 			url,
 			apiKey,
-			"/rest/config",
-			"PUT",
-			JSON.stringify(config),
+			`/rest/config/folders/${folderId}`,
+			"PATCH",
+			body,
 		);
+		this.invalidateConfigCache();
 	}
 
 	static async getHistory(
