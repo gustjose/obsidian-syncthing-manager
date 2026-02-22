@@ -6,6 +6,8 @@ export function createSyncthingIcon(colorClass: string): SVGSVGElement {
 	const ns = "http://www.w3.org/2000/svg";
 	const svg = document.createElementNS(ns, "svg");
 	svg.setAttribute("viewBox", "0 0 192 192");
+	svg.setAttribute("width", "24");
+	svg.setAttribute("height", "24");
 	svg.classList.add("st-icon-svg");
 
 	if (colorClass) {

@@ -17,7 +17,7 @@ export class StatusBarManager {
 	init() {
 		this.statusBarItem = this.plugin.addStatusBarItem();
 		this.statusBarItem.addClass("mod-clickable");
-		this.statusBarItem.setAttribute("aria-label", "Syncthing controller");
+		this.statusBarItem.setAttribute("data-tooltip-position", "top");
 		this.statusBarItem.addEventListener("click", this.onClickCallback);
 	}
 
