@@ -235,4 +235,6 @@ export default {
 	// Connection Check
 	notice_folder_missing:
 		"Pasta do Syncthing não encontrada. Por favor, reconfigure nas opções.",
+	notice_folder_migration:
+		"Configuração de pasta desatualizada. Por favor, selecione novamente a pasta do cofre nas configurações do Syncthing.",
 };

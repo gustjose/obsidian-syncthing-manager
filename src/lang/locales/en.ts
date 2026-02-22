@@ -231,4 +231,6 @@ export default {
 	// Connection Check
 	notice_folder_missing:
 		"Syncthing folder not found. Please reselect it in the settings.",
+	notice_folder_migration:
+		"Folder config needs update. Please reselect your vault folder in syncthing settings.",
 };

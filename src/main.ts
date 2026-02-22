@@ -683,6 +683,18 @@ export default class SyncthingController extends Plugin {
 
 	async verificarConexao(showNotice: boolean = false): Promise<boolean> {
 		try {
+			// Migração: em versões antigas, syncthingFolderId podia ficar
+			// com o placeholder "device-specific" no data.json.
+			if (this.settings.syncthingFolderId === "device-specific") {
+				this.settings.syncthingFolderId = "";
+				this.settings.syncthingFolderLabel = "";
+				await this.saveSettings();
+				this.currentStatus = "configurando";
+				new Notice(t("notice_folder_migration"));
+				this.atualizarTodosVisuais();
+				return false;
+			}
+
 			if (this.settings.syncthingFolderId) {
 				// Validação prévia de existência da pasta na API (evita falhas massivas 404 e 500 no background)
 				const isFolderValid = await SyncthingAPI.isFolderValid(
@@ -693,13 +705,13 @@ export default class SyncthingController extends Plugin {
 
 				if (!isFolderValid) {
 					this.currentStatus = "erro";
-					new Notice(t("notice_folder_missing"));
-					// Limpa a configuração falha imediatamente para não insistir no erro
-					this.settings.syncthingFolderId = "";
-					this.settings.syncthingFolderLabel = "";
-					await this.saveSettings();
-
-					// Finalizamos aqui o verificarConexao para não propagar erros
+					if (showNotice) {
+						new Notice(t("notice_folder_missing"));
+					}
+					Logger.warn(
+						LOG_MODULES.MAIN,
+						`Pasta "${this.settings.syncthingFolderId}" não encontrada no servidor. Config mantida para retry.`,
+					);
 					this.atualizarTodosVisuais();
 					return false;
 				}

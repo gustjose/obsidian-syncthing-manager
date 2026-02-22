@@ -234,4 +234,6 @@ export default {
 	// Connection Check
 	notice_folder_missing:
 		"Папка Syncthing не найдена. Пожалуйста, выберите её заново в настройках.",
+	notice_folder_migration:
+		"Конфигурация папки устарела. Пожалуйста, выберите папку хранилища заново в настройках Syncthing.",
 };
