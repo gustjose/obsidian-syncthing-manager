@@ -56,6 +56,13 @@ export default {
 	setting_api_desc:
 		"Copie este código no Syncthing em: Ações > Configurações > Geral.",
 	btn_test_conn: "Testar Conexão",
+	setting_api_stored_securely:
+		"A chave da API está armazenada com segurança no chaveiro do sistema.",
+	setting_api_stored_legacy:
+		"A chave da API está armazenada localmente (atualize o Obsidian para suporte ao chaveiro).",
+	setting_api_configured: "Configurada",
+	setting_api_not_configured: "Não configurada",
+	btn_modify_secret: "Modificar secret",
 
 	// Settings - Folder
 	setting_folder_name: "Pasta do Cofre",

@@ -22,6 +22,7 @@ import { ExplorerManager } from "./services/explorer-manager";
 import { Logger, LOG_MODULES } from "./utils/logger";
 import { createSyncthingIcon } from "./ui/icons";
 import { DebugReportModal } from "./ui/debug-report-modal";
+import { SecretManager } from "./services/secret-manager";
 import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
 
 export default class SyncthingController extends Plugin {
@@ -36,6 +37,7 @@ export default class SyncthingController extends Plugin {
 	history: SyncthingHistoryItem[] = [];
 	myDeviceID: string = "";
 	tabManager: TabManager;
+	secretManager: SecretManager;
 	private _ignoreManager: IgnoreManager | null = null;
 
 	public pathPrefix: string = "";
@@ -58,7 +60,8 @@ export default class SyncthingController extends Plugin {
 	// --- Lifecycle ---
 
 	async onload() {
-		this.settingsManager = new SettingsManager(this);
+		this.secretManager = new SecretManager(this.app);
+		this.settingsManager = new SettingsManager(this, this.secretManager);
 		this.settings = await this.settingsManager.loadSettings();
 		setLanguage(this.settings.language);
 

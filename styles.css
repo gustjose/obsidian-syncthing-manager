@@ -639,3 +639,15 @@
 		gap: 4px 8px;
 	}
 }
+
+/* --- API Key Status (Keychain) --- */
+.st-api-key-status {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	margin-right: 8px;
+	white-space: nowrap;
+}
+
+.st-api-key-status.st-api-key-configured {
+	color: var(--text-success);
+}

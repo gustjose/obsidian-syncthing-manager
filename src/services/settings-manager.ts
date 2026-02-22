@@ -5,14 +5,21 @@ import {
 	LS_KEY_HOST,
 	LS_KEY_PORT,
 	LS_KEY_HTTPS,
-	LS_KEY_API,
 } from "../types";
+import { SecretManager } from "./secret-manager";
 
+/**
+ * Gerencia o carregamento e persistência das configurações do plugin.
+ * Configurações device-specific (host, port, https) ficam no localStorage.
+ * A API key é gerenciada pelo SecretManager (Keychain ou localStorage).
+ */
 export class SettingsManager {
 	private plugin: Plugin;
+	private secretManager: SecretManager;
 
-	constructor(plugin: Plugin) {
+	constructor(plugin: Plugin, secretManager: SecretManager) {
 		this.plugin = plugin;
+		this.secretManager = secretManager;
 	}
 
 	async loadSettings(): Promise<SyncthingPluginSettings> {
@@ -31,12 +38,16 @@ export class SettingsManager {
 		const localHost = window.localStorage.getItem(LS_KEY_HOST);
 		const localPort = window.localStorage.getItem(LS_KEY_PORT);
 		const localHttps = window.localStorage.getItem(LS_KEY_HTTPS);
-		const localKey = window.localStorage.getItem(LS_KEY_API);
 
 		if (localHost) settings.syncthingHost = localHost;
 		if (localPort) settings.syncthingPort = localPort;
 		if (localHttps !== null) settings.useHttps = localHttps === "true";
-		if (localKey) settings.syncthingApiKey = localKey;
+
+		// Migra API key para o Keychain se possível
+		this.secretManager.migrateIfNeeded();
+
+		// Carrega API key via SecretManager (Keychain → localStorage fallback)
+		settings.syncthingApiKey = this.secretManager.loadApiKey();
 
 		return settings;
 	}
@@ -65,10 +76,12 @@ export class SettingsManager {
 		};
 		await this.plugin.saveData(sharedSettings);
 
-		// 2. Salva configurações sensíveis/locais no LocalStorage
+		// 2. Salva configurações locais do dispositivo
 		window.localStorage.setItem(LS_KEY_HOST, settings.syncthingHost);
 		window.localStorage.setItem(LS_KEY_PORT, settings.syncthingPort);
 		window.localStorage.setItem(LS_KEY_HTTPS, String(settings.useHttps));
-		window.localStorage.setItem(LS_KEY_API, settings.syncthingApiKey);
+
+		// 3. Salva API key via SecretManager (Keychain + localStorage fallback)
+		this.secretManager.saveApiKey(settings.syncthingApiKey);
 	}
 }

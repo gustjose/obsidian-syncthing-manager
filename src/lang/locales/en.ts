@@ -57,6 +57,13 @@ export default {
 	setting_api_desc:
 		"Copy this from syncthing > actions > settings > general.",
 	btn_test_conn: "Test connection",
+	setting_api_stored_securely:
+		"API key is stored securely in your system keychain.",
+	setting_api_stored_legacy:
+		"API key is stored locally (upgrade Obsidian for keychain support).",
+	setting_api_configured: "Configured",
+	setting_api_not_configured: "Not configured",
+	btn_modify_secret: "Modify secret",
 
 	// Settings - Folder
 	setting_folder_name: "Vault folder ID",

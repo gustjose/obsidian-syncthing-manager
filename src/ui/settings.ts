@@ -4,6 +4,7 @@ import { SyncthingAPI, SyncthingFolder } from "../api/syncthing-api";
 import { Logger } from "../utils/logger";
 import { t, setLanguage, LANGUAGE_LIST } from "../lang/lang";
 import { IgnoreModal } from "./ignore-modal";
+import { InputModal } from "./input-modal";
 import { ContextMenuModal } from "./context-menu-modal";
 import { DebugModal } from "./debug-modal";
 import { DebugReportModal } from "./debug-report-modal";
@@ -95,8 +96,47 @@ export class SyncthingSettingTab extends PluginSettingTab {
 
 		const api_key_Setting = new Setting(containerEl)
 			.setName(t("setting_api_name"))
-			.setDesc(t("setting_api_desc"))
-			.addText((text) => {
+			.setDesc(t("setting_api_desc"));
+
+		if (this.plugin.secretManager.hasKeychainSupport) {
+			// Layout Keychain: indicador de status + botão modificar
+			const statusText = this.plugin.settings.syncthingApiKey
+				? `✓ ${t("setting_api_configured")}`
+				: `✗ ${t("setting_api_not_configured")}`;
+
+			api_key_Setting.setDesc(
+				`${t("setting_api_stored_securely")}\n${t("setting_api_desc")}`,
+			);
+
+			api_key_Setting.addButton((button) =>
+				button.setButtonText(t("btn_modify_secret")).onClick(() => {
+					new InputModal(
+						this.app,
+						t("setting_api_name"),
+						this.plugin.settings.syncthingApiKey,
+						async (value) => {
+							this.plugin.settings.syncthingApiKey = value;
+							await this.plugin.saveSettings();
+							this.display();
+						},
+					).open();
+				}),
+			);
+
+			const statusEl = api_key_Setting.controlEl.createSpan({
+				cls: "st-api-key-status",
+			});
+			statusEl.setText(statusText);
+			if (this.plugin.settings.syncthingApiKey) {
+				statusEl.addClass("st-api-key-configured");
+			}
+		} else {
+			// Layout legado: textbox de senha (versões antigas do Obsidian)
+			api_key_Setting.setDesc(
+				`${t("setting_api_stored_legacy")}\n${t("setting_api_desc")}`,
+			);
+
+			api_key_Setting.addText((text) => {
 				text.setPlaceholder("...")
 					.setValue(this.plugin.settings.syncthingApiKey)
 					.onChange((value) => {
@@ -108,6 +148,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 				text.inputEl.type = "password";
 				text.inputEl.addClass("st-input-full-width");
 			});
+		}
 
 		api_key_Setting.addButton((button) =>
 			button

@@ -56,6 +56,13 @@ export default {
 	setting_api_desc:
 		"Найдите его по пути Syncthing > Действия > Настройки > Общие.",
 	btn_test_conn: "Проверить соединение",
+	setting_api_stored_securely:
+		"API ключ надёжно хранится в связке ключей системы.",
+	setting_api_stored_legacy:
+		"API ключ хранится локально (обновите Obsidian для поддержки связки ключей).",
+	setting_api_configured: "Настроен",
+	setting_api_not_configured: "Не настроен",
+	btn_modify_secret: "Изменить секрет",
 
 	// Settings - Folder
 	setting_folder_name: "ID папки хранилища",

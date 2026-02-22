@@ -68,3 +68,21 @@ export const LS_KEY_HTTPS = "syncthing-controller-https";
 export const LS_KEY_API = "syncthing-controller-api-key";
 export const LS_KEY_FOLDER = "syncthing-controller-folder-id";
 export const LS_KEY_FOLDER_LABEL = "syncthing-controller-folder-label";
+
+// Keychain Secret Key
+export const SECRET_KEY_API = "syncthing-api-key";
+
+/**
+ * Module augmentation para a API de secrets do Obsidian (v1.11.4+).
+ * `app.secretStorage` pode não existir em versões mais antigas do Obsidian,
+ * portanto deve ser verificado em runtime antes do uso.
+ */
+declare module "obsidian" {
+	interface App {
+		secretStorage?: {
+			setSecret(id: string, secret: string): void;
+			getSecret(id: string): string | null;
+			listSecrets(): string[];
+		};
+	}
+}
