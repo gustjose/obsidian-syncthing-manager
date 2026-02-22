@@ -415,18 +415,31 @@ export class SyncthingAPI {
 		apiKey: string,
 		folderId: string,
 		filePath: string,
-	): Promise<SyncthingFileStatusResponse> {
+	): Promise<SyncthingFileStatusResponse | null> {
 		const params = new URLSearchParams({
 			folder: folderId,
 			file: filePath,
 		});
 
-		// Chama o endpoint /rest/db/file
-		return this.request<SyncthingFileStatusResponse>(
-			url,
-			apiKey,
-			`/rest/db/file?${params.toString()}`,
-		);
+		try {
+			// Chama o endpoint /rest/db/file
+			return await this.request<SyncthingFileStatusResponse>(
+				url,
+				apiKey,
+				`/rest/db/file?${params.toString()}`,
+				"GET",
+				undefined,
+				[404],
+			);
+		} catch (error) {
+			const errDesc =
+				error instanceof Error ? error.message : String(error);
+			// 404 significa que o arquivo (novo ou apagado) ainda não consta no banco do Syncthing.
+			if (errDesc.includes("404")) {
+				return null;
+			}
+			throw error;
+		}
 	}
 
 	static async getIgnores(

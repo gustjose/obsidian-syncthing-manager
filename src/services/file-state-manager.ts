@@ -53,7 +53,11 @@ export class FileStateManager {
 
 				// Limpa arquivos temporários do Syncthing salvos acidentalmente em versões anteriores
 				for (const key in this.data.activeFiles) {
-					if (key.includes("~syncthing~")) {
+					if (
+						key.includes("~syncthing~") ||
+						key.endsWith(".tmp") ||
+						key.endsWith(".sync-conflict")
+					) {
 						delete this.data.activeFiles[key];
 					}
 				}
@@ -79,6 +83,13 @@ export class FileStateManager {
 	markAsDirty(path: string) {
 		// Normaliza para garantir consistência interna (sempre /)
 		const normalizedPath = path.replace(/\\/g, "/");
+		if (
+			normalizedPath.endsWith(".tmp") ||
+			normalizedPath.endsWith(".sync-conflict") ||
+			normalizedPath.includes("~syncthing~")
+		) {
+			return; // Ignora eventos de sistema do próprio Syncthing e do Obsidian saving
+		}
 		const now = Date.now();
 
 		this.data.activeFiles[normalizedPath] = {

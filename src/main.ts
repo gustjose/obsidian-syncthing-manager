@@ -447,6 +447,13 @@ export default class SyncthingController extends Plugin {
 			fullPath,
 		);
 
+		if (!info) {
+			// Se retornar null, o Syncthing ainda não conhece o arquivo (retornou 404).
+			// Retornamos quietamente, deixando o arquivo marcado como pendente até que
+			// o EventMonitor notifique sua efetivação.
+			return;
+		}
+
 		const localVer = info.local?.version || [];
 		const globalVer = info.global?.version || [];
 
