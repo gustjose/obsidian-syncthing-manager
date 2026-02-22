@@ -24,6 +24,7 @@ export interface SyncthingPluginSettings {
 	groupContextMenuItems: boolean;
 	debugMode: boolean;
 	debugModules: string[];
+	logLevel: "off" | "error" | "warn" | "debug";
 }
 
 export type SyncStatus =
@@ -57,6 +58,7 @@ export const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	groupContextMenuItems: false,
 	debugMode: false,
 	debugModules: ["Main", "API", "FileStateManager"],
+	logLevel: "debug",
 };
 
 // Local Storage Keys

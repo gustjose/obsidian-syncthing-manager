@@ -209,6 +209,23 @@ export default {
 	debug_report_no_errors: "Нет недавних ошибок или предупреждений.",
 	btn_debug_report: "Отчёт об отладке",
 
+	// Уровни логов
+	setting_log_level_name: "Уровень логов",
+	setting_log_level_desc:
+		"Установите минимальную серьёзность логов для захвата.",
+	log_level_off: "Выключено",
+	log_level_error: "Только ошибки",
+	log_level_warn: "Предупреждения + ошибки",
+	log_level_debug: "Все (отладка)",
+
+	// Консоль отладки
+	debug_console_title: "Консоль отладки",
+	debug_console_empty: "Логи пока не захвачены.",
+	debug_console_clear: "Очистить",
+	btn_open_console: "Открыть консоль",
+	debug_console_filter_level: "Минимальный уровень",
+	debug_console_filter_modules: "Модули",
+
 	// Versioning
 	modal_versioning_title: "Версионирование файлов",
 	versioning_type: "Стратегия версионирования",

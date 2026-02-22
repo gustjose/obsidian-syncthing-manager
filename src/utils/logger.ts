@@ -10,25 +10,40 @@ export const LOG_MODULES = {
 
 export type LogModule = (typeof LOG_MODULES)[keyof typeof LOG_MODULES];
 
+export type LogLevel = "off" | "error" | "warn" | "debug";
+
 export interface LogEntry {
 	timestamp: string;
-	level: "error" | "warn";
+	level: "error" | "warn" | "debug";
 	module: LogModule;
 	message: string;
 	details?: string;
 }
 
-const MAX_BUFFER_SIZE = 50;
+type LogListener = (entry: LogEntry) => void;
+
+const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
+	off: 0,
+	error: 1,
+	warn: 2,
+	debug: 3,
+};
+
+const MAX_BUFFER_SIZE = 200;
 
 export class Logger {
 	private static isDebugMode: boolean = false;
-
+	private static logLevel: LogLevel = "debug";
 	private static activeModules: Set<string> = new Set();
-
 	private static buffer: LogEntry[] = [];
+	private static listeners: LogListener[] = [];
 
 	static setDebugMode(enabled: boolean) {
 		this.isDebugMode = enabled;
+	}
+
+	static setLogLevel(level: LogLevel) {
+		this.logLevel = level;
 	}
 
 	static setActiveModules(modules: string[]) {
@@ -36,16 +51,51 @@ export class Logger {
 	}
 
 	/**
-	 * Log de Debug: Só aparece se o módulo estiver ativo na lista acima E o modo debug estiver ligado.
+	 * Registra um listener que será chamado sempre que uma nova entrada for adicionada ao buffer.
+	 * Retorna uma função para remover o listener (unsubscribe).
+	 */
+	static onNewEntry(listener: LogListener): () => void {
+		this.listeners.push(listener);
+		return () => {
+			this.listeners = this.listeners.filter((l) => l !== listener);
+		};
+	}
+
+	/**
+	 * Retorna o nível efetivo: se debugMode está OFF, só loga errors.
+	 * Se debugMode está ON, respeita o logLevel configurado.
+	 */
+	private static getEffectiveLevel(): number {
+		if (!this.isDebugMode) return LOG_LEVEL_PRIORITY.error;
+		return LOG_LEVEL_PRIORITY[this.logLevel];
+	}
+
+	/**
+	 * Log de Debug: Só aparece se debugMode + módulo ativo + nível >= DEBUG.
 	 */
 	static debug(module: LogModule, message: string, ...args: unknown[]) {
-		if (this.isDebugMode && this.activeModules.has(module)) {
+		const effective = this.getEffectiveLevel();
+		if (
+			effective >= LOG_LEVEL_PRIORITY.debug &&
+			this.activeModules.has(module)
+		) {
 			console.debug(`[ST-${module}] ${message}`, ...args);
+			this.pushToBuffer("debug", module, message, args);
 		}
 	}
 
 	/**
-	 * Log de Erro: Sempre exibe no console e armazena no buffer.
+	 * Log de Aviso: Loga se nível efetivo >= WARN. Sempre vai ao console.
+	 */
+	static warn(module: LogModule, message: string, ...args: unknown[]) {
+		console.warn(`[ST-${module}] ⚠️ ${message}`, ...args);
+		if (this.getEffectiveLevel() >= LOG_LEVEL_PRIORITY.warn) {
+			this.pushToBuffer("warn", module, message, args);
+		}
+	}
+
+	/**
+	 * Log de Erro: Sempre loga (console + buffer).
 	 */
 	static error(module: LogModule, message: string, ...args: unknown[]) {
 		console.error(`[ST-${module}] ❌ ${message}`, ...args);
@@ -53,18 +103,17 @@ export class Logger {
 	}
 
 	/**
-	 * Log de Aviso: Sempre exibe no console e armazena no buffer.
-	 */
-	static warn(module: LogModule, message: string, ...args: unknown[]) {
-		console.warn(`[ST-${module}] ⚠️ ${message}`, ...args);
-		this.pushToBuffer("warn", module, message, args);
-	}
-
-	/**
-	 * Retorna os últimos erros/avisos armazenados no buffer.
+	 * Retorna todas as entradas do buffer.
 	 */
 	static getEntries(): LogEntry[] {
 		return [...this.buffer];
+	}
+
+	/**
+	 * Limpa o buffer de logs.
+	 */
+	static clearBuffer() {
+		this.buffer = [];
 	}
 
 	/**
@@ -82,7 +131,6 @@ export class Logger {
 				})
 				.join(" ");
 
-			// Remove caminhos absolutos do sistema (Windows e Unix)
 			return raw
 				.replace(/[A-Z]:\\[^\s"',)}\]]+/gi, "<path>")
 				.replace(
@@ -95,10 +143,10 @@ export class Logger {
 	}
 
 	/**
-	 * Adiciona uma entrada ao buffer circular.
+	 * Adiciona uma entrada ao buffer circular e notifica listeners.
 	 */
 	private static pushToBuffer(
-		level: "error" | "warn",
+		level: "error" | "warn" | "debug",
 		module: LogModule,
 		message: string,
 		args: unknown[],
@@ -115,6 +163,14 @@ export class Logger {
 
 		if (this.buffer.length > MAX_BUFFER_SIZE) {
 			this.buffer.shift();
+		}
+
+		for (const listener of this.listeners) {
+			try {
+				listener(entry);
+			} catch {
+				// Listener falhou, ignora silenciosamente
+			}
 		}
 	}
 }

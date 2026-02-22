@@ -65,6 +65,7 @@ export default class SyncthingController extends Plugin {
 		// Initialize Logger Debug Mode
 		Logger.setDebugMode(this.settings.debugMode);
 		Logger.setActiveModules(this.settings.debugModules);
+		Logger.setLogLevel(this.settings.logLevel);
 
 		this.tabManager = new TabManager(this.app, this);
 

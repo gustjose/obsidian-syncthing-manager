@@ -176,6 +176,7 @@ export class SyncthingEventMonitor {
 			event.type === "DeviceConnected" ||
 			event.type === "DeviceDisconnected"
 		) {
+			Logger.debug(LOG_MODULES.EVENT, `[Event] ${event.type}`);
 			void this.plugin.atualizarContagemDispositivos();
 			return;
 		}
@@ -187,6 +188,10 @@ export class SyncthingEventMonitor {
 		if (event.type === "FolderCompletion") {
 			const data = event.data as FolderCompletionData;
 			if ("folder" in data && data.folder === targetFolder) {
+				Logger.debug(
+					LOG_MODULES.EVENT,
+					`[Event] FolderCompletion → ${data.completion}% (need: ${data.needBytes}B)`,
+				);
 				if (data.completion < 100 || data.needBytes > 0) {
 					this.updateStatus("sincronizando");
 				} else {
@@ -199,6 +204,10 @@ export class SyncthingEventMonitor {
 		if (event.type === "StateChanged") {
 			const data = event.data as StateChangedData;
 			if ("folder" in data && data.folder === targetFolder) {
+				Logger.debug(
+					LOG_MODULES.EVENT,
+					`[Event] StateChanged → ${data.to}`,
+				);
 				if (data.to === "scanning" || data.to === "syncing") {
 					this.updateStatus("sincronizando");
 				} else if (data.to === "idle") {
@@ -213,6 +222,10 @@ export class SyncthingEventMonitor {
 		if (event.type === "FolderSummary") {
 			const data = event.data as FolderSummaryData;
 			if ("folder" in data && data.folder === targetFolder) {
+				Logger.debug(
+					LOG_MODULES.EVENT,
+					`[Event] FolderSummary → needBytes: ${data.summary?.needBytes ?? 0}`,
+				);
 				if (data.summary && data.summary.needBytes > 0) {
 					this.updateStatus("sincronizando");
 				} else {

@@ -506,3 +506,136 @@
 	gap: 8px;
 	margin-top: 12px;
 }
+
+/* --- Debug Console Modal --- */
+
+.st-debug-console-modal {
+	width: 85vw;
+	max-width: 900px;
+}
+
+.st-debug-console-filters {
+	margin-bottom: 12px;
+}
+
+.st-debug-console-filters .setting-item {
+	border-bottom: none;
+	padding: 4px 0;
+}
+
+.st-debug-console-modules-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	margin-top: 6px;
+}
+
+.st-debug-console-module-item {
+	font-size: 0.85em;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.st-debug-console-list {
+	height: clamp(200px, 45vh, 400px);
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 8px;
+	font-family: var(--font-monospace);
+	font-size: 11px;
+	background-color: var(--background-primary-alt);
+}
+
+.st-debug-console-empty {
+	color: var(--text-muted);
+	text-align: center;
+	padding: 40px 0;
+}
+
+.st-debug-console-entry {
+	padding: 3px 0;
+	border-bottom: 1px solid var(--background-modifier-border-hover);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 6px;
+	align-items: baseline;
+}
+
+.st-debug-console-entry:last-child {
+	border-bottom: none;
+}
+
+.st-debug-console-time {
+	color: var(--text-faint);
+	flex-shrink: 0;
+}
+
+.st-debug-console-level {
+	font-weight: bold;
+	flex-shrink: 0;
+	min-width: 42px;
+}
+
+.st-log-level-error {
+	color: var(--text-error);
+}
+
+.st-log-level-warn {
+	color: var(--text-warning);
+}
+
+.st-log-level-debug {
+	color: var(--text-muted);
+}
+
+.st-debug-console-module {
+	color: var(--text-accent);
+	flex-shrink: 0;
+}
+
+.st-debug-console-msg {
+	color: var(--text-normal);
+	word-break: break-word;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.st-debug-console-details {
+	width: 100%;
+	color: var(--text-faint);
+	padding-left: 16px;
+	font-size: 0.9em;
+}
+
+.st-debug-console-footer {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 12px;
+}
+
+/* Mobile / telas pequenas */
+@media (max-width: 600px) {
+	.st-debug-console-modal {
+		width: 95vw;
+	}
+
+	.st-debug-console-list {
+		font-size: 10px;
+		padding: 6px;
+	}
+
+	.st-debug-console-entry {
+		gap: 2px 4px;
+	}
+
+	.st-debug-console-time {
+		display: none;
+	}
+
+	.st-debug-console-modules-list {
+		gap: 4px 8px;
+	}
+}

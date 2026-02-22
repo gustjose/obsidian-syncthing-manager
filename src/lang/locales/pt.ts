@@ -210,6 +210,23 @@ export default {
 	debug_report_no_errors: "Nenhum erro ou aviso recente.",
 	btn_debug_report: "Relatório de depuração",
 
+	// Níveis de Log
+	setting_log_level_name: "Nível de log",
+	setting_log_level_desc:
+		"Define a severidade mínima dos logs a serem capturados.",
+	log_level_off: "Desligado",
+	log_level_error: "Apenas erros",
+	log_level_warn: "Avisos + erros",
+	log_level_debug: "Todos (debug)",
+
+	// Console de Depuração
+	debug_console_title: "Console de depuração",
+	debug_console_empty: "Nenhum log capturado ainda.",
+	debug_console_clear: "Limpar",
+	btn_open_console: "Abrir console",
+	debug_console_filter_level: "Nível mínimo",
+	debug_console_filter_modules: "Módulos",
+
 	// Versioning
 	modal_versioning_title: "Versionamento de Arquivos",
 	versioning_type: "Estratégia de versionamento",

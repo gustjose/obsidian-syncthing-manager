@@ -205,6 +205,22 @@ export default {
 	debug_report_open_issue: "Open issue on GitHub",
 	debug_report_no_errors: "No recent errors or warnings.",
 	btn_debug_report: "Debug report",
+
+	// Log Levels
+	setting_log_level_name: "Log level",
+	setting_log_level_desc: "Set the minimum severity of logs to capture.",
+	log_level_off: "Off",
+	log_level_error: "Error only",
+	log_level_warn: "Warnings + errors",
+	log_level_debug: "All (debug)",
+
+	// Debug Console
+	debug_console_title: "Debug console",
+	debug_console_empty: "No logs captured yet.",
+	debug_console_clear: "Clear",
+	btn_open_console: "Open console",
+	debug_console_filter_level: "Minimum level",
+	debug_console_filter_modules: "Modules",
 	// Versioning
 	modal_versioning_title: "File versioning",
 	versioning_type: "Versioning strategy",
