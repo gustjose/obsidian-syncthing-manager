@@ -212,9 +212,8 @@ export class SyncthingView extends ItemView {
 
 		// 5. Seção de Histórico
 		if (this.plugin.history.length > 0) {
-			const historyTitleKey = "info_history";
 			container.createEl("h4", {
-				text: t(historyTitleKey as never) || "Recent Activity",
+				text: t("info_history"),
 				cls: "st-history-title",
 			});
 

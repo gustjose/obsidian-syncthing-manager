@@ -558,8 +558,12 @@ export default class SyncthingController extends Plugin {
 			});
 
 			this.atualizarTodosVisuais();
-		} catch {
-			// Fail silently
+		} catch (e) {
+			Logger.debug(
+				LOG_MODULES.MAIN,
+				"Falha ao atualizar contagem de dispositivos",
+				e,
+			);
 		}
 	}
 

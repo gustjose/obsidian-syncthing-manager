@@ -47,6 +47,10 @@ export class StatusBarManager {
 				text = t("status_config");
 				cssClass = "st-color-muted";
 				break;
+			case "pausado":
+				text = t("status_paused");
+				cssClass = "st-color-muted";
+				break;
 		}
 
 		const tooltipInfo = `${text}\n\n${t("info_last_sync")}: ${lastSyncTime}\n${t("info_devices")}: ${connectedDevices}`;
