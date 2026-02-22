@@ -113,6 +113,12 @@ export interface SyncthingVersion {
 	version: string[];
 }
 
+export interface SyncthingSystemVersion {
+	version: string;
+	os: string;
+	arch: string;
+}
+
 export class SyncthingAPI {
 	// --- System Status & Config ---
 
@@ -124,6 +130,20 @@ export class SyncthingAPI {
 			url,
 			apiKey,
 			"/rest/system/status",
+		);
+	}
+
+	/**
+	 * Retorna a versão do Syncthing em execução.
+	 */
+	static async getSystemVersion(
+		url: string,
+		apiKey: string,
+	): Promise<SyncthingSystemVersion> {
+		return this.request<SyncthingSystemVersion>(
+			url,
+			apiKey,
+			"/rest/system/version",
 		);
 	}
 

@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Platform, apiVersion } from "obsidian";
 import SyncthingController from "../main";
+import { SyncthingAPI } from "../api/syncthing-api";
 import { Logger } from "../utils/logger";
 import { t } from "../lang/lang";
 
@@ -8,6 +9,7 @@ import { t } from "../lang/lang";
  */
 export class DebugReportModal extends Modal {
 	plugin: SyncthingController;
+	private syncthingVersion: string = "unknown";
 
 	constructor(app: App, plugin: SyncthingController) {
 		super(app);
@@ -21,6 +23,26 @@ export class DebugReportModal extends Modal {
 		contentEl.createEl("h2", { text: t("debug_report_title") });
 		contentEl.createEl("p", { text: t("debug_report_desc") });
 
+		// Busca versão do Syncthing e depois renderiza o conteúdo
+		void this.fetchSyncthingVersion().then(() => {
+			this.renderContent(contentEl);
+		});
+	}
+
+	private async fetchSyncthingVersion() {
+		try {
+			const url = this.plugin.apiUrl;
+			const apiKey = this.plugin.settings.syncthingApiKey;
+			if (url && apiKey) {
+				const ver = await SyncthingAPI.getSystemVersion(url, apiKey);
+				this.syncthingVersion = ver.version || "unknown";
+			}
+		} catch {
+			this.syncthingVersion = "unknown";
+		}
+	}
+
+	private renderContent(contentEl: HTMLElement) {
 		const report = this.buildReport();
 
 		const textarea = contentEl.createEl("textarea", {
@@ -66,6 +88,7 @@ export class DebugReportModal extends Modal {
 
 		lines.push("=== Syncthing Manager — Debug Report ===");
 		lines.push("");
+		lines.push(`Syncthing: ${this.syncthingVersion}`);
 		lines.push(`Plugin: v${this.plugin.manifest.version}`);
 		lines.push(`Obsidian: v${this.getObsidianVersion()}`);
 		lines.push(`Platform: ${this.getPlatformString()}`);
@@ -127,6 +150,7 @@ export class DebugReportModal extends Modal {
 
 		params.set("template", "bug_report.yml");
 		params.set("obsidian_version", this.getObsidianVersion());
+		params.set("syncthing_version", this.syncthingVersion);
 		params.set("os", this.getPlatformString());
 		params.set("logs", report);
 
