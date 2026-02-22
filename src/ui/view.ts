@@ -4,6 +4,7 @@ import { t } from "../lang/lang";
 import { ConflictManager } from "../services/conflict-manager";
 import { ConflictModal } from "../ui/conflict-modal";
 import { SyncthingHistoryItem } from "../api/syncthing-api";
+import { getStatusDisplay } from "./status-utils";
 
 export const VIEW_TYPE_SYNCTHING = "syncthing-view";
 
@@ -71,43 +72,12 @@ export class SyncthingView extends ItemView {
 		const statusBox = container.createDiv({ cls: "st-status-box" });
 		const iconDiv = statusBox.createDiv({ cls: "st-big-icon" });
 
-		const currentStatus = this.plugin.currentStatus;
-
-		let cssClass = "st-color-muted";
-		let statusText = t("status_unknown");
-
-		switch (currentStatus) {
-			case "conectado":
-				cssClass = "st-color-success";
-				statusText = t("status_synced");
-				setIcon(iconDiv, "check-circle");
-				break;
-			case "sincronizando":
-				cssClass = "st-color-warning";
-				statusText = t("status_syncing");
-				setIcon(iconDiv, "loader");
-				break;
-			case "desconectado":
-				cssClass = "st-color-muted";
-				statusText = t("status_offline");
-				setIcon(iconDiv, "wifi-off");
-				break;
-			case "erro":
-				cssClass = "st-color-error";
-				statusText = t("status_error");
-				setIcon(iconDiv, "alert-triangle");
-				break;
-			case "pausado":
-				cssClass = "st-color-muted";
-				statusText = t("status_paused");
-				setIcon(iconDiv, "pause-circle");
-				break;
-			case "configurando":
-				cssClass = "st-color-muted";
-				statusText = t("status_config");
-				setIcon(iconDiv, "settings");
-				break;
-		}
+		const {
+			text: statusText,
+			cssClass,
+			icon,
+		} = getStatusDisplay(this.plugin.currentStatus);
+		setIcon(iconDiv, icon);
 
 		iconDiv.addClass(cssClass);
 		statusBox
