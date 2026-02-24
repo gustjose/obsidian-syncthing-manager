@@ -43,6 +43,7 @@ export class SyncthingEventMonitor {
 	plugin: SyncthingController;
 	running: boolean = false;
 	lastEventId: number = 0;
+	private abortController: AbortController | null = null;
 
 	constructor(plugin: SyncthingController) {
 		this.plugin = plugin;
@@ -88,6 +89,10 @@ export class SyncthingEventMonitor {
 
 	stop(): void {
 		this.running = false;
+		if (this.abortController) {
+			this.abortController.abort();
+			this.abortController = null;
+		}
 		Logger.debug(LOG_MODULES.EVENT, "Monitor de eventos parado.");
 	}
 
@@ -101,13 +106,34 @@ export class SyncthingEventMonitor {
 
 				const url = `${this.plugin.apiUrl}/rest/events?since=${this.lastEventId}&timeout=60`;
 
-				const response = await requestUrl({
+				this.abortController = new AbortController();
+
+				// Timeout de Segurança (90s). O Syncthing usa 60s por padrão no Long-Polling.
+				const timeoutId = setTimeout(() => {
+					if (this.abortController) {
+						Logger.debug(
+							LOG_MODULES.EVENT,
+							"EventMonitor Timeout atingido (90s). Abortando requisição zumbi.",
+						);
+						this.abortController.abort();
+					}
+				}, 90000);
+
+				// Nota: A API requestUrl do Obsidian web usa fetch subjacente. Passar o signal é suportado nativamente.
+				const requestOpts: any = {
 					url: url,
 					method: "GET",
 					headers: {
 						"X-API-Key": this.plugin.settings.syncthingApiKey,
 					},
-				});
+				};
+
+				if (typeof AbortSignal !== "undefined") {
+					requestOpts.signal = this.abortController.signal;
+				}
+
+				const response = await requestUrl(requestOpts);
+				clearTimeout(timeoutId);
 
 				if (response.status === 200) {
 					// Cast seguro para unknown[] primeiro
