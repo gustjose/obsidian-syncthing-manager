@@ -107,6 +107,9 @@ export default {
 	notice_folders_found: "папки(ок) найдено.",
 	notice_config_first: "Пожалуйста, сначала настройте API Ключ, URL и папку.",
 	notice_searching: "Подключение к Syncthing...",
+	notice_invalid_host:
+		"Неверный формат хоста. Используйте IPv4, IPv6, localhost или действительный домен без http/https.",
+	notice_invalid_port: "Неверный порт. Строго укажите число от 1 до 65535.",
 
 	// Conflict Modal
 	modal_conflict_title: "Разрешить конфликты синхронизации",

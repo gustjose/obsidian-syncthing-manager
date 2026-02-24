@@ -107,6 +107,9 @@ export default {
 	notice_config_first:
 		"Por favor, configure a API Key, a URL e a pasta primeiro.",
 	notice_searching: "Conectando ao Syncthing...",
+	notice_invalid_host:
+		"Formato de host inválido. Use IPv4, IPv6, localhost ou um domínio válido sem http/https.",
+	notice_invalid_port: "Porta inválida. Deve ser um número entre 1 e 65535.",
 
 	// Modal de Conflitos
 	modal_conflict_title: "Resolver Conflitos de Sync",

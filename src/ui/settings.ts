@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice } from "obsidian";
+import { App, PluginSettingTab, Setting, Notice, debounce } from "obsidian";
 import SyncthingController from "../main";
 import { SyncthingAPI, SyncthingFolder } from "../api/syncthing-api";
 import { Logger } from "../utils/logger";
@@ -12,6 +12,18 @@ import { VersioningModal } from "./versioning-modal";
 
 export class SyncthingSettingTab extends PluginSettingTab {
 	plugin: SyncthingController;
+
+	// Debounced Notice callbacks to prevent UI spam while typing
+	private showHostNotice = debounce(
+		() => new Notice(t("notice_invalid_host")),
+		1500,
+		true,
+	);
+	private showPortNotice = debounce(
+		() => new Notice(t("notice_invalid_port")),
+		1500,
+		true,
+	);
 
 	constructor(app: App, plugin: SyncthingController) {
 		super(app, plugin);
@@ -56,13 +68,49 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			.setName(t("setting_host_name"))
 			.setDesc(t("setting_host_desc"))
 			.addText((text) => {
-				text.setPlaceholder("127.0.0.1")
+				text.setPlaceholder("localhost")
 					.setValue(this.plugin.settings.syncthingHost)
-					.onChange((value) => {
-						void (async () => {
-							this.plugin.settings.syncthingHost = value;
+					.onChange(async (value) => {
+						// Remove "http://" and "https://" se colado
+						const sanitizedValue = value.replace(
+							/^(https?:\/\/)/,
+							"",
+						);
+
+						if (value !== sanitizedValue) {
+							// Se havia protocolo, atualiza o campo de texto tbm
+							text.setValue(sanitizedValue);
+							new Notice(
+								t("status_error") ||
+									"Remova o http/https do host.",
+							);
+						}
+
+						// Regex simples para IP, IPv6 ou dominios válidos
+						const isValidHost =
+							/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/i.test(
+								sanitizedValue,
+							) || // IPv4
+							/^\[?[0-9a-fA-F:]+\]?$/.test(sanitizedValue) || // IPv6
+							/^localhost$/i.test(sanitizedValue) || // localhost puro
+							/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/i.test(
+								sanitizedValue,
+							); // FQDN (ex: servidor.local)
+
+						if (!isValidHost || sanitizedValue.trim() === "") {
+							text.inputEl.style.borderColor =
+								"var(--text-error)";
+							text.inputEl.setAttribute(
+								"title",
+								t("notice_invalid_host"),
+							);
+							this.showHostNotice();
+						} else {
+							text.inputEl.style.borderColor = "";
+							text.inputEl.removeAttribute("title");
+							this.plugin.settings.syncthingHost = sanitizedValue;
 							await this.plugin.saveSettings();
-						})();
+						}
 					});
 				text.inputEl.addClass("st-input-full-width");
 			});
@@ -73,11 +121,32 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			.addText((text) => {
 				text.setPlaceholder("8384")
 					.setValue(this.plugin.settings.syncthingPort)
-					.onChange((value) => {
-						void (async () => {
-							this.plugin.settings.syncthingPort = value;
+					.onChange(async (value) => {
+						// Apenas números
+						const sanitizedValue = value.replace(/\D/g, "");
+						const portNum = parseInt(sanitizedValue, 10);
+
+						if (value !== sanitizedValue) {
+							text.setValue(sanitizedValue);
+						}
+
+						// Portas TCP vão de 1 a 65535
+						const isValidPort = portNum > 0 && portNum <= 65535;
+
+						if (!isValidPort && sanitizedValue.length > 0) {
+							text.inputEl.style.borderColor =
+								"var(--text-error)";
+							text.inputEl.setAttribute(
+								"title",
+								t("notice_invalid_port"),
+							);
+							this.showPortNotice();
+						} else {
+							text.inputEl.style.borderColor = "";
+							text.inputEl.removeAttribute("title");
+							this.plugin.settings.syncthingPort = sanitizedValue;
 							await this.plugin.saveSettings();
-						})();
+						}
 					});
 				text.inputEl.addClass("st-input-full-width");
 			});
@@ -275,9 +344,9 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			.setName(t("setting_file_versioning_name"))
 			.setDesc(t("setting_file_versioning_desc"));
 
-		versioningSetting.addExtraButton((btn) => {
-			btn.setIcon("settings")
-				.setTooltip(t("btn_configure"))
+		versioningSetting.addButton((btn) => {
+			btn.setButtonText(t("btn_configure"))
+				.setIcon("settings")
 				.onClick(() => {
 					if (!this.plugin.settings.syncthingFolderId) {
 						new Notice(t("notice_config_first"));
@@ -400,13 +469,14 @@ export class SyncthingSettingTab extends PluginSettingTab {
 		new Setting(infoContainer)
 			.setName(t("setting_version_name"))
 			.setDesc(`v${this.plugin.manifest.version}`)
-			.addExtraButton((btn) => {
-				btn.setIcon("info").setTooltip(t("setting_version_tooltip"));
-				btn.onClick(() => {
-					window.open(
-						`https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/${this.plugin.manifest.version}`,
-					);
-				});
+			.addButton((btn) => {
+				btn.setButtonText(t("setting_version_tooltip"))
+					.setIcon("info")
+					.onClick(() => {
+						window.open(
+							`https://github.com/gustjose/obsidian-syncthing-manager/releases/tag/${this.plugin.manifest.version}`,
+						);
+					});
 			});
 
 		// Debug Mode Toggle

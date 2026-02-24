@@ -106,6 +106,9 @@ export default {
 	notice_folders_found: "Folders found.",
 	notice_config_first: "Please configure the API key, URL and folder first",
 	notice_searching: "Connecting to syncthing...",
+	notice_invalid_host:
+		"Invalid host format. Please use IPv4, IPv6, localhost or a valid domain without http/https.",
+	notice_invalid_port: "Invalid port. Must be a number between 1 and 65535.",
 
 	// Conflict Modal
 	modal_conflict_title: "Resolve sync conflicts",
