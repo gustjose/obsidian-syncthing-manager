@@ -1,4 +1,4 @@
-import { App, TFile, setIcon } from "obsidian";
+import { App, TFile, setIcon, debounce } from "obsidian";
 import SyncthingController from "../main";
 import { Logger, LOG_MODULES } from "../utils/logger";
 import { t } from "../lang/lang";
@@ -7,6 +7,15 @@ export class ExplorerManager {
 	app: App;
 	plugin: SyncthingController;
 	observer: MutationObserver | null = null;
+
+	private debouncedInject = debounce(
+		(container: HTMLElement) => {
+			if (!this.plugin.settings.showExplorerIcon) return;
+			this.injectButtons(container);
+		},
+		150,
+		true,
+	);
 
 	constructor(app: App, plugin: SyncthingController) {
 		this.app = app;
@@ -87,7 +96,7 @@ export class ExplorerManager {
 			});
 			if (shouldInject) {
 				// Logger.debug(LOG_MODULES.MAIN, "[Explorer] Mutação detectada. Reinjetando botões...");
-				this.injectButtons(container);
+				this.debouncedInject(container);
 			}
 		});
 
@@ -96,13 +105,13 @@ export class ExplorerManager {
 			subtree: true,
 		});
 
-		this.injectButtons(container);
+		this.debouncedInject(container);
 	}
 
 	private refreshAll() {
 		const leaves = this.app.workspace.getLeavesOfType("file-explorer");
 		if (leaves.length > 0) {
-			this.injectButtons(leaves[0].view.containerEl);
+			this.debouncedInject(leaves[0].view.containerEl);
 		}
 	}
 

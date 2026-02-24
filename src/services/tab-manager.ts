@@ -40,11 +40,23 @@ export class TabManager {
 		// 2. [NOVO] Ao mudar o layout (ex: dividir janelas, restaurar sessão)
 		this.plugin.registerEvent(
 			this.app.workspace.on("layout-change", () => {
-				// Re-aplica ícones em todos os arquivos pendentes visíveis
 				const pendingFiles =
 					this.plugin.fileStateManager.getPendingFiles();
-				pendingFiles.forEach((fileState) => {
-					this.updateTabsForFile(fileState.path, "pending");
+				if (pendingFiles.length === 0) return;
+
+				const pendingPaths = new Set(pendingFiles.map((f) => f.path));
+
+				// Varredura única para todos os arquivos pendentes
+				this.app.workspace.iterateAllLeaves((leaf) => {
+					const viewType = leaf.view.getViewType();
+					if (viewType !== "markdown" && viewType !== "image") return;
+
+					if (leaf.view instanceof FileView) {
+						const viewFile = leaf.view.file;
+						if (viewFile && pendingPaths.has(viewFile.path)) {
+							this.injectIconToLeaf(leaf, "pending");
+						}
+					}
 				});
 			}),
 		);
@@ -74,6 +86,9 @@ export class TabManager {
 
 	private cleanupStaleIcons() {
 		this.app.workspace.iterateAllLeaves((leaf) => {
+			const viewType = leaf.view.getViewType();
+			if (viewType !== "markdown" && viewType !== "image") return;
+
 			if (leaf.view instanceof FileView) {
 				const viewFile = leaf.view.file;
 				const internalLeaf = leaf as InternalWorkspaceLeaf;
@@ -112,6 +127,9 @@ export class TabManager {
 
 	private updateTabsForFile(path: string, status: SyncState) {
 		this.app.workspace.iterateAllLeaves((leaf) => {
+			const viewType = leaf.view.getViewType();
+			if (viewType !== "markdown" && viewType !== "image") return;
+
 			if (leaf.view instanceof FileView) {
 				const viewFile = leaf.view.file;
 
