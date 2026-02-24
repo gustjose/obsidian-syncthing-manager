@@ -85,4 +85,8 @@ declare module "obsidian" {
 			listSecrets(): string[];
 		};
 	}
+
+	interface Workspace {
+		on(name: "syncthing:status-changed", callback: () => void): EventRef;
+	}
 }

@@ -19,10 +19,23 @@ export class StatusBarManager {
 		this.statusBarItem.addClass("mod-clickable");
 		this.statusBarItem.setAttribute("data-tooltip-position", "top");
 		this.statusBarItem.addEventListener("click", this.onClickCallback);
+
+		this.plugin.registerEvent(
+			this.plugin.app.workspace.on("syncthing:status-changed", () => {
+				this.update();
+			}),
+		);
 	}
 
-	update(status: SyncStatus, lastSyncTime: string, connectedDevices: number) {
+	update() {
 		if (!this.statusBarItem) return;
+
+		// Tipagem segura para ler propriedades injetadas dinamicamente via plugin principal (SyncthingController)
+		const pluginSafe = this.plugin as any;
+
+		const status: SyncStatus = pluginSafe.currentStatus || "desconhecido";
+		const lastSyncTime: string = pluginSafe.lastSyncTime || "--:--";
+		const connectedDevices: number = pluginSafe.connectedDevices || 0;
 
 		const { text, cssClass } = getStatusDisplay(status);
 

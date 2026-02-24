@@ -100,6 +100,31 @@ export default class SyncthingController extends Plugin {
 					void this.activateView();
 				},
 			);
+
+			// Atualiza o ribbon icon passivamente quando o status mudar
+			this.registerEvent(
+				this.app.workspace.on("syncthing:status-changed", () => {
+					if (this.ribbonIconEl) {
+						this.ribbonIconEl.empty();
+						const iconContainer = this.ribbonIconEl.createDiv({
+							cls: "ribbon-icon-svg",
+						});
+
+						const svg = createSyncthingIcon("");
+						iconContainer.appendChild(svg);
+
+						const tooltipInfo = `${t("status_synced")}\n\n${t(
+							"info_last_sync",
+						)}: ${this.lastSyncTime}\n${t("info_devices")}: ${
+							this.connectedDevices
+						}`;
+						this.ribbonIconEl.setAttribute(
+							"aria-label",
+							tooltipInfo,
+						);
+					}
+				}),
+			);
 		}
 
 		// [NOVO] Inicializa o gerenciador de botões do explorador
@@ -254,7 +279,7 @@ export default class SyncthingController extends Plugin {
 		this.monitor = new SyncthingEventMonitor(this);
 		this.addSettingTab(new SyncthingSettingTab(this.app, this));
 
-		this.atualizarTodosVisuais();
+		this.app.workspace.trigger("syncthing:status-changed");
 
 		this.app.workspace.onLayoutReady(async () => {
 			await this.initializeConnection(ignoreManager);
@@ -507,37 +532,8 @@ export default class SyncthingController extends Plugin {
 		if (leaf) await workspace.revealLeaf(leaf);
 	}
 
-	atualizarTodosVisuais() {
-		if (this.statusBarManager && this.settings.showStatusBar) {
-			this.statusBarManager.update(
-				this.currentStatus,
-				this.lastSyncTime,
-				this.connectedDevices,
-			);
-		}
-
-		if (this.ribbonIconEl) {
-			this.ribbonIconEl.empty();
-			const iconContainer = this.ribbonIconEl.createDiv({
-				cls: "ribbon-icon-svg",
-			});
-			const svg = createSyncthingIcon("");
-			iconContainer.appendChild(svg);
-
-			const tooltipInfo = `${t("status_synced")}\n\n${t(
-				"info_last_sync",
-			)}: ${this.lastSyncTime}\n${t("info_devices")}: ${
-				this.connectedDevices
-			}`;
-
-			this.ribbonIconEl.setAttribute("aria-label", tooltipInfo);
-		}
-
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_SYNCTHING);
-		leaves.forEach((leaf) => {
-			if (leaf.view instanceof SyncthingView) leaf.view.updateView();
-		});
-	}
+	// Eventos e UI delegam via Event Bus
+	// atualizarTodosVisuais() removido.
 
 	async saveSettings() {
 		await this.settingsManager.saveSettings(this.settings);
@@ -601,7 +597,7 @@ export default class SyncthingController extends Plugin {
 				return this.deviceMap.get(id) || id.substring(0, 7);
 			});
 
-			this.atualizarTodosVisuais();
+			this.app.workspace.trigger("syncthing:status-changed");
 		} catch (e) {
 			Logger.debug(
 				LOG_MODULES.MAIN,
@@ -642,7 +638,7 @@ export default class SyncthingController extends Plugin {
 
 		new Notice(t("notice_syncing"));
 		this.currentStatus = "sincronizando";
-		this.atualizarTodosVisuais();
+		this.app.workspace.trigger("syncthing:status-changed");
 
 		try {
 			await SyncthingAPI.forceScan(
@@ -658,12 +654,12 @@ export default class SyncthingController extends Plugin {
 				hour: "2-digit",
 				minute: "2-digit",
 			});
-			this.atualizarTodosVisuais();
+			this.app.workspace.trigger("syncthing:status-changed");
 		} catch (error) {
 			Logger.warn(LOG_MODULES.MAIN, "Erro ao forçar scan:", error);
 			new Notice("Erro!");
 			this.currentStatus = "erro";
-			this.atualizarTodosVisuais();
+			this.app.workspace.trigger("syncthing:status-changed");
 		}
 	}
 
@@ -733,7 +729,7 @@ export default class SyncthingController extends Plugin {
 				this.isPaused = true;
 				this.currentStatus = "pausado";
 			}
-			this.atualizarTodosVisuais();
+			this.app.workspace.trigger("syncthing:status-changed");
 		} catch (error) {
 			Logger.error(LOG_MODULES.MAIN, "Erro ao alternar pausa", error);
 			new Notice(t("status_error"));
@@ -750,7 +746,7 @@ export default class SyncthingController extends Plugin {
 				await this.saveSettings();
 				this.currentStatus = "configurando";
 				new Notice(t("notice_folder_migration"));
-				this.atualizarTodosVisuais();
+				this.app.workspace.trigger("syncthing:status-changed");
 				return false;
 			}
 
@@ -771,7 +767,7 @@ export default class SyncthingController extends Plugin {
 						LOG_MODULES.MAIN,
 						`Pasta "${this.settings.syncthingFolderId}" não encontrada no servidor. Config mantida para retry.`,
 					);
-					this.atualizarTodosVisuais();
+					this.app.workspace.trigger("syncthing:status-changed");
 					return false;
 				}
 
@@ -812,7 +808,7 @@ export default class SyncthingController extends Plugin {
 			}
 			await this.checkPauseStatus(); // checkPauseStatus sets 'pausado' if true, overwriting 'conectado' or others if needed.
 
-			this.atualizarTodosVisuais();
+			this.app.workspace.trigger("syncthing:status-changed");
 			// Retornamos sucesso APENAS se houver pasta ativa. Se a pasta for falsa/limpa, é um "false" operacional para o resto.
 			return (
 				this.currentStatus !== "erro" &&
@@ -826,7 +822,7 @@ export default class SyncthingController extends Plugin {
 				this.currentStatus = "desconectado";
 				if (showNotice) new Notice(t("notice_offline"));
 			}
-			this.atualizarTodosVisuais();
+			this.app.workspace.trigger("syncthing:status-changed");
 			return false;
 		}
 	}

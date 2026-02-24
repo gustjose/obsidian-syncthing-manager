@@ -41,7 +41,9 @@ export class SyncthingSettingTab extends PluginSettingTab {
 						this.plugin.settings.language = value;
 						await this.plugin.saveSettings();
 						setLanguage(value);
-						this.plugin.atualizarTodosVisuais();
+						this.plugin.app.workspace.trigger(
+							"syncthing:status-changed",
+						);
 						this.display();
 					})();
 				});

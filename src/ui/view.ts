@@ -31,6 +31,14 @@ export class SyncthingView extends ItemView {
 
 	onOpen() {
 		this.render();
+
+		// Registra para atualizar quando status mudar
+		this.registerEvent(
+			this.app.workspace.on("syncthing:status-changed", () => {
+				this.updateView();
+			}),
+		);
+
 		return Promise.resolve();
 	}
 	async onClose() {}

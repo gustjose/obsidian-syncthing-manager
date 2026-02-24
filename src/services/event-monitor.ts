@@ -163,9 +163,11 @@ export class SyncthingEventMonitor {
 					minute: "2-digit",
 				});
 			}
-			this.plugin.atualizarTodosVisuais();
+			this.plugin.app.workspace.trigger("syncthing:status-changed");
 		}
 	}
+
+	public destroy() {}
 
 	private processEvent(event: SyncthingEvent) {
 		const targetFolder = this.plugin.settings.syncthingFolderId;
