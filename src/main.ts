@@ -145,44 +145,77 @@ export default class SyncthingController extends Plugin {
 
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
-				if (file instanceof TFile) {
-					// FEATURE: Context Menu Configuration
-					// Only show if enabled in settings
-					// Context Menu Items
-					const enabledItems = this.settings.enabledContextMenuItems;
-					const shouldGroup = this.settings.groupContextMenuItems;
+				const isFile = file instanceof TFile;
+				const isFolder = !isFile;
 
-					// Define available items with their logic
-					const availableItems: Record<
-						string,
-						{
-							title: string;
-							icon: string;
-							action: () => void | Promise<void>;
-						}
-					> = {
-						view_file_versions: {
-							title: t("cmd_view_versions") || "File versions",
-							icon: "history",
-							action: () => {
-								new VersionModal(
-									this.app,
-									this,
+				// FEATURE: Context Menu Configuration
+				// Only show if enabled in settings
+				// Context Menu Items
+				const enabledItems = this.settings.enabledContextMenuItems;
+				const shouldGroup = this.settings.groupContextMenuItems;
+
+				// Define available items with their logic
+				const availableItems: Record<
+					string,
+					{
+						title: string;
+						icon: string;
+						show: boolean;
+						disabled?: boolean;
+						action: () => void | Promise<void>;
+					}
+				> = {
+					view_file_versions: {
+						title: t("cmd_view_versions") || "File versions",
+						icon: "history",
+						show: isFile,
+						action: () => {
+							new VersionModal(this.app, this, file.path).open();
+						},
+					},
+					sync_file: {
+						title: t("cmd_sync_file") || "Sync file",
+						icon: "refresh-cw",
+						show: isFile,
+						action: async () => {
+							await this.syncSpecificFile(file.path);
+						},
+					},
+					ignore_file: {
+						title: t("cmd_ignore_file") || "Don't sync this",
+						icon: "eye-off",
+						show: true, // Show for both files and folders
+						disabled: this._ignoreManager
+							? this._ignoreManager.isIgnored(file.path)
+							: false,
+						action: async () => {
+							if (!this._ignoreManager) return;
+
+							const success =
+								await this._ignoreManager.addIgnoreRule(
 									file.path,
-								).open();
-							},
+									isFolder,
+								);
+							if (success) {
+								new Notice(t("notice_ignored_success"));
+							} else {
+								new Notice(t("notice_ignored_error"));
+							}
 						},
-						sync_file: {
-							title: t("cmd_sync_file") || "Sync file",
-							icon: "refresh-cw",
-							action: async () => {
-								await this.syncSpecificFile(file.path);
-							},
-						},
-					};
+					},
+				};
 
-					if (shouldGroup) {
-						// Create a parent item
+				if (shouldGroup) {
+					// Create a parent item
+					// Mostrar o grupo apenas se existir ao menos um item ativado visível para o contexto (isFile ou isFolder)
+					const hasVisibleItem = Object.keys(availableItems).some(
+						(id) =>
+							enabledItems.includes(id) &&
+							availableItems[id] &&
+							availableItems[id].show,
+					);
+
+					if (hasVisibleItem) {
 						menu.addItem((item) => {
 							item.setTitle("Syncthing")
 								.setIcon("refresh-cw") // Use a standard icon for now
@@ -198,32 +231,41 @@ export default class SyncthingController extends Plugin {
 							) {
 								const submenu = itemWithSubmenu.setSubmenu();
 
-								enabledItems.forEach((id) => {
-									const def = availableItems[id];
-									if (def) {
-										submenu.addItem((subItem) => {
-											subItem
-												.setTitle(def.title)
-												.setIcon(def.icon)
-												.onClick(def.action);
-										});
+								Object.keys(availableItems).forEach((id) => {
+									if (enabledItems.includes(id)) {
+										const def = availableItems[id];
+										if (def && def.show) {
+											submenu.addItem((subItem) => {
+												subItem
+													.setTitle(def.title)
+													.setIcon(def.icon)
+													.setDisabled(
+														def.disabled || false,
+													)
+													.onClick(def.action);
+											});
+										}
 									}
 								});
 							}
 						});
-					} else {
-						// Add items directly to root menu
-						enabledItems.forEach((id) => {
+					}
+				} else {
+					// Add items directly to root menu
+					Object.keys(availableItems).forEach((id) => {
+						// Double Check the strictly tracked string array
+						if (enabledItems.includes(id)) {
 							const def = availableItems[id];
-							if (def) {
+							if (def && def.show) {
 								menu.addItem((item) => {
 									item.setTitle(def.title)
 										.setIcon(def.icon)
+										.setDisabled(def.disabled || false)
 										.onClick(def.action);
 								});
 							}
-						});
-					}
+						}
+					});
 				}
 			}),
 		);

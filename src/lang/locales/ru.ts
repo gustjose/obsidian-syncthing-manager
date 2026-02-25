@@ -202,6 +202,9 @@ export default {
 	header_context_menu_items: "Элементы",
 	btn_view_version: "Просмотр содержимого",
 	cmd_sync_file: "Синхронизировать файл",
+	cmd_ignore_file: "Не синхронизировать это",
+	notice_ignored_success: "Добавлено в .stignore",
+	notice_ignored_error: "Не удалось добавить в .stignore",
 	// Debug
 	setting_debug_mode_name: "Режим отладки",
 	setting_debug_mode_desc: "Включить подробное логирование в консоли (dev).",

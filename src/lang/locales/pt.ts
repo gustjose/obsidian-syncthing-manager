@@ -203,6 +203,9 @@ export default {
 	header_context_menu_items: "Itens",
 	btn_view_version: "Ver conteúdo",
 	cmd_sync_file: "Sincronizar arquivo",
+	cmd_ignore_file: "Não sincronizar isto",
+	notice_ignored_success: "Adicionado ao .stignore",
+	notice_ignored_error: "Falha ao adicionar ao .stignore",
 	// Debug
 	setting_debug_mode_name: "Modo de Depuração",
 	setting_debug_mode_desc: "Habilita logs detalhados no console (dev).",

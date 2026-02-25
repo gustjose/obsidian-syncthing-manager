@@ -28,6 +28,22 @@ export class SettingsManager {
 
 		const settings = Object.assign({}, DEFAULT_SETTINGS, loadedData);
 
+		// Migração: Garante que usuários que já possuem o plugin tenham o novo item "ignore_file" inserido nas listas de menus
+		if (!settings.hasMigratedIgnoreContextMenu) {
+			if (!settings.enabledContextMenuItems.includes("ignore_file")) {
+				settings.enabledContextMenuItems.push("ignore_file");
+			}
+			settings.hasMigratedIgnoreContextMenu = true;
+			void this.plugin.saveData(
+				Object.assign({}, settings, {
+					syncthingHost: "device-specific",
+					syncthingPort: "device-specific",
+					syncthingApiKey: "device-specific",
+					useHttps: false,
+				}),
+			);
+		}
+
 		// Limpa placeholders antigos se existirem
 		if (settings.syncthingHost === "device-specific")
 			settings.syncthingHost = "";
@@ -67,6 +83,7 @@ export class SettingsManager {
 			syncthingFolderLabel: settings.syncthingFolderLabel,
 			enabledContextMenuItems: settings.enabledContextMenuItems,
 			groupContextMenuItems: settings.groupContextMenuItems,
+			hasMigratedIgnoreContextMenu: settings.hasMigratedIgnoreContextMenu,
 			debugMode: settings.debugMode,
 			debugModules: settings.debugModules,
 			syncthingHost: "device-specific",

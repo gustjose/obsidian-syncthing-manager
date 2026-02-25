@@ -198,6 +198,9 @@ export default {
 	header_context_menu_items: "Items",
 	btn_view_version: "View content",
 	cmd_sync_file: "Sync file",
+	cmd_ignore_file: "Don't sync this",
+	notice_ignored_success: "Added to .stignore",
+	notice_ignored_error: "Failed to add to .stignore",
 	// Debug
 	setting_debug_mode_name: "Debug mode",
 	setting_debug_mode_desc: "Enable verbose logging to console (dev).",

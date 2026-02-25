@@ -6,6 +6,7 @@ import { SyncthingAPI } from "../api/syncthing-api";
 export class IgnoreManager {
 	app: App;
 	plugin: SyncthingController;
+	cachedIgnores: string[] = [];
 
 	constructor(app: App, plugin: SyncthingController) {
 		this.app = app;
@@ -37,6 +38,7 @@ export class IgnoreManager {
 			);
 
 			const currentLines = currentIgnores.ignore || [];
+			this.cachedIgnores = currentLines; // Hydrate cache on startup
 
 			// 2. Define as regras que NÓS queremos garantir
 			// Nota: Usamos o pathPrefix para apontar corretamente para a subpasta
@@ -129,7 +131,9 @@ export class IgnoreManager {
 			this.plugin.settings.syncthingFolderId,
 		);
 
-		return (result.ignore || []).join("\n");
+		const rules = result.ignore || [];
+		this.cachedIgnores = rules; // Update cache
+		return rules.join("\n");
 	}
 
 	/**
@@ -154,9 +158,109 @@ export class IgnoreManager {
 			lines,
 		);
 
+		this.cachedIgnores = lines; // Update cache
+
 		Logger.debug(
 			LOG_MODULES.MAIN,
 			"Regras de ignore atualizadas manualmente via Modal.",
 		);
+	}
+
+	/**
+	 * Adiciona uma nova regra ao .stignore do Syncthing.
+	 * Converte caminhos locais do Obsidian no caminho de contexto do Syncthing (considerando pathPrefix).
+	 */
+	async addIgnoreRule(
+		obsidianPath: string,
+		isFolder: boolean,
+	): Promise<boolean> {
+		if (
+			!this.plugin.settings.syncthingApiKey ||
+			!this.plugin.settings.syncthingFolderId
+		) {
+			Logger.warn(
+				LOG_MODULES.MAIN,
+				"Falha ao adicionar ignore: configuração da pasta não encontrada.",
+			);
+			return false;
+		}
+
+		try {
+			// 1. Carrega todas as regras atuais da API
+			const currentRulesStr = await this.loadRules();
+
+			// 2. Transforma as regras numa array com base na quebra de linha
+			const lines = currentRulesStr
+				? currentRulesStr.split("\n").map((line) => line.trimEnd())
+				: [];
+
+			// 3. Monta o caminho novo combinando pathPrefix e finalizando com barra "/" no caso de diretórios
+			const prefix = this.plugin.pathPrefix || "";
+			let newRule = (prefix + obsidianPath).replace(/\\/g, "/");
+
+			// O Syncthing processa pastas e arquivos da mesma forma. Adicionar "/" no
+			// final pode fazer com que a pasta vazia seja criada no outro lado.
+			// Portanto, enviamos o caminho limpo tanto para arquivos quanto pastas.
+
+			// Previne prefixos usando barra principal de forma absoluta (o stignore na doc do Syncthing adota "/pasta/" como pattern a partir da raiz da sincronização)
+			// Porém se o path dentro do syncthing já inicia de um nome de arquivo/pasta como `dev-obsidian/` inserimos sem a barra.
+			if (!newRule.startsWith("/") && (prefix === "" || prefix === "/")) {
+				newRule = "/" + newRule;
+			}
+
+			// 4. Verifica se já existe para evitar duplicatas
+			if (lines.includes(newRule)) {
+				Logger.debug(
+					LOG_MODULES.MAIN,
+					`[IgnoreManager] a regra '${newRule}' já consta no arquivo.`,
+				);
+				return true; // Considerado sucesso pois o fim atingido é o mesmo
+			}
+
+			// 5. Adiciona a nova linha
+			lines.push(`${newRule}`);
+
+			// 6. Envia o conjunto de regras via API e salva
+			await SyncthingAPI.setIgnores(
+				this.plugin.apiUrl,
+				this.plugin.settings.syncthingApiKey,
+				this.plugin.settings.syncthingFolderId,
+				lines,
+			);
+
+			this.cachedIgnores = lines; // Update cache
+
+			Logger.debug(
+				LOG_MODULES.MAIN,
+				`[IgnoreManager] O caminho '${newRule}' foi adicionado usando menu de contexto.`,
+			);
+			return true;
+		} catch (error) {
+			Logger.error(
+				LOG_MODULES.MAIN,
+				"[IgnoreManager] Falha ao adicionar regra no .stignore via menu de contexto",
+				error,
+			);
+			return false;
+		}
+	}
+
+	/**
+	 * Retorna se o caminho está presente atualmente no .stignore cacheado.
+	 * Usado para desabilitar o item no menu de contexto.
+	 */
+	isIgnored(obsidianPath: string): boolean {
+		const prefix = this.plugin.pathPrefix || "";
+		let ruleCheck = (prefix + obsidianPath).replace(/\\/g, "/");
+
+		// Regra pura
+		if (this.cachedIgnores.includes(ruleCheck)) return true;
+
+		// Regra com barra inicial se aplicável localmente
+		if (!ruleCheck.startsWith("/") && (prefix === "" || prefix === "/")) {
+			if (this.cachedIgnores.includes("/" + ruleCheck)) return true;
+		}
+
+		return false;
 	}
 }

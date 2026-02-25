@@ -46,6 +46,10 @@ export class ContextMenuModal extends Modal {
 				id: "sync_file",
 				label: t("cmd_sync_file") || "Sync File",
 			},
+			{
+				id: "ignore_file",
+				label: t("cmd_ignore_file") || "Don't sync this",
+			},
 		];
 
 		items.forEach((item) => {
@@ -68,10 +72,17 @@ export class ContextMenuModal extends Modal {
 								);
 							}
 						} else {
-							this.plugin.settings.enabledContextMenuItems =
-								this.plugin.settings.enabledContextMenuItems.filter(
-									(id) => id !== item.id,
+							// Modifica a matrix original localmente in-place para que o cache de pointer garanta exclusão no Obsidian DOM
+							const index =
+								this.plugin.settings.enabledContextMenuItems.indexOf(
+									item.id,
 								);
+							if (index > -1) {
+								this.plugin.settings.enabledContextMenuItems.splice(
+									index,
+									1,
+								);
+							}
 						}
 						await this.plugin.saveSettings();
 					});

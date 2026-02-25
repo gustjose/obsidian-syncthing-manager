@@ -22,6 +22,7 @@ export interface SyncthingPluginSettings {
 	showExplorerIcon: boolean;
 	enabledContextMenuItems: string[];
 	groupContextMenuItems: boolean;
+	hasMigratedIgnoreContextMenu?: boolean;
 	debugMode: boolean;
 	debugModules: string[];
 	logLevel: "off" | "error" | "warn" | "debug";
@@ -54,8 +55,9 @@ export const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	showTabIcon: true,
 	showExplorerIcon: true,
 	ignoredPaths: "",
-	enabledContextMenuItems: ["view_file_versions", "sync_file"],
+	enabledContextMenuItems: ["view_file_versions", "sync_file", "ignore_file"],
 	groupContextMenuItems: false,
+	hasMigratedIgnoreContextMenu: false,
 	debugMode: false,
 	debugModules: ["Main", "API", "FileStateManager"],
 	logLevel: "debug",
