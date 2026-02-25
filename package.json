@@ -26,7 +26,7 @@
 	"author": "Gustavo Carreiro",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^16.11.6",
+		"@types/node": "^20.0.0",
 		"builtin-modules": "3.3.0",
 		"esbuild": "^0.27.0",
 		"eslint": "^9.39.1",
@@ -39,8 +39,8 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"@codemirror/merge": "^6.12.0",
-		"@codemirror/state": "^6.5.4",
-		"@codemirror/view": "^6.39.15"
+		"@codemirror/merge": "6.12.0",
+		"@codemirror/state": "6.5.0",
+		"@codemirror/view": "6.38.6"
 	}
 }

@@ -14,6 +14,7 @@ export default defineConfig([
 			"main.js",
 			"package.json",
 			"package-lock.json",
+			"vitest.config.ts",
 		],
 	},
 	// 2. Configuração para os SCRIPTS (Node.js)
@@ -28,7 +29,12 @@ export default defineConfig([
 	// 3. Configuração do PLUGIN (Obsidian/Browser)
 	...obsidianmd.configs.recommendedWithLocalesEn,
 	{
-		files: ["src/**/*.ts", "src/**/*.tsx"],
+		files: [
+			"src/**/*.ts",
+			"src/**/*.tsx",
+			"tests/**/*.ts",
+			"tests/**/*.tsx",
+		],
 		languageOptions: {
 			parser: tsparser,
 			parserOptions: { project: "./tsconfig.json" },
