@@ -93,6 +93,24 @@ export class SyncthingView extends ItemView {
 			.createDiv({ cls: "st-status-text", text: statusText })
 			.addClass(cssClass);
 
+		// Barra de Progresso (permanente na estrutura)
+		const progressContainer = container.createDiv({
+			cls: "st-progress-bar-container",
+		});
+		const progressFill = progressContainer.createDiv({
+			cls: "st-progress-bar-fill",
+		});
+
+		if (this.plugin.currentStatus === "sincronizando") {
+			const completion = this.plugin.monitor?.currentCompletion ?? 0;
+			progressFill.style.width = `${completion}%`;
+			if (completion > 0 && completion < 100) {
+				progressContainer.addClass("st-active");
+			}
+		} else {
+			progressFill.style.width = `0%`;
+		}
+
 		// 3. Tabela
 		const infoContainer = container.createDiv({ cls: "st-info-container" });
 		this.createRow(

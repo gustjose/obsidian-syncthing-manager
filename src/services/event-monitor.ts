@@ -48,6 +48,11 @@ export class SyncthingEventMonitor {
 	// Estado interno para garantir que a UI só fique verde (idle) se a sincronização física (100%) também atestar.
 	private lastKnownState: string = "idle";
 	private lastKnownCompletion: number = 100;
+
+	public get currentCompletion(): number {
+		return this.lastKnownCompletion;
+	}
+
 	// Timer para certificar que o "idle" não é falso-positivo
 	private idleGraceTimer: ReturnType<typeof setTimeout> | null = null;
 
