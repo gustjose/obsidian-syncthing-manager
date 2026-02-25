@@ -122,6 +122,10 @@ export default {
 	btn_keep_conflict: "Use conflict version",
 	tooltip_keep_conflict:
 		"Overwrites your local file with the conflict version (right side).",
+	btn_use_this_version: "Use this version",
+	diff_instructions:
+		"Use the arrows in the middle to transfer changes to the original file. To keep one version entirely, click 'Use this version' above it.",
+	btn_save_merge: "Save merge",
 
 	// Diff View
 	diff_original_header: "Current file (original)",

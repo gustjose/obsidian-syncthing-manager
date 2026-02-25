@@ -255,45 +255,151 @@
 	flex-grow: 1;
 }
 
-/* Diff View */
-.st-diff-container {
-	display: flex;
-	gap: 10px;
+/* Diff View & Merge View */
+.st-diff-instructions {
+	font-size: 0.85em;
+	color: var(--text-muted);
 	margin-top: 15px;
 	margin-bottom: 15px;
-	border-top: 1px solid var(--background-modifier-border);
-	padding-top: 10px;
 }
-.st-diff-box {
+.st-diff-headers {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 5px;
+}
+.st-diff-header-box {
 	flex: 1;
 	display: flex;
-	flex-direction: column;
-	width: 50%;
+	justify-content: center;
+	align-items: center;
+	padding: 5px 0;
 }
-.st-diff-header {
-	font-weight: bold;
-	margin-bottom: 5px;
+.st-btn-accent {
+	color: var(--text-on-accent) !important;
+}
+.st-diff-controls {
+	display: flex;
+	align-items: center;
+	margin-top: 15px;
+	margin-bottom: 10px;
+	border-top: 1px solid var(--background-modifier-border);
+	padding-top: 15px;
+}
+
+.cm-changeGutter {
+	background-color: var(--background-modifier-border) !important;
+}
+
+.st-diff-legend {
+	font-size: 0.85em;
 	color: var(--text-muted);
-	font-size: 0.8em;
-	text-transform: uppercase;
+	font-weight: bold;
 }
-.st-diff-content {
-	background-color: var(--background-primary-alt);
+.st-diff-loading {
+	margin: 15px 0;
+	color: var(--text-muted);
+	font-style: italic;
+}
+.st-diff-view-wrapper {
 	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
-	padding: 10px;
-	height: 200px;
+	border-radius: 6px;
+	background-color: var(--background-primary-alt);
+	overflow: hidden;
+}
+
+/* CodeMirror Merge Styles overrides to match Obsidian Theme */
+.cm-mergeView {
+	max-height: 400px;
 	overflow-y: auto;
-	font-family: var(--font-monospace);
-	font-size: 0.8em;
-	white-space: pre-wrap;
-	user-select: text;
 }
-.st-diff-original {
-	border-left: 3px solid var(--text-success);
+.cm-mergeView .cm-editor {
+	background-color: var(--background-primary) !important;
+	color: var(--text-normal) !important;
+	font-family: var(--font-monospace) !important;
+	font-size: 0.9em;
 }
-.st-diff-conflict {
-	border-left: 3px solid var(--text-warning);
+
+.cm-merge-a .cm-content {
+	border-right: 1px solid var(--background-modifier-border);
+}
+
+/* Highlight lines */
+.cm-merge-deleted {
+	background-color: rgba(var(--color-red-rgb), 0.15) !important;
+	text-decoration: line-through;
+}
+.cm-merge-inserted {
+	background-color: rgba(var(--color-green-rgb), 0.15) !important;
+}
+
+/* Background chunks */
+.cm-mergeView .cm-deletedChunk {
+	background-color: rgba(var(--color-red-rgb), 0.08) !important;
+}
+.cm-mergeView .cm-insertedChunk {
+	background-color: rgba(var(--color-green-rgb), 0.08) !important;
+}
+
+/* Revert buttons spacer */
+.cm-merge-spacer {
+	background-color: var(--background-secondary) !important;
+}
+
+.cm-merge-revert {
+	background-color: var(--background-modifier-form-field) !important;
+	border: 1px solid var(--background-modifier-border) !important;
+	color: var(--text-muted) !important;
+	border-radius: 4px;
+}
+
+.cm-merge-revert button {
+	height: 2.8vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.cm-mergeView {
+	overflow-y: auto;
+}
+
+/* Mobile Responsiveness (Celulares) */
+@media (max-width: 600px) {
+	.st-diff-instructions {
+		font-size: 0.8em;
+	}
+
+	.st-diff-header-box {
+		padding: 4px 2px;
+	}
+
+	.st-diff-header-box button {
+		font-size: 0.8em;
+		padding: 4px 8px;
+		height: auto;
+		white-space: normal;
+		text-align: center;
+	}
+
+	.st-diff-controls {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.st-diff-legend {
+		text-align: center;
+		margin-bottom: 5px;
+	}
+
+	.st-diff-controls button {
+		width: 100%;
+	}
+
+	/* Ajuste forçado para displays muito pequenos do CodeMirror MergeView */
+	.cm-mergeView .cm-editor {
+		font-size: 0.8em;
+	}
 }
 
 .st-history-container {

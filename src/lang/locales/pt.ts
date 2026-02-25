@@ -124,6 +124,10 @@ export default {
 	btn_keep_conflict: "Usar Versão do Conflito",
 	tooltip_keep_conflict:
 		"Substitui o seu arquivo local pela versão do conflito (da direita).",
+	btn_use_this_version: "Usar esta versão",
+	diff_instructions:
+		"Use as setas no meio para transferir alterações para o arquivo original. Para manter uma das versões integralmente, clique em 'Usar esta versão' acima dela.",
+	btn_save_merge: "Salvar Merge",
 
 	// Visualização de Diferença
 	diff_original_header: "Arquivo Atual (Original)",

@@ -1,125 +1,221 @@
-import { App, Modal, TFile, ButtonComponent } from 'obsidian';
-import { ConflictManager, ConflictFile } from '../services/conflict-manager';
-import { t } from '../lang/lang';
+import { App, Modal, TFile, ButtonComponent, Notice } from "obsidian";
+import { ConflictManager, ConflictFile } from "../services/conflict-manager";
+import { t } from "../lang/lang";
+import { MergeView } from "@codemirror/merge";
+import { EditorState } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 
 export class ConflictModal extends Modal {
-    manager: ConflictManager;
-    conflicts: ConflictFile[];
-    onCloseCallback: () => void;
+	manager: ConflictManager;
+	conflicts: ConflictFile[];
+	onCloseCallback: () => void;
 
-    constructor(app: App, manager: ConflictManager, onCloseCallback: () => void) {
-        super(app);
-        this.manager = manager;
-        this.onCloseCallback = onCloseCallback;
-        this.conflicts = manager.getConflicts();
-    }
+	constructor(
+		app: App,
+		manager: ConflictManager,
+		onCloseCallback: () => void,
+	) {
+		super(app);
+		this.manager = manager;
+		this.onCloseCallback = onCloseCallback;
+		this.conflicts = manager.getConflicts();
+	}
 
-    onOpen() {
-        const { contentEl } = this;
-        contentEl.empty();
-        
-        this.modalEl.addClass('st-modal-wide');
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
 
-        contentEl.createEl('h2', { text: `${t('modal_conflict_title')} (${this.conflicts.length})` });
+		this.modalEl.addClass("st-modal-wide");
 
-        if (this.conflicts.length === 0) {
-            contentEl.createEl('p', { text: t('modal_conflict_empty') });
-            return;
-        }
+		contentEl.createEl("h2", {
+			text: `${t("modal_conflict_title")} (${this.conflicts.length})`,
+		});
 
-        contentEl.createEl('p', { text: t('modal_conflict_desc') });
+		if (this.conflicts.length === 0) {
+			contentEl.createEl("p", { text: t("modal_conflict_empty") });
+			return;
+		}
 
-        this.conflicts.forEach(conflict => {
-            const container = contentEl.createDiv({ cls: 'conflict-item-box' });
-            
-            container.createEl('h4', { 
-                text: conflict.baseName, 
-                cls: 'st-conflict-title'
-            });
-            
-            container.createEl('div', { text: `Data: ${conflict.date}`, cls: 'conflict-meta' });
-            container.createEl('div', { text: conflict.path, cls: 'conflict-meta-path' });
+		contentEl.createEl("p", { text: t("modal_conflict_desc") });
 
-            const previewContainer = container.createDiv();
-            const actionsContainer = container.createDiv({ cls: 'conflict-actions' });
+		this.conflicts.forEach((conflict) => {
+			const container = contentEl.createDiv({ cls: "conflict-item-box" });
 
-            new ButtonComponent(actionsContainer)
-                .setButtonText(t('btn_compare'))
-                .setIcon('eye')
-                .onClick(async () => {
-                    if (previewContainer.hasChildNodes()) {
-                        previewContainer.empty();
-                        return;
-                    }
-                    await this.renderContentPreview(previewContainer, conflict);
-                });
+			container.createEl("h4", {
+				text: conflict.baseName,
+				cls: "st-conflict-title",
+			});
 
-            actionsContainer.createSpan({ cls: 'st-flex-grow' });
+			container.createEl("div", {
+				text: `Data: ${conflict.date}`,
+				cls: "conflict-meta",
+			});
+			container.createEl("div", {
+				text: conflict.path,
+				cls: "conflict-meta-path",
+			});
 
-            new ButtonComponent(actionsContainer)
-                .setButtonText(t('btn_keep_original'))
-                .setTooltip(t('tooltip_keep_original'))
-                .onClick(() => {
-                    this.manager.deleteConflict(conflict)
-                        .then(() => this.refresh())
-                        .catch(console.error);
-                });
+			const previewContainer = container.createDiv();
+			const actionsContainer = container.createDiv({
+				cls: "conflict-actions",
+			});
 
-            new ButtonComponent(actionsContainer)
-                .setButtonText(t('btn_keep_conflict'))
-                .setCta()
-                .setTooltip(t('tooltip_keep_conflict'))
-                .onClick(() => {
-                    this.manager.acceptConflict(conflict)
-                        .then(() => this.refresh())
-                        .catch(console.error);
-                });
-        });
-    }
+			new ButtonComponent(actionsContainer)
+				.setButtonText(t("btn_compare"))
+				.setIcon("eye")
+				.onClick(async () => {
+					if (previewContainer.hasChildNodes()) {
+						previewContainer.empty();
+						return;
+					}
+					await this.renderContentPreview(previewContainer, conflict);
+				});
+		});
+	}
 
-    async renderContentPreview(container: HTMLElement, conflict: ConflictFile) {
-        container.empty();
-        const diffWrapper = container.createDiv({ cls: 'st-diff-container' });
+	async renderContentPreview(container: HTMLElement, conflict: ConflictFile) {
+		container.empty();
 
-        const leftBox = diffWrapper.createDiv({ cls: 'st-diff-box' });
-        leftBox.createDiv({ cls: 'st-diff-header', text: t('diff_original_header') });
-        const leftContent = leftBox.createDiv({ cls: 'st-diff-content st-diff-original' });
-        leftContent.setText(t('diff_loading'));
+		const loadingEl = container.createEl("div", {
+			text: t("diff_loading"),
+			cls: "st-diff-loading",
+		});
+		let originalText = "";
+		let conflictText = "";
 
-        const rightBox = diffWrapper.createDiv({ cls: 'st-diff-box' });
-        rightBox.createDiv({ cls: 'st-diff-header', text: `${t('diff_conflict_header')} (${conflict.date})` });
-        const rightContent = rightBox.createDiv({ cls: 'st-diff-content st-diff-conflict' });
-        rightContent.setText(t('diff_loading'));
+		try {
+			conflictText = await this.app.vault.read(conflict.file);
 
-        try {
-            const conflictText = await this.app.vault.read(conflict.file);
-            rightContent.setText(conflictText);
+			const originalPath = conflict.path.replace(
+				conflict.file.name,
+				conflict.baseName,
+			);
+			const originalFile =
+				this.app.vault.getAbstractFileByPath(originalPath);
 
-            const originalPath = conflict.path.replace(conflict.file.name, conflict.baseName);
-            const originalFile = this.app.vault.getAbstractFileByPath(originalPath);
+			if (originalFile instanceof TFile) {
+				originalText = await this.app.vault.read(originalFile);
+			} else {
+				originalText = t("diff_original_missing");
+			}
+		} catch (error) {
+			console.error(error);
+			loadingEl.setText(t("diff_read_error"));
+			return;
+		}
 
-            if (originalFile instanceof TFile) {
-                const originalText = await this.app.vault.read(originalFile);
-                leftContent.setText(originalText);
-            } else {
-                leftContent.setText(t('diff_original_missing'));
-            }
+		loadingEl.remove();
 
-        } catch (error) {
-            console.error(error);
-            leftContent.setText(t('diff_read_error'));
-            rightContent.setText(t('diff_read_error'));
-        }
-    }
+		// 1. Instructions
+		container.createEl("p", {
+			text: t("diff_instructions"),
+			cls: "st-diff-instructions",
+		});
 
-    refresh() {
-        this.conflicts = this.manager.getConflicts();
-        this.onOpen(); 
-    }
+		// 2. Headers and Keep Buttons
+		const headersContainer = container.createDiv({
+			cls: "st-diff-headers",
+		});
 
-    onClose() {
-        const { contentEl } = this;
-        contentEl.empty();
-        this.onCloseCallback(); 
-    }
+		const leftHeader = headersContainer.createDiv({
+			cls: "st-diff-header-box",
+		});
+		const leftBtn = new ButtonComponent(leftHeader)
+			.setButtonText(t("btn_use_this_version"))
+			.setTooltip(t("tooltip_keep_original"))
+			.onClick(() => {
+				this.manager
+					.deleteConflict(conflict)
+					.then(() => this.refresh())
+					.catch(console.error);
+			});
+		leftBtn.buttonEl.addClass("st-btn-accent");
+
+		const rightHeader = headersContainer.createDiv({
+			cls: "st-diff-header-box",
+		});
+		const rightBtn = new ButtonComponent(rightHeader)
+			.setButtonText(t("btn_use_this_version"))
+			.setTooltip(t("tooltip_keep_conflict"))
+			.onClick(() => {
+				this.manager
+					.acceptConflict(conflict)
+					.then(() => this.refresh())
+					.catch(console.error);
+			});
+		rightBtn.buttonEl.addClass("st-btn-accent");
+
+		// 3. Diff View Wrapper
+		const diffWrapper = container.createDiv({
+			cls: "st-diff-view-wrapper",
+		});
+
+		const mergeView = new MergeView({
+			a: {
+				doc: originalText,
+				extensions: [EditorView.lineWrapping],
+			},
+			b: {
+				doc: conflictText,
+				extensions: [
+					EditorView.lineWrapping,
+					EditorState.readOnly.of(true),
+				],
+			},
+			parent: diffWrapper,
+			revertControls: "b-to-a", // Permite puxar alterações do Conflito para o Original
+		});
+
+		// 4. Save Merge Control
+		const diffControlsContainer = container.createDiv({
+			cls: "st-diff-controls",
+		});
+
+		diffControlsContainer.createEl("span", {
+			text: "Original (A)  ↔  Conflito (B)",
+			cls: "st-diff-legend",
+		});
+
+		diffControlsContainer.createSpan({ cls: "st-flex-grow" });
+
+		const saveMergeBtn = new ButtonComponent(diffControlsContainer)
+			.setButtonText(t("btn_save_merge"))
+			.setTooltip(
+				"Sobrescrever original com estado atual da esquerda e remover o conflito",
+			)
+			.setCta();
+
+		saveMergeBtn.onClick(async () => {
+			const mergedText = mergeView.a.state.doc.toString();
+			const originalPath = conflict.path.replace(
+				conflict.file.name,
+				conflict.baseName,
+			);
+			const originalFile =
+				this.app.vault.getAbstractFileByPath(originalPath);
+
+			try {
+				if (originalFile instanceof TFile) {
+					await this.app.vault.modify(originalFile, mergedText);
+					await this.manager.deleteConflict(conflict);
+					new Notice(`Merge salvo: ${conflict.baseName}`);
+					this.refresh();
+				}
+			} catch (e) {
+				console.error(e);
+				new Notice("Erro ao salvar arquivo merged.");
+			}
+		});
+	}
+
+	refresh() {
+		this.conflicts = this.manager.getConflicts();
+		this.onOpen();
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+		this.onCloseCallback();
+	}
 }
