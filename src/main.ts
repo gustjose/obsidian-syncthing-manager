@@ -286,20 +286,20 @@ export default class SyncthingController extends Plugin {
 		});
 	}
 
-	/**
-	 * Inicializa ou reinicializa a conexão com o Syncthing.
-	 * Chamado no boot e pode ser chamado após reconexão.
-	 */
 	async initializeConnection(
 		ignoreManager?: IgnoreManager,
 		showNotice: boolean = false,
+		skipIdleStatusUpdate: boolean = false,
 	): Promise<boolean> {
 		// Salva referência para reconexões futuras
 		if (ignoreManager) {
 			this._ignoreManager = ignoreManager;
 		}
 
-		const conexaoValida = await this.verificarConexao(showNotice);
+		const conexaoValida = await this.verificarConexao(
+			showNotice,
+			skipIdleStatusUpdate,
+		);
 
 		if (conexaoValida) {
 			await this.fetchMyDeviceID();
@@ -614,15 +614,17 @@ export default class SyncthingController extends Plugin {
 			return;
 		}
 
-		// Valida se a pasta ainda existe no servidor e reinicializa módulos
+		new Notice(t("notice_syncing"));
+		this.currentStatus = "sincronizando";
+		this.app.workspace.trigger("syncthing:status-changed");
+
 		const isConexaoValida = await this.initializeConnection(
 			this._ignoreManager || undefined,
+			false,
 			true,
 		);
 
 		if (!isConexaoValida || !this.settings.syncthingFolderId) {
-			// Não continua se o servidor estiver offline, se a api key for invalida
-			// ou se a pasta não existir mais (verificarConexao limpa o FolderId nesse caso).
 			return;
 		}
 
@@ -636,10 +638,6 @@ export default class SyncthingController extends Plugin {
 			app.commands.executeCommandById("editor:save-file");
 		}
 
-		new Notice(t("notice_syncing"));
-		this.currentStatus = "sincronizando";
-		this.app.workspace.trigger("syncthing:status-changed");
-
 		try {
 			await SyncthingAPI.forceScan(
 				this.apiUrl,
@@ -648,13 +646,6 @@ export default class SyncthingController extends Plugin {
 			);
 			await this.atualizarContagemDispositivos();
 			await this.refreshHistory();
-
-			this.currentStatus = "conectado";
-			this.lastSyncTime = new Date().toLocaleTimeString([], {
-				hour: "2-digit",
-				minute: "2-digit",
-			});
-			this.app.workspace.trigger("syncthing:status-changed");
 		} catch (error) {
 			Logger.warn(LOG_MODULES.MAIN, "Erro ao forçar scan:", error);
 			new Notice("Erro!");
@@ -677,7 +668,6 @@ export default class SyncthingController extends Plugin {
 			);
 			if (currentFolder) {
 				this.isPaused = !!currentFolder.paused;
-				// Update status if paused
 				if (this.isPaused) {
 					this.currentStatus = "pausado";
 				}
@@ -706,7 +696,6 @@ export default class SyncthingController extends Plugin {
 		}
 
 		try {
-			// Update status first to be sure
 			await this.checkPauseStatus();
 
 			if (this.isPaused) {
@@ -717,7 +706,6 @@ export default class SyncthingController extends Plugin {
 				);
 				new Notice("Resuming sync...");
 				this.isPaused = false;
-				// Force check connection to update status from 'pausado' to 'conectado'/'syncing'
 				await this.verificarConexao(false);
 			} else {
 				await SyncthingAPI.pauseFolder(
@@ -736,10 +724,12 @@ export default class SyncthingController extends Plugin {
 		}
 	}
 
-	async verificarConexao(showNotice: boolean = false): Promise<boolean> {
+	async verificarConexao(
+		showNotice: boolean = false,
+		skipIdleStatusUpdate: boolean = false,
+	): Promise<boolean> {
 		try {
-			// Migração: em versões antigas, syncthingFolderId podia ficar
-			// com o placeholder "device-specific" no data.json.
+			if (!this.app || !this.app.workspace) return false;
 			if (this.settings.syncthingFolderId === "device-specific") {
 				this.settings.syncthingFolderId = "";
 				this.settings.syncthingFolderLabel = "";
@@ -751,7 +741,6 @@ export default class SyncthingController extends Plugin {
 			}
 
 			if (this.settings.syncthingFolderId) {
-				// Validação prévia de existência da pasta na API (evita falhas massivas 404 e 500 no background)
 				const isFolderValid = await SyncthingAPI.isFolderValid(
 					this.apiUrl,
 					this.settings.syncthingApiKey,
@@ -784,32 +773,32 @@ export default class SyncthingController extends Plugin {
 					state === "syncing" ||
 					needBytes > 0
 				) {
-					this.currentStatus = "sincronizando";
-					if (showNotice) new Notice(t("notice_syncing"));
+					if (!skipIdleStatusUpdate) {
+						this.currentStatus = "sincronizando";
+						if (showNotice) new Notice(t("notice_syncing"));
+					}
 				} else if (state === "idle" && needBytes === 0) {
 					this.lastSyncTime = new Date().toLocaleTimeString([], {
 						hour: "2-digit",
 						minute: "2-digit",
 					});
-					this.currentStatus = "conectado";
-					if (showNotice) new Notice(t("status_synced"));
+
+					if (!skipIdleStatusUpdate) {
+						this.currentStatus = "conectado";
+					}
 				} else {
 					this.currentStatus = "erro";
 					if (showNotice) new Notice(`Status: ${state}`);
 				}
 			} else {
-				// Cenário onde não há pasta configurada (ou ela acabou de ser limpa por erro)
 				if (showNotice) {
 					new Notice(t("notice_config_first"));
 				}
-				// Para evitar que a tela de status do histórico diga falsamente "Sincronizado/Conectado" quando tudo está vazio,
-				// retornamos "configurando" que assume uma UI mais precisa (Cinza - Settings).
 				this.currentStatus = "configurando";
 			}
-			await this.checkPauseStatus(); // checkPauseStatus sets 'pausado' if true, overwriting 'conectado' or others if needed.
+			await this.checkPauseStatus();
 
 			this.app.workspace.trigger("syncthing:status-changed");
-			// Retornamos sucesso APENAS se houver pasta ativa. Se a pasta for falsa/limpa, é um "false" operacional para o resto.
 			return (
 				this.currentStatus !== "erro" &&
 				!!this.settings.syncthingFolderId

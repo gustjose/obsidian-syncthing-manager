@@ -45,6 +45,12 @@ export class SyncthingEventMonitor {
 	lastEventId: number = 0;
 	private abortController: AbortController | null = null;
 
+	// Estado interno para garantir que a UI só fique verde (idle) se a sincronização física (100%) também atestar.
+	private lastKnownState: string = "idle";
+	private lastKnownCompletion: number = 100;
+	// Timer para certificar que o "idle" não é falso-positivo
+	private idleGraceTimer: ReturnType<typeof setTimeout> | null = null;
+
 	constructor(plugin: SyncthingController) {
 		this.plugin = plugin;
 	}
@@ -161,9 +167,6 @@ export class SyncthingEventMonitor {
 				);
 
 				const msg = String(error).toLowerCase();
-				// Se for timeout normal, apenas continuamos aguardando.
-				// Para erros de conexão (refused, 400, etc), o Syncthing pode
-				// ter reiniciado. Resetamos o lastEventId para resincronizar os IDs.
 				if (!msg.includes("timeout")) {
 					this.lastEventId = 0;
 					if (this.running) await this.sleep(5000);
@@ -216,15 +219,12 @@ export class SyncthingEventMonitor {
 		if (event.type === "FolderCompletion") {
 			const data = event.data as FolderCompletionData;
 			if ("folder" in data && data.folder === targetFolder) {
+				this.lastKnownCompletion = data.completion;
 				Logger.debug(
 					LOG_MODULES.EVENT,
 					`[Event] FolderCompletion → ${data.completion}% (need: ${data.needBytes}B)`,
 				);
-				if (data.completion < 100 || data.needBytes > 0) {
-					this.updateStatus("sincronizando");
-				} else {
-					this.updateStatus("conectado");
-				}
+				this.evaluateCombinedState();
 			}
 		}
 
@@ -232,17 +232,23 @@ export class SyncthingEventMonitor {
 		if (event.type === "StateChanged") {
 			const data = event.data as StateChangedData;
 			if ("folder" in data && data.folder === targetFolder) {
+				this.lastKnownState = data.to;
 				Logger.debug(
 					LOG_MODULES.EVENT,
 					`[Event] StateChanged → ${data.to}`,
 				);
-				if (data.to === "scanning" || data.to === "syncing") {
-					this.updateStatus("sincronizando");
-				} else if (data.to === "idle") {
-					this.updateStatus("conectado");
-				} else if (data.to === "error") {
-					this.updateStatus("erro");
+
+				if (
+					data.to === "scanning" ||
+					data.to === "syncing" ||
+					data.to === "scan-waiting"
+				) {
+					if (this.lastKnownCompletion === 100) {
+						this.lastKnownCompletion = 99;
+					}
 				}
+
+				this.evaluateCombinedState();
 			}
 		}
 
@@ -254,11 +260,6 @@ export class SyncthingEventMonitor {
 					LOG_MODULES.EVENT,
 					`[Event] FolderSummary → needBytes: ${data.summary?.needBytes ?? 0}`,
 				);
-				if (data.summary && data.summary.needBytes > 0) {
-					this.updateStatus("sincronizando");
-				} else {
-					this.updateStatus("conectado");
-				}
 			}
 		}
 
@@ -300,6 +301,41 @@ export class SyncthingEventMonitor {
 					});
 				}
 			}
+		}
+	}
+
+	private evaluateCombinedState() {
+		// Se não estiver idle, cancela qualquer timer pendente imediatamente e aplica cor.
+		if (this.lastKnownState !== "idle") {
+			if (this.idleGraceTimer) {
+				clearTimeout(this.idleGraceTimer);
+				this.idleGraceTimer = null;
+			}
+			if (this.lastKnownState === "error") {
+				this.updateStatus("erro");
+			} else {
+				this.updateStatus("sincronizando");
+			}
+			return;
+		}
+
+		// Se o estado for idle:
+		if (this.lastKnownCompletion === 100) {
+			// Se o completion já é 100, podemos aplicar verde imediatamente
+			if (this.idleGraceTimer) {
+				clearTimeout(this.idleGraceTimer);
+				this.idleGraceTimer = null;
+			}
+			this.updateStatus("conectado");
+		} else {
+			if (!this.idleGraceTimer) {
+				this.idleGraceTimer = setTimeout(() => {
+					this.lastKnownCompletion = 100;
+					this.updateStatus("conectado");
+					this.idleGraceTimer = null;
+				}, 2000);
+			}
+			this.updateStatus("sincronizando");
 		}
 	}
 

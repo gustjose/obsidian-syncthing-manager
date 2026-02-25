@@ -154,18 +154,14 @@ export class SyncthingView extends ItemView {
 		const btnText = btn.createSpan({ text: t("btn_sync_now") });
 
 		btn.addEventListener("click", () => {
-			// Alteramos apenas o span de texto, preservando o ícone
 			btnText.setText(t("btn_requesting") || "Requesting...");
 			btn.disabled = true;
 
-			// Opcional: Adiciona uma animação de rotação ao ícone durante o clique
 			btnIcon.addClass("st-spin-anim");
 
 			this.plugin
 				.forcarSincronizacao()
 				.catch((err) => console.error(err));
-			// Nota: O botão permanece desabilitado até a view recarregar
-			// pelo evento do monitor, o que é o comportamento correto.
 		});
 
 		// 4.1 Botão Pause/Resume
@@ -177,10 +173,6 @@ export class SyncthingView extends ItemView {
 					: t("tooltip_pause") || "Pause sync",
 			},
 		});
-		// Remove mod-cta to differentiate? Or keep it? keeping consistent style.
-		// Maybe remove mod-cta and just use st-pause-button for specific styling if needed.
-		// Let's use mod-cta for consistency but maybe change color via CSS later if needed.
-		// Actually, let's keep it simple.
 
 		const pauseIcon = this.plugin.isPaused ? "play-circle" : "pause-circle";
 		setIcon(btnPause, pauseIcon);
@@ -211,8 +203,6 @@ export class SyncthingView extends ItemView {
 
 				const leftSide = itemEl.createDiv({ cls: "st-history-left" });
 
-				// --- NOVO: Lógica das Setas de Direção ---
-				// Define o ícone e a classe de cor baseada na direção (in/out)
 				const isIncoming = item.direction === "in";
 				const arrowIcon = isIncoming
 					? "arrow-down-left"
@@ -221,11 +211,9 @@ export class SyncthingView extends ItemView {
 					? "st-direction-in"
 					: "st-direction-out";
 
-				// Cria o elemento da seta
 				const arrowSpan = leftSide.createSpan({
 					cls: `st-history-arrow ${arrowClass}`,
 				});
-				// Dica: Adicionamos um tooltip simples para explicar a seta ao passar o mouse
 				arrowSpan.setAttribute(
 					"aria-label",
 					isIncoming
