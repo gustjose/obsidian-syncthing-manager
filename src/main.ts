@@ -38,7 +38,7 @@ export default class SyncthingController extends Plugin {
 	myDeviceID: string = "";
 	tabManager: TabManager;
 	secretManager: SecretManager;
-	private _ignoreManager: IgnoreManager | null = null;
+	public ignoreManager: IgnoreManager | null = null;
 
 	public pathPrefix: string = "";
 
@@ -185,14 +185,14 @@ export default class SyncthingController extends Plugin {
 						title: t("cmd_ignore_file") || "Don't sync this",
 						icon: "eye-off",
 						show: true, // Show for both files and folders
-						disabled: this._ignoreManager
-							? this._ignoreManager.isIgnored(file.path)
+						disabled: this.ignoreManager
+							? this.ignoreManager.isIgnored(file.path)
 							: false,
 						action: async () => {
-							if (!this._ignoreManager) return;
+							if (!this.ignoreManager) return;
 
 							const success =
-								await this._ignoreManager.addIgnoreRule(
+								await this.ignoreManager.addIgnoreRule(
 									file.path,
 									isFolder,
 								);
@@ -335,7 +335,7 @@ export default class SyncthingController extends Plugin {
 	): Promise<boolean> {
 		// Salva referência para reconexões futuras
 		if (ignoreManager) {
-			this._ignoreManager = ignoreManager;
+			this.ignoreManager = ignoreManager;
 		}
 
 		const conexaoValida = await this.verificarConexao(
@@ -346,8 +346,8 @@ export default class SyncthingController extends Plugin {
 		if (conexaoValida) {
 			await this.fetchMyDeviceID();
 			await this.detectPathPrefix();
-			if (this._ignoreManager) {
-				await this._ignoreManager.ensureDefaults();
+			if (this.ignoreManager) {
+				await this.ignoreManager.ensureDefaults();
 			}
 			await this.atualizarContagemDispositivos();
 			await this.reconcileFileStates();
@@ -661,7 +661,7 @@ export default class SyncthingController extends Plugin {
 		this.app.workspace.trigger("syncthing:status-changed");
 
 		const isConexaoValida = await this.initializeConnection(
-			this._ignoreManager || undefined,
+			this.ignoreManager || undefined,
 			false,
 			true,
 		);

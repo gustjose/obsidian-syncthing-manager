@@ -19,7 +19,7 @@ export class IgnoreModal extends Modal {
 	constructor(app: App, plugin: SyncthingController) {
 		super(app);
 		this.plugin = plugin;
-		this.manager = new IgnoreManager(app, plugin);
+		this.manager = plugin.ignoreManager || new IgnoreManager(app, plugin);
 	}
 
 	async onOpen() {
