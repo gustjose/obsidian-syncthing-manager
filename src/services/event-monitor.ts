@@ -1,4 +1,4 @@
-import { requestUrl } from "obsidian";
+import { requestUrl, RequestUrlParam } from "obsidian";
 import SyncthingController from "../main";
 import { Logger, LOG_MODULES } from "../utils/logger";
 import { SyncStatus } from "../types";
@@ -131,15 +131,18 @@ export class SyncthingEventMonitor {
 				}, 90000);
 
 				// Nota: A API requestUrl do Obsidian web usa fetch subjacente. Passar o signal é suportado nativamente.
-				const requestOpts: any = {
+				const requestOpts = {
 					url: url,
 					method: "GET",
 					headers: {
 						"X-API-Key": this.plugin.settings.syncthingApiKey,
 					},
-				};
+				} as RequestUrlParam & { signal?: AbortSignal };
 
-				if (typeof AbortSignal !== "undefined") {
+				if (
+					typeof AbortSignal !== "undefined" &&
+					this.abortController
+				) {
 					requestOpts.signal = this.abortController.signal;
 				}
 

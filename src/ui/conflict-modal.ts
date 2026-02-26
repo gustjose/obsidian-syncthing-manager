@@ -172,7 +172,7 @@ export class ConflictModal extends Modal {
 		});
 
 		diffControlsContainer.createEl("span", {
-			text: "Original (A)  ↔  Conflito (B)",
+			text: t("diff_legend"),
 			cls: "st-diff-legend",
 		});
 

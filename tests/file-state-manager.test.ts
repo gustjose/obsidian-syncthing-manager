@@ -4,6 +4,7 @@ import { FileStateManager } from "../src/services/file-state-manager";
 function createMockApp() {
 	return {
 		vault: {
+			configDir: "mock-config",
 			adapter: {
 				exists: vi.fn().mockResolvedValue(false),
 				read: vi.fn().mockResolvedValue("{}"),
@@ -21,7 +22,7 @@ describe("FileStateManager", () => {
 		mockApp = createMockApp();
 		manager = new FileStateManager(
 			mockApp as never,
-			".obsidian/plugins/test",
+			`${mockApp.vault.configDir}/plugins/test`,
 		);
 		vi.spyOn(console, "debug").mockImplementation(() => {});
 		vi.spyOn(console, "warn").mockImplementation(() => {});

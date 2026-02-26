@@ -68,7 +68,7 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			.setName(t("setting_host_name"))
 			.setDesc(t("setting_host_desc"))
 			.addText((text) => {
-				text.setPlaceholder("localhost")
+				text.setPlaceholder(t("setting_host_placeholder"))
 					.setValue(this.plugin.settings.syncthingHost)
 					.onChange(async (value) => {
 						// Remove "http://" and "https://" se colado
@@ -98,15 +98,16 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							); // FQDN (ex: servidor.local)
 
 						if (!isValidHost || sanitizedValue.trim() === "") {
-							text.inputEl.style.borderColor =
-								"var(--text-error)";
+							text.inputEl.setCssProps({
+								"border-color": "var(--text-error)",
+							});
 							text.inputEl.setAttribute(
 								"title",
 								t("notice_invalid_host"),
 							);
 							this.showHostNotice();
 						} else {
-							text.inputEl.style.borderColor = "";
+							text.inputEl.setCssProps({ "border-color": "" });
 							text.inputEl.removeAttribute("title");
 							this.plugin.settings.syncthingHost = sanitizedValue;
 							await this.plugin.saveSettings();
@@ -134,15 +135,16 @@ export class SyncthingSettingTab extends PluginSettingTab {
 						const isValidPort = portNum > 0 && portNum <= 65535;
 
 						if (!isValidPort && sanitizedValue.length > 0) {
-							text.inputEl.style.borderColor =
-								"var(--text-error)";
+							text.inputEl.setCssProps({
+								"border-color": "var(--text-error)",
+							});
 							text.inputEl.setAttribute(
 								"title",
 								t("notice_invalid_port"),
 							);
 							this.showPortNotice();
 						} else {
-							text.inputEl.style.borderColor = "";
+							text.inputEl.setCssProps({ "border-color": "" });
 							text.inputEl.removeAttribute("title");
 							this.plugin.settings.syncthingPort = sanitizedValue;
 							await this.plugin.saveSettings();

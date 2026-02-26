@@ -96,7 +96,8 @@ describe("Logger", () => {
 			Logger.error(LOG_MODULES.MAIN, "test");
 
 			expect(listener).toHaveBeenCalledOnce();
-			expect(listener.mock.calls[0][0].message).toBe("test");
+			const callArg = listener.mock.calls[0][0] as { message: string };
+			expect(callArg.message).toBe("test");
 		});
 
 		it("unsubscribe remove o listener", () => {

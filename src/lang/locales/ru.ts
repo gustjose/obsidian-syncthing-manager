@@ -49,6 +49,7 @@ export default {
 	setting_host_name: "IP Адрес / Хост",
 	setting_host_desc:
 		'Адрес, по которому открывается доступ к интерфейсу Syncthing. Используйте "127.0.0.1" для локальной сети.',
+	setting_host_placeholder: "localhost",
 	setting_port_name: "Порт",
 	setting_port_desc:
 		"Стандартный 8384. Проверьте настройки Syncthing через интерфейс, если вы его изменили.",
@@ -128,6 +129,7 @@ export default {
 	diff_instructions:
 		"Используйте стрелки посередине для переноса изменений в исходный файл. Чтобы полностью сохранить одну из версий, нажмите 'Использовать эту версию' над ней.",
 	btn_save_merge: "Сохранить слияние",
+	diff_legend: "Оригинал (A) ↔ конфликт (B)",
 
 	// Diff View
 	diff_original_header: "Текущий файл (Оригинал)",

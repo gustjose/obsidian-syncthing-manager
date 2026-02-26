@@ -1,4 +1,5 @@
 import { Plugin } from "obsidian";
+import SyncthingController from "../main";
 import { SyncStatus } from "../types";
 import { t } from "../lang/lang";
 import { createSyncthingIcon } from "./icons";
@@ -31,7 +32,7 @@ export class StatusBarManager {
 		if (!this.statusBarItem) return;
 
 		// Tipagem segura para ler propriedades injetadas dinamicamente via plugin principal (SyncthingController)
-		const pluginSafe = this.plugin as any;
+		const pluginSafe = this.plugin as SyncthingController;
 
 		const status: SyncStatus = pluginSafe.currentStatus || "desconhecido";
 		const lastSyncTime: string = pluginSafe.lastSyncTime || "--:--";

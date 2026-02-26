@@ -10,7 +10,7 @@ export const requestUrl = vi.fn();
 // --- Plugin ---
 export class Plugin {
 	app: App;
-	manifest = { dir: ".obsidian/plugins/syncthing-manager" };
+	manifest = { dir: "test-config/plugins/syncthing-manager" };
 
 	constructor() {
 		this.app = new App();
@@ -32,7 +32,7 @@ export class App {
 			read: vi.fn().mockResolvedValue("{}"),
 			write: vi.fn().mockResolvedValue(undefined),
 		},
-		configDir: ".obsidian",
+		configDir: "test-config",
 	};
 	workspace = {
 		on: vi.fn(),

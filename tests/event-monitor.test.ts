@@ -37,10 +37,8 @@ describe("SyncthingEventMonitor Timeout", () => {
 
 	it("should abort zombie requests exactly after 90 seconds (90000ms)", async () => {
 		// Fazemos o requestUrl simular uma conexão travada (pendente) que não resolve nem rejeita
-		(requestUrl as unknown as ReturnType<typeof vi.fn>).mockImplementation(
-			() => {
-				return new Promise(() => {}); // Retorna uma Promise que nunca se conclui
-			},
+		(requestUrl as unknown as ReturnType<typeof vi.fn>).mockReturnValue(
+			new Promise(() => {}), // Retorna uma Promise que nunca se conclui
 		);
 
 		// Ignora o setTimeout inicial do event-monitor para buscar o ID. Injetamos um loop artificial.
@@ -49,7 +47,7 @@ describe("SyncthingEventMonitor Timeout", () => {
 		// Dispara a iteração 1x manualmente
 		// Utilizamos uma promise intermediária pois a função loop() roda em background
 		// @ts-ignore (Acessando método privado para teste unitário)
-		const loopPromise = monitor.loop();
+		void monitor.loop();
 
 		// Avançamos o tempo em 89 segundos.
 		// A requisição aidna deve estar travada e o abortController.signal não acionado!

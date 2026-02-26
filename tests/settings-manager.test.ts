@@ -90,7 +90,8 @@ describe("SettingsManager", () => {
 			const manager = new SettingsManager(plugin as never, secret);
 			await manager.loadSettings();
 
-			expect(secret.migrateIfNeeded).toHaveBeenCalledOnce();
+			// eslint-disable-next-line @typescript-eslint/unbound-method
+			expect(vi.mocked(secret.migrateIfNeeded)).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -106,7 +107,10 @@ describe("SettingsManager", () => {
 
 			await manager.saveSettings(settings);
 
-			const savedData = plugin.saveData.mock.calls[0][0];
+			const savedData = plugin.saveData.mock.calls[0][0] as {
+				syncthingHost: string;
+				syncthingApiKey: string;
+			};
 			expect(savedData.syncthingHost).toBe("device-specific");
 			expect(savedData.syncthingApiKey).toBe("device-specific");
 		});
@@ -119,7 +123,8 @@ describe("SettingsManager", () => {
 
 			await manager.saveSettings(settings);
 
-			expect(secret.saveApiKey).toHaveBeenCalledWith("my-key");
+			// eslint-disable-next-line @typescript-eslint/unbound-method
+			expect(vi.mocked(secret.saveApiKey)).toHaveBeenCalledWith("my-key");
 		});
 	});
 });

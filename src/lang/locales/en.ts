@@ -50,6 +50,7 @@ export default {
 	setting_host_name: "IP address / host",
 	setting_host_desc:
 		'The address where syncthing GUI is running. Use "127.0.0.1" for localhost.',
+	setting_host_placeholder: "Localhost",
 	setting_port_name: "Port",
 	setting_port_desc:
 		"Default is 8384. Check your syncthing GUI settings if you changed it.",
@@ -107,7 +108,7 @@ export default {
 	notice_config_first: "Please configure the API key, URL and folder first",
 	notice_searching: "Connecting to syncthing...",
 	notice_invalid_host:
-		"Invalid host format. Please use IPv4, IPv6, localhost or a valid domain without http/https.",
+		"Invalid host format. Please use ipv4, ipv6, localhost or a valid domain without HTTP/HTTPS.",
 	notice_invalid_port: "Invalid port. Must be a number between 1 and 65535.",
 
 	// Conflict Modal
@@ -124,8 +125,9 @@ export default {
 		"Overwrites your local file with the conflict version (right side).",
 	btn_use_this_version: "Use this version",
 	diff_instructions:
-		"Use the arrows in the middle to transfer changes to the original file. To keep one version entirely, click 'Use this version' above it.",
+		"Use the arrows in the middle to transfer changes to the original file. To keep one version entirely, click 'use this version' above it.",
 	btn_save_merge: "Save merge",
+	diff_legend: "Original (a) ↔ conflict (b)",
 
 	// Diff View
 	diff_original_header: "Current file (original)",

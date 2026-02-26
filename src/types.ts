@@ -1,3 +1,5 @@
+import { EventRef } from "obsidian";
+
 // --- Interfaces ---
 
 export interface AppWithCommands {

@@ -49,6 +49,7 @@ export default {
 	setting_host_name: "Endereço IP / Host",
 	setting_host_desc:
 		'O endereço onde a interface do Syncthing roda. Use "127.0.0.1" para localhost.',
+	setting_host_placeholder: "localhost",
 	setting_port_name: "Porta",
 	setting_port_desc:
 		"Padrão é 8384. Verifique nas configurações do Syncthing se você alterou.",
@@ -128,6 +129,7 @@ export default {
 	diff_instructions:
 		"Use as setas no meio para transferir alterações para o arquivo original. Para manter uma das versões integralmente, clique em 'Usar esta versão' acima dela.",
 	btn_save_merge: "Salvar Merge",
+	diff_legend: "Original (A) ↔ conflito (B)",
 
 	// Visualização de Diferença
 	diff_original_header: "Arquivo Atual (Original)",

@@ -50,7 +50,16 @@ export default defineConfig([
 				"warn",
 				{
 					brands: ["Syncthing", "Obsidian", "GitHub", "Android"],
-					acronyms: ["OK", "API", "URL", "HTTPS", "TLS", "IP", "ID"],
+					acronyms: [
+						"OK",
+						"API",
+						"URL",
+						"HTTPS",
+						"TLS",
+						"IP",
+						"ID",
+						"localhost",
+					],
 					enforceCamelCaseLower: true,
 					allowAutoFix: true,
 				},

@@ -34,13 +34,16 @@ describe("SyncthingAPI", () => {
 
 			const result = await SyncthingAPI.getStatus(BASE_URL, API_KEY);
 
-			expect(mockRequestUrl).toHaveBeenCalledWith(
-				expect.objectContaining({
-					url: `${BASE_URL}/rest/system/status`,
-					method: "GET",
-					headers: expect.objectContaining({ "X-API-Key": API_KEY }),
-				}),
-			);
+			expect(mockRequestUrl).toHaveBeenCalled();
+			const callArg = mockRequestUrl.mock.calls[0][0] as {
+				url: string;
+				method: string;
+				headers: Record<string, string>;
+			};
+			expect(callArg.url).toBe(`${BASE_URL}/rest/system/status`);
+			expect(callArg.method).toBe("GET");
+			expect(callArg.headers["X-API-Key"]).toBe(API_KEY);
+
 			expect(result.myID).toBe("device-123");
 		});
 	});
@@ -96,13 +99,13 @@ describe("SyncthingAPI", () => {
 
 			await SyncthingAPI.forceScan(BASE_URL, API_KEY, "my-folder");
 
-			expect(mockRequestUrl).toHaveBeenCalledWith(
-				expect.objectContaining({
-					method: "POST",
-				}),
-			);
-			const calledUrl = mockRequestUrl.mock.calls[0][0].url;
-			expect(calledUrl).toContain("folder=my-folder");
+			expect(mockRequestUrl).toHaveBeenCalled();
+			const callArg = mockRequestUrl.mock.calls[0][0] as {
+				url: string;
+				method: string;
+			};
+			expect(callArg.method).toBe("POST");
+			expect(callArg.url).toContain("folder=my-folder");
 		});
 	});
 
