@@ -896,7 +896,7 @@ export default class SyncthingController extends Plugin {
 				}
 			});
 		} catch (error) {
-			Logger.error(LOG_MODULES.MAIN, "Failed to fetch history", error);
+			Logger.error(LOG_MODULES.MAIN, "Failed to Fetch History", error);
 		}
 	}
 }

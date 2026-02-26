@@ -39,27 +39,40 @@ export class SyncthingSettingTab extends PluginSettingTab {
 			.setName(t("setting_header_general"))
 			.setHeading();
 
-		new Setting(containerEl)
+		const langSetting = new Setting(containerEl)
 			.setName(t("setting_lang_name"))
-			.setDesc(t("setting_lang_desc"))
-			.addDropdown((dropDown) => {
-				LANGUAGE_LIST.forEach((lang) => {
-					dropDown.addOption(lang.code, lang.display);
-				});
+			.setDesc(t("setting_lang_desc"));
 
-				dropDown.setValue(this.plugin.settings.language);
-				dropDown.onChange((value) => {
-					void (async () => {
-						this.plugin.settings.language = value;
-						await this.plugin.saveSettings();
-						setLanguage(value);
-						this.plugin.app.workspace.trigger(
-							"syncthing:status-changed",
-						);
-						this.display();
-					})();
-				});
+		langSetting.addDropdown((dropDown) => {
+			LANGUAGE_LIST.forEach((lang) => {
+				dropDown.addOption(lang.code, lang.display);
 			});
+
+			dropDown.setValue(this.plugin.settings.language);
+			dropDown.onChange((value) => {
+				void (async () => {
+					this.plugin.settings.language = value;
+					await this.plugin.saveSettings();
+					setLanguage(value);
+					this.plugin.app.workspace.trigger(
+						"syncthing:status-changed",
+					);
+					this.display();
+				})();
+			});
+		});
+
+		langSetting.addExtraButton((btn) => {
+			btn.setIcon("languages")
+				.setTooltip(
+					t("tooltip_help_translate") || "Help translate via Crowdin",
+				)
+				.onClick(() => {
+					window.open(
+						"https://crowdin.com/project/obsidian-syncthing-manager",
+					);
+				});
+		});
 
 		// CONEXÃO
 		new Setting(containerEl).setName(t("setting_header_conn")).setHeading();

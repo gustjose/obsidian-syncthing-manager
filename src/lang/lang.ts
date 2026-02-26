@@ -1,11 +1,11 @@
 import { moment } from "obsidian";
-import en from "./locales/en";
-import pt from "./locales/pt";
-import ru from "./locales/ru";
+import en from "./locales/en.json";
+import pt from "./locales/pt.json";
+import ru from "./locales/ru.json";
 
-const locales: Record<string, Partial<typeof en>> = {
-	pt: pt,
-	ru: ru,
+const locales: Record<string, Record<string, string>> = {
+	pt: pt as Record<string, string>,
+	ru: ru as Record<string, string>,
 };
 
 export const LANGUAGE_LIST = [
@@ -34,8 +34,12 @@ export function t(key: TranslationKey): string {
 	}
 
 	const dict = locales[lang];
+	const defaultDict = en as Record<string, string>;
 
-	const translation = dict && dict[key] ? dict[key] : en[key];
+	const translation =
+		dict && dict[key as string]
+			? dict[key as string]
+			: defaultDict[key as string];
 
 	return translation || key;
 }

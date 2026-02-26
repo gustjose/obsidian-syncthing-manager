@@ -150,6 +150,10 @@ Contributions are welcome! If you encounter bugs or have feature requests, pleas
 - **Build:** `npm run build`
 - **Dev:** `npm run dev`
 
+### 🌍 Translations
+
+Help us make the plugin accessible to everyone! We use **[Crowdin](https://crowdin.com/project/obsidian-syncthing-manager)** to manage translations. You don't need to be a developer to contribute. Just create a free account and start translating strings to your language directly in the browser!
+
 ---
 
 ## License

@@ -15,6 +15,7 @@ export default defineConfig([
 			"package.json",
 			"package-lock.json",
 			"vitest.config.ts",
+			"src/lang/locales/*.json",
 		],
 	},
 	// 2. Configuração para os SCRIPTS (Node.js)
