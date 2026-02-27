@@ -27,7 +27,7 @@
 	"setting_header_interface": "Interface",
 	"setting_header_general": "Geral",
 	"setting_lang_name": "Idioma",
-	"setting_lang_desc": "Force a interface do plugin para um idioma específico ou siga o Obsidian. Este plugin é traduzido pela comunidade. Para ajudar a, clique no ícone para entrar no nosso projeto do Crowdin.",
+	"setting_lang_desc": "Force a interface do plugin para um idioma específico ou siga o Obsidian. Este plugin é traduzido pela comunidade. Para ajudar, clique no ícone para entrar no nosso projeto do Crowdin.",
 	"tooltip_help_translate": "Ajudar a traduzir (Crowdin)",
 	"setting_https_name": "Usar HTTPS",
 	"setting_https_desc": "IMPORTANTE: Mantenha DESATIVADO para Android/Mobile funcionar corretamente, também deve estar desativado no syncthing. Só ative se você configurou certificados TLS válidos no Desktop.",

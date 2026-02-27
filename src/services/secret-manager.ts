@@ -24,10 +24,10 @@ export class SecretManager {
 	 * Prioriza o Keychain quando suportado, com fallback para localStorage.
 	 */
 	loadApiKey(): string {
-		if (this.hasKeychainSupport) {
+		const storage = this.app.secretStorage;
+		if (storage) {
 			try {
-				const secret =
-					this.app.secretStorage!.getSecret(SECRET_KEY_API);
+				const secret = storage.getSecret(SECRET_KEY_API);
 				if (secret) return secret;
 			} catch (e) {
 				Logger.warn(
@@ -46,9 +46,10 @@ export class SecretManager {
 	 * Usa o Keychain quando suportado e mantém localStorage como fallback.
 	 */
 	saveApiKey(value: string): void {
-		if (this.hasKeychainSupport) {
+		const storage = this.app.secretStorage;
+		if (storage) {
 			try {
-				this.app.secretStorage!.setSecret(SECRET_KEY_API, value);
+				storage.setSecret(SECRET_KEY_API, value);
 			} catch (e) {
 				Logger.warn(
 					LOG_MODULES.MAIN,
@@ -66,17 +67,17 @@ export class SecretManager {
 	 * Executado automaticamente durante o carregamento das configurações.
 	 */
 	migrateIfNeeded(): void {
-		if (!this.hasKeychainSupport) return;
+		const storage = this.app.secretStorage;
+		if (!storage) return;
 
 		try {
-			const keychainValue =
-				this.app.secretStorage!.getSecret(SECRET_KEY_API);
+			const keychainValue = storage.getSecret(SECRET_KEY_API);
 			if (keychainValue) return;
 
 			const localValue = window.localStorage.getItem(LS_KEY_API);
 			if (!localValue) return;
 
-			this.app.secretStorage!.setSecret(SECRET_KEY_API, localValue);
+			storage.setSecret(SECRET_KEY_API, localValue);
 			window.localStorage.removeItem(LS_KEY_API);
 
 			Logger.debug(
