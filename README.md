@@ -25,7 +25,7 @@ For full usage guides, installation instructions, and troubleshooting, visit the
 
 ---
 
-## ✨ What's New (v1.2 - v1.3)
+## ✨ What's New (v1.2 - v1.4)
 
 Syncthing Manager is constantly evolving. Here are the latest highlights:
 
