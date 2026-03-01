@@ -25,16 +25,17 @@ For full usage guides, installation instructions, and troubleshooting, visit the
 
 ---
 
-## ✨ New in v1.1: Visual Sync
+## ✨ What's New (v1.2 - v1.3)
 
-Now you can see exactly what is happening with your files without leaving the editor.
+Syncthing Manager is constantly evolving. Here are the latest highlights:
 
-- **Tab Status Icons:** Instant feedback on the file you are editing.
-    - 🟠 **Syncing:** Spinning icon indicates the file is being uploaded/downloaded.
-    - 🟢 **Synced:** A checkmark appears briefly when synchronization is complete.
-- **Smart History:** Know the direction of your data.
-    - ↙️ **Incoming:** Changes received from a remote device.
-    - ↗️ **Outgoing:** Local changes sent to other devices.
+- **Visual Conflict Resolver:** Safely compare and merge `.sync-conflict` files with a side-by-side diff view powered by CodeMirror 6.
+- **Sync Progress Bar:** Monitor real-time file transfer progress directly from the side panel.
+- **Quick Ignore:** Right-click any file or folder and select _"Don't sync this"_ to instantly add it to your `.stignore`.
+- **Global Localization:** Support for over 20 languages (thanks to our community on Crowdin!).
+- **Security & Stability:** API keys are now securely stored in the Obsidian native Keychain. Enhanced connection resiliency with a new long-polling architecture, plus a built-in Debug Console.
+
+_Note: The **Visual Sync** feature (spinning 🟠 and checkmark 🟢 icons on active tabs) introduced in v1.1 remains one of our core capabilities!_
 
 ---
 
