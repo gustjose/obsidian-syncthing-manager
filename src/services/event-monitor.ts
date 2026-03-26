@@ -438,19 +438,19 @@ export class SyncthingEventMonitor {
 			return;
 		}
 
-		// Prioridade 3: Atividade (Sincronizando/Escaneando)
+		// Prioridade 3: Disponibilidade (Nenhum dispositivo conectado)
+		if (this.plugin.connectedDeviceNames.length === 0) {
+			this.updateStatus("aguardando-dispositivos");
+			return;
+		}
+
+		// Prioridade 4: Atividade (Sincronizando/Escaneando)
 		if (this.lastKnownState !== "idle") {
 			if (this.idleGraceTimer) {
 				clearTimeout(this.idleGraceTimer);
 				this.idleGraceTimer = null;
 			}
 			this.updateStatus("sincronizando");
-			return;
-		}
-
-		// Prioridade 4: Disponibilidade (Nenhum dispositivo conectado)
-		if (this.plugin.connectedDeviceNames.length === 0) {
-			this.updateStatus("aguardando-dispositivos");
 			return;
 		}
 

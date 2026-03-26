@@ -837,7 +837,11 @@ export default class SyncthingController extends Plugin {
 				const state = folderStats.state;
 				const needBytes = folderStats.needBytes;
 
-				if (
+				if (this.connectedDevices === 0) {
+					if (!skipIdleStatusUpdate) {
+						this.updateStatus("aguardando-dispositivos");
+					}
+				} else if (
 					state === "scanning" ||
 					state === "syncing" ||
 					needBytes > 0
@@ -853,11 +857,7 @@ export default class SyncthingController extends Plugin {
 					});
 
 					if (!skipIdleStatusUpdate) {
-						if (this.connectedDevices === 0) {
-							this.updateStatus("aguardando-dispositivos");
-						} else {
-							this.updateStatus("conectado");
-						}
+						this.updateStatus("conectado");
 					}
 				} else {
 					this.updateStatus("erro");
