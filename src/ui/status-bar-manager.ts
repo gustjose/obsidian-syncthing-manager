@@ -38,7 +38,10 @@ export class StatusBarManager {
 		const lastSyncTime: string = pluginSafe.lastSyncTime || "--:--";
 		const connectedDevices: number = pluginSafe.connectedDevices || 0;
 
-		const { text, cssClass } = getStatusDisplay(status);
+		const { text, cssClass } = getStatusDisplay(
+			status,
+			pluginSafe.remotePausedDevice,
+		);
 
 		const tooltipInfo = `${text}\n\n${t("info_last_sync")}: ${lastSyncTime}\n${t("info_devices")}: ${connectedDevices}`;
 
