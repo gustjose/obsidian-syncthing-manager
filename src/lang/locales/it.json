@@ -199,5 +199,6 @@
 	"tab_syncing": "Syncing...",
 	"tab_synced": "Synced!",
 	"conflict_delete_error": "Error deleting file.",
-	"conflict_restore_error": "Error restoring conflict."
+	"conflict_restore_error": "Error restoring conflict.",
+	"notice_no_devices_warning": "No remote devices connected. Sync will be local only."
 }

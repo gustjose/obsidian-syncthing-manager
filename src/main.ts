@@ -683,6 +683,11 @@ export default class SyncthingController extends Plugin {
 		}
 
 		new Notice(t("notice_syncing"));
+
+		if (this.connectedDevices === 0) {
+			new Notice(t("notice_no_devices_warning"));
+		}
+
 		this.updateStatus("sincronizando");
 
 		const isConexaoValida = await this.initializeConnection(

@@ -199,5 +199,6 @@
 	"tab_syncing": "Синхронизация...",
 	"tab_synced": "Синхронизировано!",
 	"conflict_delete_error": "Ошибка удаления файла.",
-	"conflict_restore_error": "Ошибка восстановления конфликта."
+	"conflict_restore_error": "Ошибка восстановления конфликта.",
+	"notice_no_devices_warning": "No remote devices connected. Sync will be local only."
 }
