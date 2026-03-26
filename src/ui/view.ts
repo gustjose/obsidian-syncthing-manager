@@ -82,10 +82,22 @@ export class SyncthingView extends ItemView {
 		const iconDiv = statusBox.createDiv({ cls: "st-big-icon" });
 
 		const {
-			text: statusText,
+			text: statusTextBase,
 			cssClass,
 			icon,
 		} = getStatusDisplay(this.plugin.currentStatus);
+
+		let statusText = statusTextBase;
+		if (
+			this.plugin.currentStatus === "pausado-remoto" &&
+			this.plugin.remotePausedDevice
+		) {
+			statusText = statusTextBase.replace(
+				"{device}",
+				this.plugin.remotePausedDevice,
+			);
+		}
+
 		setIcon(iconDiv, icon);
 
 		iconDiv.addClass(cssClass);
@@ -200,8 +212,17 @@ export class SyncthingView extends ItemView {
 			btnPause.disabled = true;
 		}
 
-		const pauseIcon = this.plugin.isPaused ? "play-circle" : "pause-circle";
+		const pauseIcon = this.plugin.isPaused
+			? "play-circle"
+			: isRemotePaused
+				? "lock"
+				: "pause-circle";
+
 		setIcon(btnPause, pauseIcon);
+
+		if (isRemotePaused) {
+			btnPause.addClass("st-btn-remote-paused");
+		}
 
 		btnPause.addEventListener("click", () => {
 			this.plugin

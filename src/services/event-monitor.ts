@@ -1,8 +1,9 @@
-import { requestUrl, RequestUrlParam } from "obsidian";
+import { requestUrl, RequestUrlParam, Notice } from "obsidian";
 import SyncthingController from "../main";
 import { Logger, LOG_MODULES } from "../utils/logger";
 import { SyncStatus } from "../types";
 import { SyncthingAPI } from "../api/syncthing-api";
+import { t } from "../lang/lang";
 
 interface SyncthingEvent {
 	id: number;
@@ -343,6 +344,7 @@ export class SyncthingEventMonitor {
 
 		this.lastRemoteCheck = Date.now();
 		let anyRemotePaused = false;
+		let pausedDeviceID: string | null = null;
 
 		try {
 			// 1. Obtém conexões atuais para saber quais dispositivos estão ativos
@@ -368,6 +370,7 @@ export class SyncthingEventMonitor {
 
 					if (completion.remoteState === "paused") {
 						anyRemotePaused = true;
+						pausedDeviceID = deviceId;
 						Logger.debug(
 							LOG_MODULES.EVENT,
 							`Detectada pausa remota no dispositivo: ${deviceId}`,
@@ -386,6 +389,23 @@ export class SyncthingEventMonitor {
 			// 3. Se o estado mudou, reavalia o status global
 			if (this.remotePaused !== anyRemotePaused) {
 				this.remotePaused = anyRemotePaused;
+
+				if (anyRemotePaused && pausedDeviceID) {
+					const deviceName =
+						this.plugin.deviceMap.get(pausedDeviceID) ||
+						pausedDeviceID.substring(0, 7);
+					this.plugin.remotePausedDevice = deviceName;
+
+					// Sugestão 3: Alerta Ativo (Notice)
+					const noticeMsg = t("notice_remote_paused_alert").replace(
+						"{device}",
+						deviceName,
+					);
+					new Notice(noticeMsg);
+				} else {
+					this.plugin.remotePausedDevice = null;
+				}
+
 				Logger.debug(
 					LOG_MODULES.EVENT,
 					`Estado de pausa remota alterado para: ${anyRemotePaused}`,

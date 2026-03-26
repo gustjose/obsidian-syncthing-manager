@@ -785,6 +785,199 @@
 		gap: 4px 8px;
 	}
 }
+/* Estilo do botão ao passar o mouse nele */
+.st-explorer-btn:hover {
+	color: var(--text-normal);
+}
+
+.st-explorer-btn svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Estado: Carregando (Girando) */
+.st-explorer-btn.st-loading {
+	opacity: 1 !important;
+	color: var(--text-accent);
+	pointer-events: none;
+}
+
+.st-explorer-btn.st-loading svg {
+	animation: st-spin 1s linear infinite;
+}
+
+/* Estado: Sucesso (Verde) */
+.st-explorer-btn.st-success {
+	color: var(--text-success) !important;
+	opacity: 1 !important;
+}
+
+/* --- Badges de Dispositivos --- */
+.st-badges-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	justify-content: flex-end; /* Alinha badges à direita */
+	max-width: 60%; /* Evita ocupar toda a linha se o label for longo */
+}
+
+.st-device-badge {
+	font-size: 0.75em;
+	background-color: var(--background-modifier-border);
+	color: var(--text-normal);
+	padding: 2px 6px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border-hover);
+	white-space: nowrap;
+}
+
+/* --- Debug Report Modal --- */
+
+.st-debug-report-textarea {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: 12px;
+	resize: vertical;
+}
+
+.st-debug-report-buttons {
+	display: flex;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+/* --- Debug Console Modal --- */
+
+.st-debug-console-modal {
+	width: 85vw;
+	max-width: 900px;
+}
+
+.st-debug-console-filters {
+	margin-bottom: 12px;
+}
+
+.st-debug-console-filters .setting-item {
+	border-bottom: none;
+	padding: 4px 0;
+}
+
+.st-debug-console-modules-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	margin-top: 6px;
+}
+
+.st-debug-console-module-item {
+	font-size: 0.85em;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.st-debug-console-list {
+	height: clamp(200px, 45vh, 400px);
+	overflow-y: auto;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 6px;
+	padding: 8px;
+	font-family: var(--font-monospace);
+	font-size: 11px;
+	background-color: var(--background-primary-alt);
+}
+
+.st-debug-console-empty {
+	color: var(--text-muted);
+	text-align: center;
+	padding: 40px 0;
+}
+
+.st-debug-console-entry {
+	padding: 3px 0;
+	border-bottom: 1px solid var(--background-modifier-border-hover);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 6px;
+	align-items: baseline;
+}
+
+.st-debug-console-entry:last-child {
+	border-bottom: none;
+}
+
+.st-debug-console-time {
+	color: var(--text-faint);
+	flex-shrink: 0;
+}
+
+.st-debug-console-level {
+	font-weight: bold;
+	flex-shrink: 0;
+	min-width: 42px;
+}
+
+.st-log-level-error {
+	color: var(--text-error);
+}
+
+.st-log-level-warn {
+	color: var(--text-warning);
+}
+
+.st-log-level-debug {
+	color: var(--text-muted);
+}
+
+.st-debug-console-module {
+	color: var(--text-accent);
+	flex-shrink: 0;
+}
+
+.st-debug-console-msg {
+	color: var(--text-normal);
+	word-break: break-word;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.st-debug-console-details {
+	width: 100%;
+	color: var(--text-faint);
+	padding-left: 16px;
+	font-size: 0.9em;
+}
+
+.st-debug-console-footer {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 12px;
+}
+
+/* Mobile / telas pequenas */
+@media (max-width: 600px) {
+	.st-debug-console-modal {
+		width: 95vw;
+	}
+
+	.st-debug-console-list {
+		font-size: 10px;
+		padding: 6px;
+	}
+
+	.st-debug-console-entry {
+		gap: 2px 4px;
+	}
+
+	.st-debug-console-time {
+		display: none;
+	}
+
+	.st-debug-console-modules-list {
+		gap: 4px 8px;
+	}
+}
 
 /* --- API Key Status (Keychain) --- */
 .st-api-key-status {
@@ -796,4 +989,10 @@
 
 .st-api-key-status.st-api-key-configured {
 	color: var(--text-success);
+}
+
+.st-btn-remote-paused {
+	opacity: 0.6;
+	filter: grayscale(0.8);
+	cursor: not-allowed;
 }

@@ -48,6 +48,7 @@ export default class SyncthingController extends Plugin {
 	public isPaused: boolean = false;
 	public deviceMap: Map<string, string> = new Map();
 	public connectedDeviceNames: string[] = [];
+	public remotePausedDevice: string | null = null;
 
 	get apiUrl(): string {
 		const protocol = this.settings.useHttps ? "https://" : "http://";
