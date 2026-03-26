@@ -182,15 +182,23 @@ export class SyncthingView extends ItemView {
 				.catch((err) => console.error(err));
 		});
 
-		// 4.1 Botão Pause/Resume
+		const isRemotePaused =
+			this.plugin.currentStatus === "pausado-remoto";
+
 		const btnPause = btnContainer.createEl("button", {
 			cls: "st-pause-button",
 			attr: {
-				"aria-label": this.plugin.isPaused
-					? t("tooltip_resume") || "Resume sync"
-					: t("tooltip_pause") || "Pause sync",
+				"aria-label": isRemotePaused
+					? t("status_paused_remote")
+					: this.plugin.isPaused
+						? t("tooltip_resume") || "Resume sync"
+						: t("tooltip_pause") || "Pause sync",
 			},
 		});
+
+		if (isRemotePaused) {
+			btnPause.disabled = true;
+		}
 
 		const pauseIcon = this.plugin.isPaused ? "play-circle" : "pause-circle";
 		setIcon(btnPause, pauseIcon);
