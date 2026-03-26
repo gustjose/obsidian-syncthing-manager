@@ -448,7 +448,13 @@ export class SyncthingEventMonitor {
 			return;
 		}
 
-		// Prioridade 4: Ocioso (Idle)
+		// Prioridade 4: Disponibilidade (Nenhum dispositivo conectado)
+		if (this.plugin.connectedDeviceNames.length === 0) {
+			this.updateStatus("aguardando-dispositivos");
+			return;
+		}
+
+		// Prioridade 5: Ocioso (Idle)
 		if (this.lastKnownCompletion === 100) {
 			if (this.idleGraceTimer) {
 				clearTimeout(this.idleGraceTimer);

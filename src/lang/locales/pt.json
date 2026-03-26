@@ -11,6 +11,7 @@
 	"status_unknown": "Desconhecido",
 	"status_paused": "Pausado",
 	"status_paused_remote": "Pausado em: {device}",
+	"status_waiting_devices": "Aguardando dispositivos",
 	"status_config": "Configuração pendente",
 	"info_last_sync": "Último Sync",
 	"info_devices": "Dispositivos Online",

@@ -11,6 +11,7 @@
 	"status_unknown": "Неизвестно",
 	"status_paused": "Пауза",
 	"status_paused_remote": "Приостановлено на: {device}",
+	"status_waiting_devices": "Waiting for devices",
 	"status_config": "Ожидание конфигурации",
 	"info_last_sync": "Последняя синхронизация",
 	"info_devices": "Устройств в сети",

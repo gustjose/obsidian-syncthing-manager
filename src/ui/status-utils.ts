@@ -30,6 +30,12 @@ export function getStatusDisplay(status: SyncStatus): StatusDisplay {
 				cssClass: "st-color-muted",
 				icon: "wifi-off",
 			};
+		case "aguardando-dispositivos":
+			return {
+				text: t("status_waiting_devices"),
+				cssClass: "st-color-muted",
+				icon: "monitor",
+			};
 		case "erro":
 			return {
 				text: t("status_error"),
