@@ -2,6 +2,7 @@ import { requestUrl, RequestUrlParam } from "obsidian";
 import SyncthingController from "../main";
 import { Logger, LOG_MODULES } from "../utils/logger";
 import { SyncStatus } from "../types";
+import { SyncthingAPI } from "../api/syncthing-api";
 
 interface SyncthingEvent {
 	id: number;
@@ -48,6 +49,11 @@ export class SyncthingEventMonitor {
 	// Estado interno para garantir que a UI só fique verde (idle) se a sincronização física (100%) também atestar.
 	private lastKnownState: string = "idle";
 	private lastKnownCompletion: number = 100;
+
+	// Estado remoto (dispositivos conectados)
+	private remotePaused: boolean = false;
+	private lastRemoteCheck: number = 0;
+	private readonly REMOTE_CHECK_INTERVAL = 20000; // 20 segundos
 
 	public get currentCompletion(): number {
 		return this.lastKnownCompletion;
@@ -167,6 +173,12 @@ export class SyncthingEventMonitor {
 						}
 					}
 				}
+
+				// Verificação Periódica de Estado Remoto (Pausa)
+				const now = Date.now();
+				if (now - this.lastRemoteCheck > this.REMOTE_CHECK_INTERVAL) {
+					void this.checkRemotePausedStatus();
+				}
 			} catch (error) {
 				Logger.debug(
 					LOG_MODULES.EVENT,
@@ -217,6 +229,7 @@ export class SyncthingEventMonitor {
 		) {
 			Logger.debug(LOG_MODULES.EVENT, `[Event] ${event.type}`);
 			void this.plugin.atualizarContagemDispositivos();
+			void this.checkRemotePausedStatus();
 			return;
 		}
 
@@ -312,24 +325,104 @@ export class SyncthingEventMonitor {
 		}
 	}
 
+	/**
+	 * Verifica se algum dos dispositivos conectados pausou a pasta sincronizada.
+	 * Utiliza o endpoint /rest/db/completion para checar o 'remoteState'.
+	 */
+	private async checkRemotePausedStatus(): Promise<void> {
+		const targetFolder = this.plugin.settings.syncthingFolderId;
+		if (
+			!targetFolder ||
+			!this.plugin.settings.syncthingApiKey ||
+			!this.running
+		)
+			return;
+
+		this.lastRemoteCheck = Date.now();
+		let anyRemotePaused = false;
+
+		try {
+			// 1. Obtém conexões atuais para saber quais dispositivos estão ativos
+			const connections = await SyncthingAPI.getConnections(
+				this.plugin.apiUrl,
+				this.plugin.settings.syncthingApiKey,
+			);
+
+			const devices = connections.connections || {};
+			const connectedDeviceIDs = Object.keys(devices).filter(
+				(id) => devices[id].connected,
+			);
+
+			// 2. Para cada dispositivo conectado, verifica o estado da pasta
+			for (const deviceId of connectedDeviceIDs) {
+				try {
+					const completion = await SyncthingAPI.getCompletion(
+						this.plugin.apiUrl,
+						this.plugin.settings.syncthingApiKey,
+						targetFolder,
+						deviceId,
+					);
+
+					if (completion.remoteState === "paused") {
+						anyRemotePaused = true;
+						Logger.debug(
+							LOG_MODULES.EVENT,
+							`Detectada pausa remota no dispositivo: ${deviceId}`,
+						);
+						break;
+					}
+				} catch (err) {
+					Logger.error(
+						LOG_MODULES.EVENT,
+						`Erro ao checar completion do dispositivo ${deviceId}`,
+						err,
+					);
+				}
+			}
+
+			// 3. Se o estado mudou, reavalia o status global
+			if (this.remotePaused !== anyRemotePaused) {
+				this.remotePaused = anyRemotePaused;
+				Logger.debug(
+					LOG_MODULES.EVENT,
+					`Estado de pausa remota alterado para: ${anyRemotePaused}`,
+				);
+				this.evaluateCombinedState();
+			}
+		} catch (error) {
+			Logger.error(
+				LOG_MODULES.EVENT,
+				"Falha na verificação de pausa remota",
+				error,
+			);
+		}
+	}
+
 	private evaluateCombinedState() {
-		// Se não estiver idle, cancela qualquer timer pendente imediatamente e aplica cor.
+		// Prioridade 1: Erro crítico
+		if (this.lastKnownState === "error") {
+			this.updateStatus("erro");
+			return;
+		}
+
+		// Prioridade 2: Pausa (Local ou Remota)
+		if (this.plugin.isPaused || this.remotePaused) {
+			this.updateStatus("pausado");
+			return;
+		}
+
+		// Prioridade 3: Atividade (Sincronizando/Escaneando)
 		if (this.lastKnownState !== "idle") {
 			if (this.idleGraceTimer) {
 				clearTimeout(this.idleGraceTimer);
 				this.idleGraceTimer = null;
 			}
-			if (this.lastKnownState === "error") {
-				this.updateStatus("erro");
-			} else {
-				this.updateStatus("sincronizando");
-			}
+			this.updateStatus("sincronizando");
 			return;
 		}
 
-		// Se o estado for idle:
+		// Prioridade 4: Ocioso (Idle)
 		if (this.lastKnownCompletion === 100) {
-			// Se o completion já é 100, podemos aplicar verde imediatamente
 			if (this.idleGraceTimer) {
 				clearTimeout(this.idleGraceTimer);
 				this.idleGraceTimer = null;

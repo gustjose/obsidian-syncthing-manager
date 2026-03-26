@@ -119,6 +119,16 @@ export interface SyncthingSystemVersion {
 	arch: string;
 }
 
+export interface SyncthingCompletionResponse {
+	completion: number;
+	globalBytes: number;
+	needBytes: number;
+	needDeletes: number;
+	needItems: number;
+	remoteState: string;
+	sequence: number;
+}
+
 export class SyncthingAPI {
 	// --- System Status & Config ---
 
@@ -220,6 +230,28 @@ export class SyncthingAPI {
 			"GET",
 			undefined,
 			[404, 500], // Ignora log vermelhos no console caso a pasta não esteja disponível
+		);
+	}
+
+	/**
+	 * Retorna o progresso de sincronização e o estado remoto de uma pasta.
+	 * @param folderId ID da pasta.
+	 * @param deviceId ID do dispositivo (opcional, se omitido usa o local).
+	 */
+	static async getCompletion(
+		url: string,
+		apiKey: string,
+		folderId: string,
+		deviceId?: string,
+	): Promise<SyncthingCompletionResponse> {
+		const params = new URLSearchParams({ folder: folderId });
+		if (deviceId) params.append("device", deviceId);
+
+		return this.request<SyncthingCompletionResponse>(
+			url,
+			apiKey,
+			`/rest/db/completion?${params.toString()}`,
+			"GET",
 		);
 	}
 

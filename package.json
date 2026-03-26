@@ -15,7 +15,8 @@
 		"lint": "eslint .",
 		"docs:serve": "mkdocs serve",
 		"docs:build": "mkdocs build",
-		"docs:deploy": "mkdocs gh-deploy"
+		"docs:deploy": "mkdocs gh-deploy",
+		"th0th": "cd C:\\Users\\Gustavo\\Desenvolvedor\\th0th && bun run start:api"
 	},
 	"keywords": [
 		"obsidian",

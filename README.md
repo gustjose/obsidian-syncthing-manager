@@ -58,7 +58,8 @@ _Note: The **Visual Sync** feature (spinning 🟠 and checkmark 🟢 icons on ac
 
 1. **Install:** Use [BRAT](#installation) or download the latest release.
 2. **Get API Key:** In Syncthing, navigate to **Actions** > **Settings** > **General** and copy the **API Key**.
-3. **Configure:** - Open Obsidian Settings > **Syncthing Manager**.
+3. **Configure:**
+    - Open Obsidian Settings > **Syncthing Manager**.
     - Paste your API Key and click **Test Connection**.
     - **Important:** Select your **Vault Folder** from the dropdown menu to track events.
 
@@ -154,6 +155,8 @@ Contributions are welcome! If you encounter bugs or have feature requests, pleas
 ### 🌍 Translations
 
 Help us make the plugin accessible to everyone! We use **[Crowdin](https://crowdin.com/project/obsidian-syncthing-manager)** to manage translations. You don't need to be a developer to contribute. Just create a free account and start translating strings to your language directly in the browser!
+
+![](https://badges.awesome-crowdin.com/translation-17600714-875642.png)
 
 ---
 

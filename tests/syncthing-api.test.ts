@@ -109,6 +109,38 @@ describe("SyncthingAPI", () => {
 		});
 	});
 
+	describe("getCompletion()", () => {
+		it("faz GET com folder e device no query", async () => {
+			mockRequestUrl.mockResolvedValue(
+				mockResponse(200, {
+					completion: 100,
+					globalBytes: 1000,
+					needBytes: 0,
+					remoteState: "valid",
+				}),
+			);
+
+			await SyncthingAPI.getCompletion(BASE_URL, API_KEY, "f1", "d1");
+
+			expect(mockRequestUrl).toHaveBeenCalled();
+			const callArg = mockRequestUrl.mock.calls[0][0] as { url: string };
+			expect(callArg.url).toContain("folder=f1");
+			expect(callArg.url).toContain("device=d1");
+			expect(callArg.url).toContain("/rest/db/completion");
+		});
+
+		it("faz GET apenas com folder se device não for fornecido", async () => {
+			mockRequestUrl.mockResolvedValue(mockResponse(200, {}));
+
+			await SyncthingAPI.getCompletion(BASE_URL, API_KEY, "f1");
+
+			expect(mockRequestUrl).toHaveBeenCalled();
+			const callArg = mockRequestUrl.mock.calls[0][0] as { url: string };
+			expect(callArg.url).toContain("folder=f1");
+			expect(callArg.url).not.toContain("device=");
+		});
+	});
+
 	describe("request() — tratamento de erros", () => {
 		it("lança erro em status 403", async () => {
 			mockRequestUrl.mockResolvedValue(
