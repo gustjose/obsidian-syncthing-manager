@@ -42,6 +42,12 @@ export function getStatusDisplay(status: SyncStatus): StatusDisplay {
 				cssClass: "st-color-muted",
 				icon: "pause-circle",
 			};
+		case "pausado-remoto":
+			return {
+				text: t("status_paused_remote"),
+				cssClass: "st-color-muted",
+				icon: "pause-circle",
+			};
 		case "configurando":
 			return {
 				text: t("status_config"),

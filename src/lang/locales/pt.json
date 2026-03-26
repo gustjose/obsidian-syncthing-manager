@@ -10,6 +10,7 @@
 	"status_offline": "Desconectado",
 	"status_unknown": "Desconhecido",
 	"status_paused": "Pausado",
+	"status_paused_remote": "Pausado em outro dispositivo",
 	"status_config": "Configuração pendente",
 	"info_last_sync": "Último Sync",
 	"info_devices": "Dispositivos Online",

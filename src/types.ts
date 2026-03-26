@@ -35,6 +35,7 @@ export type SyncStatus =
 	| "sincronizando"
 	| "escutando"
 	| "pausado"
+	| "pausado-remoto"
 	| "desconectado"
 	| "erro"
 	| "configurando"

@@ -350,6 +350,7 @@ export default class SyncthingController extends Plugin {
 				await this.ignoreManager.ensureDefaults();
 			}
 			await this.atualizarContagemDispositivos();
+			await this.checkPauseStatus();
 			await this.reconcileFileStates();
 
 			// Reinicia o monitor se ele não estiver rodando

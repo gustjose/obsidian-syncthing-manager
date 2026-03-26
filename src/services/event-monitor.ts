@@ -100,6 +100,9 @@ export class SyncthingEventMonitor {
 			);
 		}
 
+		// Verificação Inicial de Pausa Remota
+		void this.checkRemotePausedStatus();
+
 		this.running = true;
 		void this.loop();
 	}
@@ -406,8 +409,12 @@ export class SyncthingEventMonitor {
 		}
 
 		// Prioridade 2: Pausa (Local ou Remota)
-		if (this.plugin.isPaused || this.remotePaused) {
+		if (this.plugin.isPaused) {
 			this.updateStatus("pausado");
+			return;
+		}
+		if (this.remotePaused) {
+			this.updateStatus("pausado-remoto");
 			return;
 		}
 
