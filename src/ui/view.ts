@@ -82,21 +82,13 @@ export class SyncthingView extends ItemView {
 		const iconDiv = statusBox.createDiv({ cls: "st-big-icon" });
 
 		const {
-			text: statusTextBase,
+			text: statusText,
 			cssClass,
 			icon,
-		} = getStatusDisplay(this.plugin.currentStatus);
-
-		let statusText = statusTextBase;
-		if (
-			this.plugin.currentStatus === "pausado-remoto" &&
-			this.plugin.remotePausedDevice
-		) {
-			statusText = statusTextBase.replace(
-				"{device}",
-				this.plugin.remotePausedDevice,
-			);
-		}
+		} = getStatusDisplay(
+			this.plugin.currentStatus,
+			this.plugin.remotePausedDevice,
+		);
 
 		setIcon(iconDiv, icon);
 

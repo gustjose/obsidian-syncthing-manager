@@ -1,5 +1,6 @@
 import { App, debounce } from "obsidian";
 import { Logger, LOG_MODULES } from "../utils/logger";
+import { SyncStatus } from "../types";
 
 // Tipos de Estado
 export type FileSyncStatus = "pending" | "synced";
@@ -14,6 +15,9 @@ export interface FileState {
 interface StateData {
 	version: number;
 	activeFiles: Record<string, FileState>;
+	lastSyncTime?: string;
+	connectedDevices?: number;
+	lastStatus?: SyncStatus;
 }
 
 export class FileStateManager {
@@ -163,6 +167,35 @@ export class FileStateManager {
 		return Object.values(this.data.activeFiles).filter(
 			(f) => f.status === "pending",
 		);
+	}
+
+	/**
+	 * Define o estado global do plugin
+	 */
+	setGlobalState(
+		status: SyncStatus,
+		lastSyncTime: string,
+		connectedDevices: number,
+	) {
+		this.data.lastStatus = status;
+		this.data.lastSyncTime = lastSyncTime;
+		this.data.connectedDevices = connectedDevices;
+		this.requestSave();
+	}
+
+	/**
+	 * Obtém o estado global do plugin
+	 */
+	getGlobalState(): {
+		status?: SyncStatus;
+		lastSyncTime?: string;
+		connectedDevices?: number;
+	} {
+		return {
+			status: this.data.lastStatus,
+			lastSyncTime: this.data.lastSyncTime,
+			connectedDevices: this.data.connectedDevices,
+		};
 	}
 
 	/**

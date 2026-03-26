@@ -23,6 +23,7 @@ import { Logger, LOG_MODULES } from "./utils/logger";
 import { createSyncthingIcon } from "./ui/icons";
 import { DebugReportModal } from "./ui/debug-report-modal";
 import { SecretManager } from "./services/secret-manager";
+import { getStatusDisplay } from "./ui/status-utils";
 import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
 
 export default class SyncthingController extends Plugin {
@@ -79,6 +80,21 @@ export default class SyncthingController extends Plugin {
 		);
 		await this.fileStateManager.load();
 
+		// Restaurar estado global salvo
+		const savedEntry = this.fileStateManager.getGlobalState();
+		if (savedEntry) {
+			if (savedEntry.status) this.currentStatus = savedEntry.status;
+			if (savedEntry.lastSyncTime)
+				this.lastSyncTime = savedEntry.lastSyncTime;
+			if (savedEntry.connectedDevices !== undefined)
+				this.connectedDevices = savedEntry.connectedDevices;
+			
+			// Notifica a UI sobre o estado restaurado (com um pequeno delay para garantir que a UI esteja pronta)
+			setTimeout(() => {
+				this.app.workspace.trigger("syncthing:status-changed");
+			}, 100);
+		}
+
 		const ignoreManager = new IgnoreManager(this.app, this);
 
 		this.registerView(
@@ -114,7 +130,12 @@ export default class SyncthingController extends Plugin {
 						const svg = createSyncthingIcon("");
 						iconContainer.appendChild(svg);
 
-						const tooltipInfo = `${t("status_synced")}\n\n${t(
+						const statusText = getStatusDisplay(
+							this.currentStatus,
+							this.remotePausedDevice,
+						).text;
+
+						const tooltipInfo = `${statusText}\n\n${t(
 							"info_last_sync",
 						)}: ${this.lastSyncTime}\n${t("info_devices")}: ${
 							this.connectedDevices
@@ -339,6 +360,9 @@ export default class SyncthingController extends Plugin {
 			this.ignoreManager = ignoreManager;
 		}
 
+		// Primeiro, atualiza a contagem de dispositivos
+		await this.atualizarContagemDispositivos();
+
 		const conexaoValida = await this.verificarConexao(
 			showNotice,
 			skipIdleStatusUpdate,
@@ -350,7 +374,6 @@ export default class SyncthingController extends Plugin {
 			if (this.ignoreManager) {
 				await this.ignoreManager.ensureDefaults();
 			}
-			await this.atualizarContagemDispositivos();
 			await this.checkPauseStatus();
 			await this.reconcileFileStates();
 
@@ -641,6 +664,7 @@ export default class SyncthingController extends Plugin {
 				return this.deviceMap.get(id) || id.substring(0, 7);
 			});
 
+			this.saveGlobalState();
 			this.app.workspace.trigger("syncthing:status-changed");
 		} catch (e) {
 			Logger.debug(
@@ -659,8 +683,7 @@ export default class SyncthingController extends Plugin {
 		}
 
 		new Notice(t("notice_syncing"));
-		this.currentStatus = "sincronizando";
-		this.app.workspace.trigger("syncthing:status-changed");
+		this.updateStatus("sincronizando");
 
 		const isConexaoValida = await this.initializeConnection(
 			this.ignoreManager || undefined,
@@ -693,8 +716,7 @@ export default class SyncthingController extends Plugin {
 		} catch (error) {
 			Logger.warn(LOG_MODULES.MAIN, "Erro ao forçar scan:", error);
 			new Notice("Erro!");
-			this.currentStatus = "erro";
-			this.app.workspace.trigger("syncthing:status-changed");
+			this.updateStatus("erro");
 		}
 	}
 
@@ -713,7 +735,7 @@ export default class SyncthingController extends Plugin {
 			if (currentFolder) {
 				this.isPaused = !!currentFolder.paused;
 				if (this.isPaused) {
-					this.currentStatus = "pausado";
+					this.updateStatus("pausado");
 				}
 			}
 		} catch (e) {
@@ -759,7 +781,7 @@ export default class SyncthingController extends Plugin {
 				);
 				new Notice("Pausing sync...");
 				this.isPaused = true;
-				this.currentStatus = "pausado";
+				this.updateStatus("pausado");
 			}
 			this.app.workspace.trigger("syncthing:status-changed");
 		} catch (error) {
@@ -778,9 +800,8 @@ export default class SyncthingController extends Plugin {
 				this.settings.syncthingFolderId = "";
 				this.settings.syncthingFolderLabel = "";
 				await this.saveSettings();
-				this.currentStatus = "configurando";
+				this.updateStatus("configurando");
 				new Notice(t("notice_folder_migration"));
-				this.app.workspace.trigger("syncthing:status-changed");
 				return false;
 			}
 
@@ -792,7 +813,7 @@ export default class SyncthingController extends Plugin {
 				);
 
 				if (!isFolderValid) {
-					this.currentStatus = "erro";
+					this.updateStatus("erro");
 					if (showNotice) {
 						new Notice(t("notice_folder_missing"));
 					}
@@ -800,7 +821,6 @@ export default class SyncthingController extends Plugin {
 						LOG_MODULES.MAIN,
 						`Pasta "${this.settings.syncthingFolderId}" não encontrada no servidor. Config mantida para retry.`,
 					);
-					this.app.workspace.trigger("syncthing:status-changed");
 					return false;
 				}
 
@@ -818,7 +838,7 @@ export default class SyncthingController extends Plugin {
 					needBytes > 0
 				) {
 					if (!skipIdleStatusUpdate) {
-						this.currentStatus = "sincronizando";
+						this.updateStatus("sincronizando");
 						if (showNotice) new Notice(t("notice_syncing"));
 					}
 				} else if (state === "idle" && needBytes === 0) {
@@ -828,10 +848,14 @@ export default class SyncthingController extends Plugin {
 					});
 
 					if (!skipIdleStatusUpdate) {
-						this.currentStatus = "conectado";
+						if (this.connectedDevices === 0) {
+							this.updateStatus("aguardando-dispositivos");
+						} else {
+							this.updateStatus("conectado");
+						}
 					}
 				} else {
-					this.currentStatus = "erro";
+					this.updateStatus("erro");
 					if (showNotice) new Notice(`Status: ${state}`);
 				}
 			} else {
@@ -849,13 +873,12 @@ export default class SyncthingController extends Plugin {
 			);
 		} catch (error) {
 			if (error instanceof Error && error.message.includes("403")) {
-				this.currentStatus = "erro";
+				this.updateStatus("erro");
 				if (showNotice) new Notice(t("notice_error_auth"));
 			} else {
-				this.currentStatus = "desconectado";
+				this.updateStatus("desconectado");
 				if (showNotice) new Notice(t("notice_offline"));
 			}
-			this.app.workspace.trigger("syncthing:status-changed");
 			return false;
 		}
 	}
@@ -899,6 +922,28 @@ export default class SyncthingController extends Plugin {
 			});
 		} catch (error) {
 			Logger.error(LOG_MODULES.MAIN, "Failed to Fetch History", error);
+		}
+	}
+
+	/**
+	 * Atualiza o status e persiste o estado global
+	 */
+	updateStatus(status: SyncStatus) {
+		this.currentStatus = status;
+		this.saveGlobalState();
+		this.app.workspace.trigger("syncthing:status-changed", status);
+	}
+
+	/**
+	 * Salva o estado atual no gerenciador de arquivos
+	 */
+	saveGlobalState() {
+		if (this.fileStateManager) {
+			this.fileStateManager.setGlobalState(
+				this.currentStatus,
+				this.lastSyncTime,
+				this.connectedDevices,
+			);
 		}
 	}
 }

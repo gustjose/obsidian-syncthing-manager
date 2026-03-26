@@ -10,61 +10,82 @@ export interface StatusDisplay {
 /**
  * Retorna o texto, classe CSS e ícone correspondentes ao status de sincronização.
  */
-export function getStatusDisplay(status: SyncStatus): StatusDisplay {
+export function getStatusDisplay(
+	status: SyncStatus,
+	deviceName?: string | null,
+): StatusDisplay {
+	let display: StatusDisplay;
+
 	switch (status) {
 		case "conectado":
-			return {
+			display = {
 				text: t("status_synced"),
 				cssClass: "st-color-success",
 				icon: "check-circle",
 			};
+			break;
 		case "sincronizando":
-			return {
+			display = {
 				text: t("status_syncing"),
 				cssClass: "st-color-warning",
 				icon: "loader",
 			};
+			break;
 		case "desconectado":
-			return {
+			display = {
 				text: t("status_offline"),
 				cssClass: "st-color-muted",
 				icon: "wifi-off",
 			};
+			break;
 		case "aguardando-dispositivos":
-			return {
+			display = {
 				text: t("status_waiting_devices"),
 				cssClass: "st-color-muted",
 				icon: "monitor",
 			};
+			break;
 		case "erro":
-			return {
+			display = {
 				text: t("status_error"),
 				cssClass: "st-color-error",
 				icon: "alert-triangle",
 			};
+			break;
 		case "pausado":
-			return {
+			display = {
 				text: t("status_paused"),
 				cssClass: "st-color-muted",
 				icon: "pause-circle",
 			};
+			break;
 		case "pausado-remoto":
-			return {
+			display = {
 				text: t("status_paused_remote"),
 				cssClass: "st-color-muted",
 				icon: "pause-circle",
 			};
+			break;
 		case "configurando":
-			return {
+			display = {
 				text: t("status_config"),
 				cssClass: "st-color-muted",
 				icon: "settings",
 			};
+			break;
 		default:
-			return {
+			display = {
 				text: t("status_unknown"),
 				cssClass: "st-color-muted",
 				icon: "help-circle",
 			};
+			break;
 	}
+
+	// Processa substituição de variáveis se houver nome de dispositivo
+	if (deviceName && display.text.includes("{device}")) {
+		display.text = display.text.replace("{device}", deviceName);
+	}
+
+	return display;
 }
