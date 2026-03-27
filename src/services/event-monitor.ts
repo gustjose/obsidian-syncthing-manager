@@ -53,11 +53,23 @@ export class SyncthingEventMonitor {
 
 	// Estado remoto (dispositivos conectados)
 	private remotePaused: boolean = false;
+	private deviceCompletion: Map<string, number> = new Map();
 	private lastRemoteCheck: number = 0;
 	private readonly REMOTE_CHECK_INTERVAL = 20000; // 20 segundos
 
 	public get currentCompletion(): number {
 		return this.lastKnownCompletion;
+	}
+
+	/**
+	 * Retorna true se todos os dispositivos conectados estão com 100% de sincronização.
+	 */
+	public isClusterSynced(): boolean {
+		if (this.deviceCompletion.size === 0) return true;
+		for (const completion of this.deviceCompletion.values()) {
+			if (completion < 100) return false;
+		}
+		return true;
 	}
 
 	// Timer para certificar que o "idle" não é falso-positivo
@@ -232,6 +244,10 @@ export class SyncthingEventMonitor {
 			event.type === "DeviceDisconnected"
 		) {
 			Logger.debug(LOG_MODULES.EVENT, `[Event] ${event.type}`);
+			if (event.type === "DeviceDisconnected") {
+				const deviceId = (event.data as { device: string }).device;
+				this.deviceCompletion.delete(deviceId);
+			}
 			await this.plugin.atualizarContagemDispositivos();
 			await this.checkRemotePausedStatus();
 			this.evaluateCombinedState();
@@ -243,13 +259,35 @@ export class SyncthingEventMonitor {
 
 		// 2. Progresso da Pasta (FolderCompletion)
 		if (event.type === "FolderCompletion") {
-			const data = event.data as FolderCompletionData;
+			const data = event.data as FolderCompletionData & {
+				device?: string;
+			};
 			if ("folder" in data && data.folder === targetFolder) {
-				this.lastKnownCompletion = data.completion;
-				Logger.debug(
-					LOG_MODULES.EVENT,
-					`[Event] FolderCompletion → ${data.completion}% (need: ${data.needBytes}B)`,
-				);
+				const wasSynced = this.isClusterSynced();
+
+				if (data.device) {
+					this.deviceCompletion.set(data.device, data.completion);
+					Logger.debug(
+						LOG_MODULES.EVENT,
+						`[Event] FolderCompletion (Device: ${data.device.substring(0, 7)}) → ${data.completion}%`,
+					);
+				} else {
+					this.lastKnownCompletion = data.completion;
+					Logger.debug(
+						LOG_MODULES.EVENT,
+						`[Event] FolderCompletion (Local) → ${data.completion}%`,
+					);
+				}
+
+				// Se o cluster acabou de chegar em 100%, força uma reconciliação para limpar ícones pendentes
+				if (!wasSynced && this.isClusterSynced()) {
+					Logger.debug(
+						LOG_MODULES.EVENT,
+						"[Event] Cluster 100% sincronizado. Disparando reconciliação.",
+					);
+					void this.plugin.reconcileFileStates();
+				}
+
 				this.evaluateCombinedState();
 			}
 		}
@@ -289,7 +327,7 @@ export class SyncthingEventMonitor {
 			}
 		}
 
-		// 5. Item Finalizado (Histórico)
+		// 5. Item Finalizado (Histórico + Abas)
 		if (event.type === "ItemFinished") {
 			const data = event.data as ItemFinishedData;
 			if (data.folder === targetFolder) {
@@ -298,6 +336,8 @@ export class SyncthingEventMonitor {
 					`Item finalizado: ${data.item}`,
 				);
 				void this.plugin.refreshHistory();
+				// Como o item foi finalizado (download/upload concluído), marcamos como sincronizado forçadamente
+				void this.plugin.onFileSyncedEvent(data.item, true);
 			}
 		}
 
@@ -322,7 +362,7 @@ export class SyncthingEventMonitor {
 					);
 					items.forEach((filename: string) => {
 						if (typeof filename === "string") {
-							void this.plugin.onFileSyncedEvent(filename);
+							void this.plugin.onFileSyncedEvent(filename, false);
 						}
 					});
 				}
@@ -378,6 +418,8 @@ export class SyncthingEventMonitor {
 						);
 						break;
 					}
+					// Aproveita a checagem manual para atualizar o mapa de completude
+					this.deviceCompletion.set(deviceId, completion.completion);
 				} catch (err) {
 					Logger.error(
 						LOG_MODULES.EVENT,
@@ -455,8 +497,9 @@ export class SyncthingEventMonitor {
 			return;
 		}
 
-		// Prioridade 5: Ocioso (Idle)
-		if (this.lastKnownCompletion === 100) {
+		// Prioridade 5: Ocioso (Idle/Conectado)
+		const clusterSynced = this.isClusterSynced();
+		if (this.lastKnownCompletion === 100 && clusterSynced) {
 			if (this.idleGraceTimer) {
 				clearTimeout(this.idleGraceTimer);
 				this.idleGraceTimer = null;
@@ -465,8 +508,10 @@ export class SyncthingEventMonitor {
 		} else {
 			if (!this.idleGraceTimer) {
 				this.idleGraceTimer = setTimeout(() => {
-					this.lastKnownCompletion = 100;
-					this.updateStatus("conectado");
+					if (this.isClusterSynced()) {
+						this.lastKnownCompletion = 100;
+						this.updateStatus("conectado");
+					}
 					this.idleGraceTimer = null;
 				}, 2000);
 			}

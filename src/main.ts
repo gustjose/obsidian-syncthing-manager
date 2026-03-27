@@ -574,7 +574,25 @@ export default class SyncthingController extends Plugin {
 		}
 	}
 
-	onFileSyncedEvent(path: string) {
+	/**
+	 * Evento disparado quando um arquivo é sincronizado.
+	 * @param path Caminho do arquivo.
+	 * @param force Se true, ignora a verificação do estado do cluster (usado para downloads remotos).
+	 */
+	onFileSyncedEvent(path: string, force: boolean = false) {
+		// Se o cluster não estiver sincronizado e não for uma atualização forçada (vinda de fora)
+		// mantemos o estado pendente até que todos os dispositivos confirmem o recebimento.
+		if (!force && !this.monitor.isClusterSynced()) {
+			const state = this.fileStateManager.getState(path);
+			if (state && state.status === "pending") {
+				Logger.debug(
+					LOG_MODULES.MAIN,
+					`[onFileSyncedEvent] Arquivo "${path}" aguardando propagação no cluster...`,
+				);
+				return;
+			}
+		}
+
 		this.fileStateManager.markAsSynced(path);
 		this.tabManager.setSynced(path);
 	}
