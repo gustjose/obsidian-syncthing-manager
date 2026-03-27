@@ -570,7 +570,18 @@ export default class SyncthingController extends Plugin {
 			sortedLocal.every((v, i) => sortedGlobal[i] === v);
 
 		if (isSynced) {
-			this.onFileSyncedEvent(obsidianPath);
+			// Antes de marcar como OK via polling, fazemos uma última checagem proativa no cluster
+			// para evitar falsos-positivos de scan offline imediato.
+			const reallySynced =
+				await this.monitor.checkRemoteCompletionRealtime();
+			if (reallySynced) {
+				await this.onFileSyncedEvent(obsidianPath);
+			} else {
+				Logger.debug(
+					LOG_MODULES.MAIN,
+					`[checkFileStatus] Versões batem para "${obsidianPath}", mas cluster ainda não reportou 100%. Mantendo pendente.`,
+				);
+			}
 		}
 	}
 
@@ -579,17 +590,21 @@ export default class SyncthingController extends Plugin {
 	 * @param path Caminho do arquivo.
 	 * @param force Se true, ignora a verificação do estado do cluster (usado para downloads remotos).
 	 */
-	onFileSyncedEvent(path: string, force: boolean = false) {
+	async onFileSyncedEvent(path: string, force: boolean = false) {
 		// Se o cluster não estiver sincronizado e não for uma atualização forçada (vinda de fora)
-		// mantemos o estado pendente até que todos os dispositivos confirmem o recebimento.
-		if (!force && !this.monitor.isClusterSynced()) {
-			const state = this.fileStateManager.getState(path);
-			if (state && state.status === "pending") {
-				Logger.debug(
-					LOG_MODULES.MAIN,
-					`[onFileSyncedEvent] Arquivo "${path}" aguardando propagação no cluster...`,
-				);
-				return;
+		// realizamos uma checagem proativa instantânea para garantir que não estamos captando um cache antigo.
+		if (!force) {
+			const reallySynced =
+				await this.monitor.checkRemoteCompletionRealtime();
+			if (!reallySynced) {
+				const state = this.fileStateManager.getState(path);
+				if (state && state.status === "pending") {
+					Logger.debug(
+						LOG_MODULES.MAIN,
+						`[onFileSyncedEvent] Arquivo "${path}" aguardando propagação confirmada no cluster...`,
+					);
+					return;
+				}
 			}
 		}
 

@@ -62,6 +62,66 @@ export class SyncthingEventMonitor {
 	}
 
 	/**
+	 * Consulta proativamente a API do Syncthing para verificar a completude de todos os dispositivos remotos.
+	 * Útil para evitar condições de corrida onde eventos de LocalIndexUpdated chegam antes de FolderCompletion.
+	 */
+	public async checkRemoteCompletionRealtime(): Promise<boolean> {
+		const targetFolder = this.plugin.settings.syncthingFolderId;
+		if (
+			!targetFolder ||
+			!this.plugin.settings.syncthingApiKey ||
+			!this.running
+		)
+			return this.isClusterSynced();
+
+		try {
+			// 1. Obtém conexões atuais para saber quais dispositivos estão ativos
+			const connections = await SyncthingAPI.getConnections(
+				this.plugin.apiUrl,
+				this.plugin.settings.syncthingApiKey,
+			);
+
+			const devices = connections.connections || {};
+			const connectedDeviceIDs = Object.keys(devices).filter(
+				(id) => devices[id].connected,
+			);
+
+			if (connectedDeviceIDs.length === 0) {
+				this.deviceCompletion.clear();
+				return true;
+			}
+
+			// 2. Busca o completion atualizado para cada um
+			for (const deviceId of connectedDeviceIDs) {
+				try {
+					const completion = await SyncthingAPI.getCompletion(
+						this.plugin.apiUrl,
+						this.plugin.settings.syncthingApiKey,
+						targetFolder,
+						deviceId,
+					);
+					this.deviceCompletion.set(deviceId, completion.completion);
+				} catch (e) {
+					Logger.warn(
+						LOG_MODULES.EVENT,
+						`Falha ao buscar completude proativa para dispositivo ${deviceId}`,
+						e,
+					);
+				}
+			}
+
+			return this.isClusterSynced();
+		} catch (error) {
+			Logger.error(
+				LOG_MODULES.EVENT,
+				"Erro na verificação proativa de completude do cluster",
+				error,
+			);
+			return this.isClusterSynced();
+		}
+	}
+
+	/**
 	 * Retorna true se todos os dispositivos conectados estão com 100% de sincronização.
 	 */
 	public isClusterSynced(): boolean {
