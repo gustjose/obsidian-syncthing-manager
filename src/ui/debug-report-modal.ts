@@ -152,7 +152,28 @@ export class DebugReportModal extends Modal {
 		params.set("obsidian_version", this.getObsidianVersion());
 		params.set("syncthing_version", this.syncthingVersion);
 		params.set("os", this.getPlatformString());
-		params.set("logs", report);
+
+		// Limita os logs para evitar erro de URL muito longa (414 Request-URI Too Large)
+		const MAX_LOG_CHARS = 1800;
+		let truncatedLogs = report;
+
+		if (report.length > MAX_LOG_CHARS) {
+			const lines = report.split("\n");
+			const headerLines = lines.slice(0, 14);
+			const logLines = lines.slice(14);
+			const lastLogs = logLines.slice(-15);
+
+			truncatedLogs = [
+				...headerLines,
+				"",
+				"... [LOGS TRUNCATED FOR URL LENGTH LIMITS] ...",
+				"... [PLEASE PASTE THE FULL REPORT FROM THE MODAL BELOW] ...",
+				"",
+				...lastLogs,
+			].join("\n");
+		}
+
+		params.set("logs", truncatedLogs);
 
 		return `${base}?${params.toString()}`;
 	}
