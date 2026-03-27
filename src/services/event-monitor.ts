@@ -172,7 +172,7 @@ export class SyncthingEventMonitor {
 							) {
 								const typedEvent = event as SyncthingEvent;
 								this.lastEventId = typedEvent.id;
-								this.processEvent(typedEvent);
+								await this.processEvent(typedEvent);
 							}
 						}
 					}
@@ -222,7 +222,7 @@ export class SyncthingEventMonitor {
 
 	public destroy() {}
 
-	private processEvent(event: SyncthingEvent) {
+	private async processEvent(event: SyncthingEvent): Promise<void> {
 		const targetFolder = this.plugin.settings.syncthingFolderId;
 		if (!targetFolder) return;
 
@@ -232,8 +232,9 @@ export class SyncthingEventMonitor {
 			event.type === "DeviceDisconnected"
 		) {
 			Logger.debug(LOG_MODULES.EVENT, `[Event] ${event.type}`);
-			void this.plugin.atualizarContagemDispositivos();
-			void this.checkRemotePausedStatus();
+			await this.plugin.atualizarContagemDispositivos();
+			await this.checkRemotePausedStatus();
+			this.evaluateCombinedState();
 			return;
 		}
 
