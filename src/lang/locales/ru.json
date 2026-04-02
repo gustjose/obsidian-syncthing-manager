@@ -10,7 +10,7 @@
 	"status_offline": "Не в сети",
 	"status_unknown": "Неизвестно",
 	"status_paused": "Пауза",
-	"status_paused_remote": "Приостановлено на: {device}",
+	"status_paused_remote": "Paused on: {device}",
 	"status_waiting_devices": "Waiting for devices",
 	"status_config": "Ожидание конфигурации",
 	"info_last_sync": "Последняя синхронизация",
@@ -190,7 +190,8 @@
 	"notice_resuming": "Возобновление синхронизации...",
 	"notice_pausing": "Приостановка синхронизации...",
 	"notice_is_paused": "Синхронизация приостановлена.",
-	"notice_remote_paused_alert": "Синхронизация была приостановлена удаленно устройством: {device}",
+	"notice_remote_paused_alert": "Sync was paused remotely by device: {device}",
+	"notice_no_devices_warning": "No remote devices connected. Sync will be local only.",
 	"loading_versions": "Загрузка версий...",
 	"loading_config": "Загрузка конфигурации...",
 	"error_folder_not_found": "Папка не найдена в конфигурации.",
@@ -199,6 +200,5 @@
 	"tab_syncing": "Синхронизация...",
 	"tab_synced": "Синхронизировано!",
 	"conflict_delete_error": "Ошибка удаления файла.",
-	"conflict_restore_error": "Ошибка восстановления конфликта.",
-	"notice_no_devices_warning": "No remote devices connected. Sync will be local only."
+	"conflict_restore_error": "Ошибка восстановления конфликта."
 }

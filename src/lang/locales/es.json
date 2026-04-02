@@ -191,6 +191,7 @@
 	"notice_pausing": "Pausing sync...",
 	"notice_is_paused": "Sync is paused.",
 	"notice_remote_paused_alert": "Sync was paused remotely by device: {device}",
+	"notice_no_devices_warning": "No remote devices connected. Sync will be local only.",
 	"loading_versions": "Loading versions...",
 	"loading_config": "Loading configuration...",
 	"error_folder_not_found": "Folder not found in configuration.",
@@ -199,6 +200,5 @@
 	"tab_syncing": "Syncing...",
 	"tab_synced": "Synced!",
 	"conflict_delete_error": "Error deleting file.",
-	"conflict_restore_error": "Error restoring conflict.",
-	"notice_no_devices_warning": "No remote devices connected. Sync will be local only."
+	"conflict_restore_error": "Error restoring conflict."
 }
