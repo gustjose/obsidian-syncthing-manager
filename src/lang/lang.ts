@@ -12,7 +12,7 @@ export const LANGUAGE_LIST = [
 	{ code: "auto", display: "Auto" },
 	{ code: "en", display: "English" },
 	{ code: "pt", display: "Português" },
-	{ code: "ru", display: "Russian" },
+	{ code: "ru", display: "Русский" },
 ];
 
 export type TranslationKey = keyof typeof en;
