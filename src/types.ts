@@ -59,7 +59,12 @@ export const DEFAULT_SETTINGS: SyncthingPluginSettings = {
 	showTabIcon: true,
 	showExplorerIcon: true,
 	ignoredPaths: "",
-	enabledContextMenuItems: ["view_file_versions", "sync_file", "ignore_file"],
+	enabledContextMenuItems: [
+		"view_file_versions",
+		"sync_file",
+		"ignore_file",
+		"file_status",
+	],
 	groupContextMenuItems: false,
 	hasMigratedIgnoreContextMenu: false,
 	debugMode: false,

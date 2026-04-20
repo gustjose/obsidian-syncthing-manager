@@ -50,6 +50,10 @@ export class ContextMenuModal extends Modal {
 				id: "ignore_file",
 				label: t("cmd_ignore_file") || "Don't sync this",
 			},
+			{
+				id: "file_status",
+				label: t("cmd_file_status") || "File status",
+			},
 		];
 
 		items.forEach((item) => {

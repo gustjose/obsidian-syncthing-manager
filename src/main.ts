@@ -24,6 +24,7 @@ import { createSyncthingIcon } from "./ui/icons";
 import { DebugReportModal } from "./ui/debug-report-modal";
 import { SecretManager } from "./services/secret-manager";
 import { getStatusDisplay } from "./ui/status-utils";
+import { FileAvailabilityModal } from "./ui/file-availability-modal";
 import { SyncthingPluginSettings, SyncStatus, AppWithCommands } from "./types";
 
 export default class SyncthingController extends Plugin {
@@ -66,6 +67,12 @@ export default class SyncthingController extends Plugin {
 		this.settingsManager = new SettingsManager(this, this.secretManager);
 		this.settings = await this.settingsManager.loadSettings();
 		setLanguage(this.settings.language);
+
+		// Migração: Garante que o novo item de menu esteja habilitado por padrão
+		if (!this.settings.enabledContextMenuItems.includes("file_status")) {
+			this.settings.enabledContextMenuItems.push("file_status");
+			await this.saveSettings();
+		}
 
 		// Initialize Logger Debug Mode
 		Logger.setDebugMode(this.settings.debugMode);
@@ -223,6 +230,14 @@ export default class SyncthingController extends Plugin {
 							} else {
 								new Notice(t("notice_ignored_error"));
 							}
+						},
+					},
+					file_status: {
+						title: t("cmd_file_status") || "File status",
+						icon: "network",
+						show: isFile,
+						action: async () => {
+							await this.checkFileAvailability(file.path);
 						},
 					},
 				};
@@ -582,6 +597,56 @@ export default class SyncthingController extends Plugin {
 					`[checkFileStatus] Versões batem para "${obsidianPath}", mas cluster ainda não reportou 100%. Mantendo pendente.`,
 				);
 			}
+		}
+	}
+
+	/**
+	 * Verifica em quais dispositivos o arquivo selecionado já está disponível.
+	 * @param obsidianPath Caminho do arquivo no Obsidian.
+	 */
+	async checkFileAvailability(obsidianPath: string) {
+		if (!this.settings.syncthingApiKey || !this.settings.syncthingFolderId) {
+			new Notice(t("notice_config_first"));
+			return;
+		}
+
+		const fullPath = this.pathPrefix + obsidianPath;
+
+		try {
+			const info = await SyncthingAPI.getFileInfo(
+				this.apiUrl,
+				this.settings.syncthingApiKey,
+				this.settings.syncthingFolderId,
+				fullPath,
+			);
+
+			if (!info || !info.availability || info.availability.length === 0) {
+				new Notice(t("notice_file_not_synced"));
+				return;
+			}
+
+			const devices = await SyncthingAPI.getDevices(
+				this.apiUrl,
+				this.settings.syncthingApiKey,
+			);
+
+			const availabilityNames = info.availability.map((avail) => {
+				const device = devices.find((d) => d.deviceID === avail.id);
+				return device?.name || t("device_unknown");
+			});
+
+			new FileAvailabilityModal(
+				this.app,
+				obsidianPath.split("/").pop() || obsidianPath,
+				availabilityNames,
+			).open();
+		} catch (error) {
+			Logger.error(
+				LOG_MODULES.MAIN,
+				"Erro ao verificar disponibilidade do arquivo",
+				error,
+			);
+			new Notice(t("status_error"));
 		}
 	}
 

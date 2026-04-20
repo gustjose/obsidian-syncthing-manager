@@ -996,3 +996,26 @@
 	filter: grayscale(0.8);
 	cursor: not-allowed;
 }
+
+/* --- AVAILABILITY MODAL --- */
+.st-availability-filename {
+	color: var(--text-accent);
+	font-weight: bold;
+	margin-bottom: 20px;
+	word-break: break-all;
+}
+
+.st-availability-list {
+	margin: 20px 0;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 10px;
+	background-color: var(--background-primary-alt);
+}
+
+.st-availability-icon {
+	color: var(--text-accent);
+	display: flex;
+	align-items: center;
+	margin-right: 10px;
+}
