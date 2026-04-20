@@ -179,7 +179,7 @@ export class SyncthingView extends ItemView {
 			btnText.setText(t("btn_requesting") || "Requesting...");
 			btn.disabled = true;
 
-			btnIcon.addClass("st-spin-anim");
+			btnIcon.addClass("st-anim-spin");
 
 			this.plugin
 				.forcarSincronizacao()

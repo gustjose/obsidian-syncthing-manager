@@ -173,6 +173,18 @@ export default class SyncthingController extends Plugin {
 		);
 
 		this.registerEvent(
+			this.app.vault.on("create", (abstractFile) => {
+				if (abstractFile instanceof TFile) {
+					// Ignora arquivos temporários criados pelo próprio Syncthing
+					if (abstractFile.name.includes("~syncthing~")) return;
+
+					this.fileStateManager.markAsDirty(abstractFile.path);
+					this.tabManager.setPendingSync(abstractFile);
+				}
+			}),
+		);
+
+		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
 				const isFile = file instanceof TFile;
 				const isFolder = !isFile;
