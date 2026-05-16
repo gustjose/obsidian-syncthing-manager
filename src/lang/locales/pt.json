@@ -201,8 +201,8 @@
 	"tab_synced": "Sincronizado!",
 	"conflict_delete_error": "Erro ao deletar arquivo.",
 	"conflict_restore_error": "Erro ao restaurar conflito.",
-	"cmd_file_status": "Status do Arquivo",
-	"notice_file_not_synced": "Este arquivo ainda não foi sincronizado para outros dispositivos.",
-	"notice_file_status_title": "Disponibilidade do Arquivo",
-	"device_unknown": "Dispositivo Desconhecido"
+	"cmd_file_status": "File Status",
+	"notice_file_not_synced": "This file has not been synced to other devices yet.",
+	"notice_file_status_title": "File Availability",
+	"device_unknown": "Unknown Device"
 }
