@@ -200,5 +200,9 @@
 	"tab_syncing": "Синхронизация...",
 	"tab_synced": "Синхронизировано!",
 	"conflict_delete_error": "Ошибка удаления файла.",
-	"conflict_restore_error": "Ошибка восстановления конфликта."
+	"conflict_restore_error": "Ошибка восстановления конфликта.",
+	"cmd_file_status": "File Status",
+	"notice_file_not_synced": "This file has not been synced to other devices yet.",
+	"notice_file_status_title": "File Availability",
+	"device_unknown": "Unknown Device"
 }
