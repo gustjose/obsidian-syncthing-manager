@@ -47,4 +47,24 @@ Object.defineProperty(globalThis.window, "localStorage", {
 	configurable: true,
 });
 
+// Mocking Obsidian-specific globals for popout compatibility
+interface GlobalWithObsidian {
+	activeWindow: unknown;
+	activeDocument: unknown;
+	window: unknown;
+	document: unknown;
+}
+
+const globalWithObsidian = globalThis as unknown as GlobalWithObsidian;
+
+globalWithObsidian.activeWindow = globalWithObsidian.window;
+globalWithObsidian.activeDocument = globalWithObsidian.document || {
+	createElement: (_tag: string) => ({
+		appendChild: vi.fn(),
+		createDiv: vi.fn(() => ({ appendChild: vi.fn() })),
+		createSpan: vi.fn(() => ({ appendChild: vi.fn() })),
+		createEl: vi.fn(() => ({ appendChild: vi.fn() })),
+	}),
+};
+
 export { localStorageStore, localStorageMock };
