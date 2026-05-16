@@ -46,11 +46,11 @@ export class ConflictModal extends Modal {
 				cls: "st-conflict-title",
 			});
 
-			container.createEl("div", {
+			container.createDiv({
 				text: `Data: ${conflict.date}`,
 				cls: "conflict-meta",
 			});
-			container.createEl("div", {
+			container.createDiv({
 				text: conflict.path,
 				cls: "conflict-meta-path",
 			});
@@ -76,7 +76,7 @@ export class ConflictModal extends Modal {
 	async renderContentPreview(container: HTMLElement, conflict: ConflictFile) {
 		container.empty();
 
-		const loadingEl = container.createEl("div", {
+		const loadingEl = container.createDiv({
 			text: t("diff_loading"),
 			cls: "st-diff-loading",
 		});
@@ -171,7 +171,7 @@ export class ConflictModal extends Modal {
 			cls: "st-diff-controls",
 		});
 
-		diffControlsContainer.createEl("span", {
+		diffControlsContainer.createSpan({
 			text: t("diff_legend"),
 			cls: "st-diff-legend",
 		});

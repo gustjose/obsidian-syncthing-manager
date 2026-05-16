@@ -97,7 +97,7 @@ export default class SyncthingController extends Plugin {
 				this.connectedDevices = savedEntry.connectedDevices;
 			
 			// Notifica a UI sobre o estado restaurado (com um pequeno delay para garantir que a UI esteja pronta)
-			setTimeout(() => {
+			activeWindow.setTimeout(() => {
 				this.app.workspace.trigger("syncthing:status-changed");
 			}, 100);
 		}
@@ -498,7 +498,7 @@ export default class SyncthingController extends Plugin {
 			);
 
 			// 2. Aguarda um momento para o Syncthing processar o hash do arquivo
-			await new Promise((resolve) => setTimeout(resolve, 1500));
+			await new Promise((resolve) => activeWindow.setTimeout(resolve, 1500));
 
 			// 3. Loop de Verificação (Polling)
 			// Verifica se o estado convergiu (Local == Global)
@@ -514,7 +514,9 @@ export default class SyncthingController extends Plugin {
 					break;
 				} catch (e) {
 					Logger.warn(LOG_MODULES.MAIN, `Erro: ${e}`);
-					await new Promise((resolve) => setTimeout(resolve, 1000));
+					await new Promise((resolve) =>
+						activeWindow.setTimeout(resolve, 1000),
+					);
 				}
 			}
 

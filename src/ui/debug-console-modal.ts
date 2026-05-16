@@ -49,7 +49,7 @@ export class DebugConsoleModal extends Modal {
 		const modulesContainer = filterBar.createDiv({
 			cls: "st-debug-console-modules",
 		});
-		modulesContainer.createEl("span", {
+		modulesContainer.createSpan({
 			text: t("debug_console_filter_modules"),
 			cls: "st-debug-console-modules-label setting-item-name",
 		});

@@ -46,7 +46,7 @@ export class ExplorerManager {
 
 	onunload() {
 		if (this.observer) this.observer.disconnect();
-		document
+		activeDocument
 			.querySelectorAll(".st-explorer-btn")
 			.forEach((el) => el.remove());
 		Logger.debug(
@@ -62,7 +62,7 @@ export class ExplorerManager {
 
 	public stop() {
 		if (this.observer) this.observer.disconnect();
-		document
+		activeDocument
 			.querySelectorAll(".st-explorer-btn")
 			.forEach((el) => el.remove());
 	}
@@ -156,10 +156,10 @@ export class ExplorerManager {
 					);
 
 					btn.removeClass("st-loading");
-					btn.addClass("st-success");
+					btn.removeClass("st-success");
 					setIcon(btn, "check");
 
-					setTimeout(() => {
+					activeWindow.setTimeout(() => {
 						btn.removeClass("st-success");
 						setIcon(btn, "refresh-cw");
 					}, 2000);

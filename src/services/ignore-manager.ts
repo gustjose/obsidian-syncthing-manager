@@ -172,7 +172,7 @@ export class IgnoreManager {
 	 */
 	async addIgnoreRule(
 		obsidianPath: string,
-		isFolder: boolean,
+		_isFolder: boolean,
 	): Promise<boolean> {
 		if (
 			!this.plugin.settings.syncthingApiKey ||

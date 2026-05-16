@@ -111,16 +111,14 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							); // FQDN (ex: servidor.local)
 
 						if (!isValidHost || sanitizedValue.trim() === "") {
-							text.inputEl.setCssProps({
-								"border-color": "var(--text-error)",
-							});
+							text.inputEl.addClass("st-input-error");
 							text.inputEl.setAttribute(
 								"title",
 								t("notice_invalid_host"),
 							);
 							this.showHostNotice();
 						} else {
-							text.inputEl.setCssProps({ "border-color": "" });
+							text.inputEl.removeClass("st-input-error");
 							text.inputEl.removeAttribute("title");
 							this.plugin.settings.syncthingHost = sanitizedValue;
 							await this.plugin.saveSettings();
@@ -148,16 +146,14 @@ export class SyncthingSettingTab extends PluginSettingTab {
 						const isValidPort = portNum > 0 && portNum <= 65535;
 
 						if (!isValidPort && sanitizedValue.length > 0) {
-							text.inputEl.setCssProps({
-								"border-color": "var(--text-error)",
-							});
+							text.inputEl.addClass("st-input-error");
 							text.inputEl.setAttribute(
 								"title",
 								t("notice_invalid_port"),
 							);
 							this.showPortNotice();
 						} else {
-							text.inputEl.setCssProps({ "border-color": "" });
+							text.inputEl.removeClass("st-input-error");
 							text.inputEl.removeAttribute("title");
 							this.plugin.settings.syncthingPort = sanitizedValue;
 							await this.plugin.saveSettings();
@@ -302,19 +298,21 @@ export class SyncthingSettingTab extends PluginSettingTab {
 							if (selectEl) selectEl.innerHTML = "";
 
 							const optionDefault =
-								document.createElement("option");
-							optionDefault.value = "";
-							optionDefault.text = t("dropdown_default");
-							selectEl?.appendChild(optionDefault);
+								selectEl?.createEl("option");
+							if (optionDefault) {
+								optionDefault.value = "";
+								optionDefault.text = t("dropdown_default");
+							}
 
 							folders.forEach((folder: SyncthingFolder) => {
-								const option = document.createElement("option");
-								option.value = folder.id;
-								option.text = folder.label || folder.id;
-								option.selected =
-									folder.id ===
-									this.plugin.settings.syncthingFolderId;
-								selectEl?.appendChild(option);
+								const option = selectEl?.createEl("option");
+								if (option) {
+									option.value = folder.id;
+									option.text = folder.label || folder.id;
+									option.selected =
+										folder.id ===
+										this.plugin.settings.syncthingFolderId;
+								}
 							});
 
 							new Notice(

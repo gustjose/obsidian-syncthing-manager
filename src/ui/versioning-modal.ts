@@ -20,7 +20,7 @@ export class VersioningModal extends Modal {
 		contentEl.empty();
 		contentEl.createEl("h2", { text: t("modal_versioning_title") });
 
-		contentEl.createEl("div", {
+		contentEl.createDiv({
 			text: t("loading_config"),
 			cls: "st-loading-indicator",
 		});

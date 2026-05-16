@@ -96,7 +96,7 @@ export interface SyncthingFileAvailability {
 }
 
 export interface SyncthingFileStatusResponse {
-	global: SyncthingFileEntry;
+	"global": SyncthingFileEntry;
 	local: SyncthingFileEntry;
 	availability: SyncthingFileAvailability[];
 }
@@ -361,7 +361,7 @@ export class SyncthingAPI {
 		apiKey: string,
 		folderId: string,
 		ignoredPaths: string,
-		myDeviceID: string,
+		_myDeviceID: string,
 	): Promise<SyncthingHistoryItem[]> {
 		const endpoint = `/rest/events?limit=100&events=ItemFinished,LocalIndexUpdated&timeout=0`;
 

@@ -42,6 +42,8 @@ export default defineConfig([
 			globals: {
 				...globals.browser,
 				...globals.es2021,
+				activeWindow: "readonly",
+				activeDocument: "readonly",
 			},
 		},
 

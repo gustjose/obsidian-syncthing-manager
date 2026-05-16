@@ -10,6 +10,8 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: write
+            id-token: write
+            attestations: write
 
         steps:
             - name: Checkout Code
@@ -53,6 +55,21 @@ jobs:
                   TAG_NAME: ${{ github.ref_name }}
               run: python .github/workflows/generate_notes.py
 
+            - name: Attest main.js
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-path: main.js
+
+            - name: Attest manifest.json
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-path: manifest.json
+
+            - name: Attest styles.css
+              uses: actions/attest-build-provenance@v2
+              with:
+                  subject-path: styles.css
+
             - name: Create GitHub Release
               uses: softprops/action-gh-release@v1
               with:
@@ -64,4 +81,3 @@ jobs:
                       main.js
                       manifest.json
                       styles.css
-                      versions.json

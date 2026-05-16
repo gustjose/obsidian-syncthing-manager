@@ -183,7 +183,7 @@ export class TabManager {
 			setIcon(iconContainer, "check");
 			iconContainer.setAttribute("aria-label", t("tab_synced"));
 
-			setTimeout(() => {
+			activeWindow.setTimeout(() => {
 				if (
 					iconContainer &&
 					iconContainer.hasClass("st-sync-success")
