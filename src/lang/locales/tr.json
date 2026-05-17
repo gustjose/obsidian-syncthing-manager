@@ -201,8 +201,8 @@
 	"tab_synced": "Eşitlendi!",
 	"conflict_delete_error": "Dosya silinirken hata.",
 	"conflict_restore_error": "Çatışma giderilirken hata.",
-	"cmd_file_status": "File status",
-	"notice_file_not_synced": "This file has not been synced to other devices yet.",
-	"notice_file_status_title": "File availability",
-	"device_unknown": "Unknown device"
+	"cmd_file_status": "Dosya durumu",
+	"notice_file_not_synced": "Bu dosya henüz diğer cihazlara eşitlenmedi.",
+	"notice_file_status_title": "Dosya erişilebilirliği",
+	"device_unknown": "Bilinmeyen cihaz"
 }
