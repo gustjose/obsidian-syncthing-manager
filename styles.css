@@ -277,6 +277,11 @@
 .st-btn-accent.st-btn-accent {
 	color: var(--text-on-accent);
 }
+
+.theme-light button.st-btn-accent {
+	color: #333333;
+}
+
 .st-diff-controls {
 	display: flex;
 	align-items: center;
