@@ -41,8 +41,8 @@
 	width: 100%;
 }
 
-.st-input-error {
-	border-color: var(--text-error) !important;
+.st-input-error.st-input-error {
+	border-color: var(--text-error);
 }
 
 .st-textarea-code {
@@ -274,8 +274,8 @@
 	align-items: center;
 	padding: 5px 0;
 }
-.st-btn-accent {
-	color: var(--text-on-accent) !important;
+.st-btn-accent.st-btn-accent {
+	color: var(--text-on-accent);
 }
 .st-diff-controls {
 	display: flex;
@@ -286,8 +286,8 @@
 	padding-top: 15px;
 }
 
-.cm-changeGutter {
-	background-color: var(--background-modifier-border) !important;
+.st-diff-view-wrapper .cm-changeGutter {
+	background-color: var(--background-modifier-border);
 }
 
 .st-diff-legend {
@@ -312,10 +312,10 @@
 	max-height: 400px;
 	overflow-y: auto;
 }
-.cm-mergeView .cm-editor {
-	background-color: var(--background-primary) !important;
-	color: var(--text-normal) !important;
-	font-family: var(--font-monospace) !important;
+.st-diff-view-wrapper .cm-mergeView .cm-editor {
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	font-family: var(--font-monospace);
 	font-size: 0.9em;
 }
 
@@ -324,31 +324,31 @@
 }
 
 /* Highlight lines */
-.cm-merge-deleted {
-	background-color: rgba(var(--color-red-rgb), 0.15) !important;
+.st-diff-view-wrapper .cm-merge-deleted {
+	background-color: rgba(var(--color-red-rgb), 0.15);
 	text-decoration: line-through;
 }
-.cm-merge-inserted {
-	background-color: rgba(var(--color-green-rgb), 0.15) !important;
+.st-diff-view-wrapper .cm-merge-inserted {
+	background-color: rgba(var(--color-green-rgb), 0.15);
 }
 
 /* Background chunks */
-.cm-mergeView .cm-deletedChunk {
-	background-color: rgba(var(--color-red-rgb), 0.08) !important;
+.st-diff-view-wrapper .cm-mergeView .cm-deletedChunk {
+	background-color: rgba(var(--color-red-rgb), 0.08);
 }
-.cm-mergeView .cm-insertedChunk {
-	background-color: rgba(var(--color-green-rgb), 0.08) !important;
+.st-diff-view-wrapper .cm-mergeView .cm-insertedChunk {
+	background-color: rgba(var(--color-green-rgb), 0.08);
 }
 
 /* Revert buttons spacer */
-.cm-merge-spacer {
-	background-color: var(--background-secondary) !important;
+.st-diff-view-wrapper .cm-merge-spacer {
+	background-color: var(--background-secondary);
 }
 
-.cm-merge-revert {
-	background-color: var(--background-modifier-form-field) !important;
-	border: 1px solid var(--background-modifier-border) !important;
-	color: var(--text-muted) !important;
+.st-diff-view-wrapper .cm-merge-revert {
+	background-color: var(--background-modifier-form-field);
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
 	border-radius: 4px;
 }
 
@@ -406,8 +406,8 @@
 	padding: 5px;
 }
 
-.st-history-title {
-	margin: 0.5rem 0rem !important;
+.st-history-title.st-history-title {
+	margin: 0.5rem 0rem;
 }
 
 /* Container do item do histórico */
@@ -523,16 +523,16 @@
 }
 
 /* Estado: Sincronizando (Pendente) -> Laranja */
-.st-sync-pending {
-	/* color: var(--text-warning) !important; */
+.st-sync-pending.st-sync-pending {
+	/* color: var(--text-warning); */
 	opacity: 1;
 	width: 16px;
 	height: 16px;
 }
 
 /* Estado: Sucesso (Sincronizado) -> Verde */
-.st-sync-success {
-	color: var(--text-success) !important;
+.st-sync-success.st-sync-success {
+	color: var(--text-success);
 	opacity: 1;
 }
 
@@ -571,8 +571,8 @@
 }
 
 /* Estado: Carregando (Girando) */
-.st-explorer-btn.st-loading {
-	opacity: 1 !important;
+.st-explorer-btn.st-loading.st-loading {
+	opacity: 1;
 	color: var(--text-accent);
 	pointer-events: none;
 }
@@ -582,9 +582,9 @@
 }
 
 /* Estado: Sucesso (Verde) */
-.st-explorer-btn.st-success {
-	color: var(--text-success) !important;
-	opacity: 1 !important;
+.st-explorer-btn.st-success.st-success {
+	color: var(--text-success);
+	opacity: 1;
 }
 
 /* --- Badges de Dispositivos --- */
