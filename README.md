@@ -56,7 +56,7 @@ _Note: The **Visual Sync** feature (spinning 🟠 and checkmark 🟢 icons on ac
 
 ## Quick Start
 
-1. **Install:** Use [BRAT](#installation) or download the latest release.
+1. **Install:** Search for **Syncthing Manager** in the Obsidian Community Store and install it, or use [BRAT](#2-brat-beta).
 2. **Get API Key:** In Syncthing, navigate to **Actions** > **Settings** > **General** and copy the **API Key**.
 3. **Configure:**
     - Open Obsidian Settings > **Syncthing Manager**.
@@ -137,7 +137,19 @@ Prevent layout issues by ignoring workspace configuration files.
 
 ## Installation
 
-### BRAT (Beta)
+### 1. Obsidian Community Store (Recommended)
+
+You can search for and install **Syncthing Manager** directly from the Obsidian Community Store:
+
+1. Open **Settings** > **Community plugins** in Obsidian.
+2. Click **Browse** and search for `Syncthing Manager`.
+3. Click **Install**, then **Enable**.
+
+Alternatively, you can open the plugin page directly using [this link](https://community.obsidian.md/plugins/syncthing-manager).
+
+### 2. BRAT (Beta)
+
+If you want to test the latest beta releases:
 
 1. Install the **BRAT** plugin from the Obsidian Community Store.
 2. Add this repository URL: `https://github.com/gustjose/obsidian-syncthing-manager`.
