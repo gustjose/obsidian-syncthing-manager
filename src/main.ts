@@ -6,6 +6,7 @@ import {
 	FileSystemAdapter,
 	Menu,
 	MenuItem,
+	debounce,
 } from "obsidian";
 import { SyncthingSettingTab } from "./ui/settings";
 import { SyncthingAPI, SyncthingHistoryItem } from "./api/syncthing-api";
@@ -33,6 +34,9 @@ export default class SyncthingController extends Plugin {
 	statusBarManager: StatusBarManager;
 	fileStateManager: FileStateManager;
 	explorerManager: ExplorerManager; // [NOVO]
+
+	private pendingScanFiles: Set<string> = new Set();
+	private debouncedProcessScans: () => void;
 
 	ribbonIconEl: HTMLElement | null = null;
 	monitor: SyncthingEventMonitor;
@@ -78,6 +82,14 @@ export default class SyncthingController extends Plugin {
 		Logger.setDebugMode(this.settings.debugMode);
 		Logger.setActiveModules(this.settings.debugModules);
 		Logger.setLogLevel(this.settings.logLevel);
+
+		this.debouncedProcessScans = debounce(
+			async () => {
+				await this.processPendingScans();
+			},
+			2000,
+			true,
+		);
 
 		this.tabManager = new TabManager(this.app, this);
 
@@ -163,11 +175,11 @@ export default class SyncthingController extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("modify", (abstractFile) => {
 				if (abstractFile instanceof TFile) {
-					// Ignora arquivos temporários criados pelo próprio Syncthing
 					if (abstractFile.name.includes("~syncthing~")) return;
 
 					this.fileStateManager.markAsDirty(abstractFile.path);
 					this.tabManager.setPendingSync(abstractFile);
+					this.queueFileScan(abstractFile.path);
 				}
 			}),
 		);
@@ -175,11 +187,11 @@ export default class SyncthingController extends Plugin {
 		this.registerEvent(
 			this.app.vault.on("create", (abstractFile) => {
 				if (abstractFile instanceof TFile) {
-					// Ignora arquivos temporários criados pelo próprio Syncthing
 					if (abstractFile.name.includes("~syncthing~")) return;
 
 					this.fileStateManager.markAsDirty(abstractFile.path);
 					this.tabManager.setPendingSync(abstractFile);
+					this.queueFileScan(abstractFile.path);
 				}
 			}),
 		);
@@ -471,6 +483,66 @@ export default class SyncthingController extends Plugin {
 	}
 
 	// --- Lógica de Reconciliação e Ações de Arquivo ---
+
+	/**
+	 * Adiciona um arquivo à fila de escaneamento do Syncthing e agenda o processamento agrupado.
+	 *
+	 * @param {string} obsidianPath - O caminho relativo do arquivo no vault do Obsidian.
+	 * @returns {void}
+	 */
+	queueFileScan(obsidianPath: string): void {
+		this.pendingScanFiles.add(obsidianPath);
+		this.debouncedProcessScans();
+	}
+
+	/**
+	 * Processa a fila de arquivos acumulados para escaneamento.
+	 * Se a quantidade de arquivos for maior que 5, executa um escaneamento global.
+	 * Caso contrário, executa escaneamentos individuais concorrentemente.
+	 *
+	 * @returns {Promise<void>} Uma promessa que resolve ao concluir os escaneamentos.
+	 */
+	async processPendingScans(): Promise<void> {
+		if (this.pendingScanFiles.size === 0) {
+			return;
+		}
+
+		const filesToScan: string[] = Array.from(this.pendingScanFiles);
+		this.pendingScanFiles.clear();
+
+		try {
+			if (filesToScan.length > 5) {
+				if (this.settings.syncthingApiKey && this.settings.syncthingFolderId) {
+					await SyncthingAPI.forceScan(
+						this.apiUrl,
+						this.settings.syncthingApiKey,
+						this.settings.syncthingFolderId,
+					);
+					await this.reconcileFileStates();
+				}
+			} else {
+				await Promise.all(
+					filesToScan.map(async (filePath: string): Promise<void> => {
+						try {
+							await this.syncSpecificFile(filePath);
+						} catch (error) {
+							Logger.error(
+								LOG_MODULES.MAIN,
+								`Falha ao sincronizar arquivo ${filePath}`,
+								error,
+							);
+						}
+					})
+				);
+			}
+		} catch (error) {
+			Logger.error(
+				LOG_MODULES.MAIN,
+				"Falha no processamento agrupado de escaneamentos",
+				error,
+			);
+		}
+	}
 
 	/**
 	 * Função pública para sincronizar um arquivo específico.
