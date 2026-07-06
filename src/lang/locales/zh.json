@@ -1,5 +1,5 @@
 {
-	"cmd_open_panel": "Open side panel",
+	"cmd_open_panel": "展開側邊選單",
 	"cmd_force_sync": "Force sync now",
 	"cmd_debug_connect": "Debug: test connection",
 	"cmd_copy_debug": "Copy debug info",
