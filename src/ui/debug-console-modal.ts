@@ -16,7 +16,7 @@ export class DebugConsoleModal extends Modal {
 	constructor(app: App, plugin: SyncthingController) {
 		super(app);
 		this.plugin = plugin;
-		this.filterModules = new Set(Object.values(LOG_MODULES));
+		this.filterModules = new Set<string>(Object.values(LOG_MODULES) as string[]);
 	}
 
 	onOpen() {
@@ -57,11 +57,11 @@ export class DebugConsoleModal extends Modal {
 		const modulesList = modulesContainer.createDiv({
 			cls: "st-debug-console-modules-list",
 		});
-		Object.values(LOG_MODULES).forEach((mod) => {
+		(Object.values(LOG_MODULES) as string[]).forEach((mod: string) => {
 			const label = modulesList.createEl("label", {
 				cls: "st-debug-console-module-item",
 			});
-			const checkbox = label.createEl("input", { type: "checkbox" });
+			const checkbox = label.createEl("input", { type: "checkbox" }) as HTMLInputElement;
 			checkbox.checked = this.filterModules.has(mod);
 			checkbox.addEventListener("change", () => {
 				if (checkbox.checked) {

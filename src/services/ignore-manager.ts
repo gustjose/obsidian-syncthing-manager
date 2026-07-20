@@ -149,7 +149,7 @@ export class IgnoreManager {
 		}
 
 		// Quebra as linhas e remove espacos do final, mas preserva linhas em branco originais
-		const lines = content.split("\n").map((line) => line.trimEnd());
+		const lines: string[] = content.split("\n").map((line: string) => line.trimEnd());
 
 		await SyncthingAPI.setIgnores(
 			this.plugin.apiUrl,
@@ -190,8 +190,8 @@ export class IgnoreManager {
 			const currentRulesStr = await this.loadRules();
 
 			// 2. Transforma as regras numa array com base na quebra de linha
-			const lines = currentRulesStr
-				? currentRulesStr.split("\n").map((line) => line.trimEnd())
+			const lines: string[] = currentRulesStr
+				? currentRulesStr.split("\n").map((line: string) => line.trimEnd())
 				: [];
 
 			// 3. Monta o caminho novo combinando pathPrefix e finalizando com barra "/" no caso de diretórios

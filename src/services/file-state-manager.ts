@@ -164,8 +164,9 @@ export class FileStateManager {
 	 * Retorna todos os ficheiros que ainda estão pendentes
 	 */
 	getPendingFiles(): FileState[] {
-		return Object.values(this.data.activeFiles).filter(
-			(f) => f.status === "pending",
+		const files: FileState[] = Object.values(this.data.activeFiles);
+		return files.filter(
+			(f: FileState) => f.status === "pending",
 		);
 	}
 
@@ -232,33 +233,28 @@ export class FileStateManager {
 	 */
 	private performGarbageCollection() {
 		const now = Date.now();
-		const entries = Object.values(this.data.activeFiles);
-		// const initialCount = entries.length;
+		const entries: FileState[] = Object.values(this.data.activeFiles);
 
-		// 1. Separa pendentes (nunca apagar) e sincronizados
-		const pending = entries.filter((f) => f.status === "pending");
-		let synced = entries.filter((f) => f.status === "synced");
+		const pending: FileState[] = entries.filter((f: FileState) => f.status === "pending");
+		let synced: FileState[] = entries.filter((f: FileState) => f.status === "synced");
 
-		// 2. Remove sincronizados muito antigos (TTL)
-		synced = synced.filter((f) => {
+		synced = synced.filter((f: FileState) => {
 			return (
 				f.lastSyncCheck && now - f.lastSyncCheck < this.SYNCED_TTL_MS
 			);
 		});
 
-		// 3. Limita a quantidade máxima de sincronizados (mantém os mais recentes)
 		if (synced.length > this.MAX_SYNCED_HISTORY) {
 			synced.sort(
-				(a, b) => (b.lastSyncCheck || 0) - (a.lastSyncCheck || 0),
+				(a: FileState, b: FileState) => (b.lastSyncCheck || 0) - (a.lastSyncCheck || 0),
 			);
 			synced = synced.slice(0, this.MAX_SYNCED_HISTORY);
 		}
 
-		// 4. Reconstrói o objeto
 		const newActiveFiles: Record<string, FileState> = {};
-		[...pending, ...synced].forEach((f) => {
+		for (const f of [...pending, ...synced]) {
 			newActiveFiles[f.path] = f;
-		});
+		}
 
 		this.data.activeFiles = newActiveFiles;
 	}

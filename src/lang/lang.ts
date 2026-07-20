@@ -6,10 +6,10 @@ import zh from "./locales/zh.json";
 import tr from "./locales/tr.json";
 
 const locales: Record<string, Record<string, string>> = {
-	pt: pt as Record<string, string>,
-	ru: ru as Record<string, string>,
-	zh: zh as Record<string, string>,
-	tr: tr as Record<string, string>,
+	pt,
+	ru,
+	zh,
+	tr,
 };
 
 export const LANGUAGE_LIST = [
@@ -40,7 +40,7 @@ export function t(key: TranslationKey): string {
 	}
 
 	const dict = locales[lang];
-	const defaultDict = en as Record<string, string>;
+	const defaultDict: Record<string, string> = en;
 
 	const translation =
 		dict && dict[key as string]

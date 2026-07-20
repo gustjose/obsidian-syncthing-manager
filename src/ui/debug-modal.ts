@@ -40,14 +40,14 @@ export class DebugModal extends Modal {
 			});
 
 		// Seleção de módulos
-		const modules = Object.values(LOG_MODULES);
-		const currentSettings = new Set(this.plugin.settings.debugModules);
+		const modules: string[] = Object.values(LOG_MODULES) as string[];
+		const currentSettings = new Set<string>(this.plugin.settings.debugModules);
 
-		modules.forEach((moduleName) => {
+		modules.forEach((moduleName: string) => {
 			new Setting(contentEl).setName(moduleName).addToggle((toggle) => {
 				toggle
 					.setValue(currentSettings.has(moduleName))
-					.onChange(async (value) => {
+					.onChange(async (value: boolean) => {
 						if (value) {
 							currentSettings.add(moduleName);
 						} else {

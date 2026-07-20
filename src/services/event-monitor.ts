@@ -202,7 +202,7 @@ export class SyncthingEventMonitor {
 				this.abortController = new AbortController();
 
 				// Timeout de Segurança (90s). O Syncthing usa 60s por padrão no Long-Polling.
-				const timeoutId = activeWindow.setTimeout(() => {
+				const timeoutId = window.setTimeout(() => {
 					if (this.abortController) {
 						Logger.debug(
 							LOG_MODULES.EVENT,
@@ -229,7 +229,7 @@ export class SyncthingEventMonitor {
 				}
 
 				const response = await requestUrl(requestOpts);
-				activeWindow.clearTimeout(timeoutId);
+				window.clearTimeout(timeoutId);
 
 				if (response.status === 200) {
 					// Cast seguro para unknown[] primeiro
@@ -550,7 +550,7 @@ export class SyncthingEventMonitor {
 		// Prioridade 4: Atividade (Sincronizando/Escaneando)
 		if (this.lastKnownState !== "idle") {
 			if (this.idleGraceTimer) {
-				activeWindow.clearTimeout(this.idleGraceTimer);
+				window.clearTimeout(this.idleGraceTimer);
 				this.idleGraceTimer = null;
 			}
 			this.updateStatus("sincronizando");
@@ -561,13 +561,13 @@ export class SyncthingEventMonitor {
 		const clusterSynced = this.isClusterSynced();
 		if (this.lastKnownCompletion === 100 && clusterSynced) {
 			if (this.idleGraceTimer) {
-				activeWindow.clearTimeout(this.idleGraceTimer);
+				window.clearTimeout(this.idleGraceTimer);
 				this.idleGraceTimer = null;
 			}
 			this.updateStatus("conectado");
 		} else {
 			if (!this.idleGraceTimer) {
-				this.idleGraceTimer = activeWindow.setTimeout(() => {
+				this.idleGraceTimer = window.setTimeout(() => {
 					if (this.isClusterSynced()) {
 						this.lastKnownCompletion = 100;
 						this.updateStatus("conectado");
@@ -580,6 +580,6 @@ export class SyncthingEventMonitor {
 	}
 
 	private sleep(ms: number): Promise<void> {
-		return new Promise((resolve) => activeWindow.setTimeout(resolve, ms));
+		return new Promise((resolve) => window.setTimeout(resolve, ms));
 	}
 }

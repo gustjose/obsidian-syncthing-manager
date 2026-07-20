@@ -159,7 +159,7 @@ export class ExplorerManager {
 					btn.removeClass("st-success");
 					setIcon(btn, "check");
 
-					activeWindow.setTimeout(() => {
+					window.setTimeout(() => {
 						btn.removeClass("st-success");
 						setIcon(btn, "refresh-cw");
 					}, 2000);
