@@ -174,6 +174,7 @@ export default class SyncthingController extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("modify", (abstractFile) => {
+				if (!this.app.workspace.layoutReady) return;
 				if (abstractFile instanceof TFile) {
 					if (abstractFile.name.includes("~syncthing~")) return;
 
@@ -186,6 +187,7 @@ export default class SyncthingController extends Plugin {
 
 		this.registerEvent(
 			this.app.vault.on("create", (abstractFile) => {
+				if (!this.app.workspace.layoutReady) return;
 				if (abstractFile instanceof TFile) {
 					if (abstractFile.name.includes("~syncthing~")) return;
 
