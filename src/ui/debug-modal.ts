@@ -40,7 +40,7 @@ export class DebugModal extends Modal {
 			});
 
 		// Seleção de módulos
-		const modules: string[] = Object.values(LOG_MODULES) as string[];
+		const modules: string[] = Object.values(LOG_MODULES);
 		const currentSettings = new Set<string>(this.plugin.settings.debugModules);
 
 		modules.forEach((moduleName: string) => {
