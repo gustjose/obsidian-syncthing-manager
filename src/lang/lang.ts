@@ -1,24 +1,24 @@
 import { moment } from "obsidian";
 import en from "./locales/en.json";
 import ptBR from "./locales/pt-BR.json";
-import ru from "./locales/ru.json";
+import ruRU from "./locales/ru-RU.json";
 import zhCN from "./locales/zh-CN.json";
-import tr from "./locales/tr.json";
+import trTR from "./locales/tr-TR.json";
 
 const locales: Record<string, Record<string, string>> = {
 	"pt-br": ptBR,
-	ru,
+	"ru-ru": ruRU,
 	"zh-cn": zhCN,
-	tr,
+	"tr-tr": trTR,
 };
 
 export const LANGUAGE_LIST = [
 	{ code: "auto", display: "Auto" },
 	{ code: "en", display: "English" },
 	{ code: "pt-br", display: "Português (BR)" },
-	{ code: "ru", display: "Русский" },
+	{ code: "ru-ru", display: "Русский" },
 	{ code: "zh-cn", display: "简体中文" },
-	{ code: "tr", display: "Türkçe" },
+	{ code: "tr-tr", display: "Türkçe" },
 ];
 
 export type TranslationKey = keyof typeof en;
