@@ -61,7 +61,7 @@ export class DebugConsoleModal extends Modal {
 			const label = modulesList.createEl("label", {
 				cls: "st-debug-console-module-item",
 			});
-			const checkbox = label.createEl("input", { type: "checkbox" }) as HTMLInputElement;
+			const checkbox = label.createEl("input", { type: "checkbox" });
 			checkbox.checked = this.filterModules.has(mod);
 			checkbox.addEventListener("change", () => {
 				if (checkbox.checked) {
