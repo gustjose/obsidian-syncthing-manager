@@ -1,23 +1,23 @@
 import { moment } from "obsidian";
 import en from "./locales/en.json";
-import pt from "./locales/pt.json";
+import ptBR from "./locales/pt-BR.json";
 import ru from "./locales/ru.json";
-import zh from "./locales/zh.json";
+import zhCN from "./locales/zh-CN.json";
 import tr from "./locales/tr.json";
 
 const locales: Record<string, Record<string, string>> = {
-	pt,
+	"pt-br": ptBR,
 	ru,
-	zh,
+	"zh-cn": zhCN,
 	tr,
 };
 
 export const LANGUAGE_LIST = [
 	{ code: "auto", display: "Auto" },
 	{ code: "en", display: "English" },
-	{ code: "pt", display: "Português" },
+	{ code: "pt-br", display: "Português (BR)" },
 	{ code: "ru", display: "Русский" },
-	{ code: "zh", display: "简体中文" },
+	{ code: "zh-cn", display: "简体中文" },
 	{ code: "tr", display: "Türkçe" },
 ];
 
@@ -35,11 +35,17 @@ export function t(key: TranslationKey): string {
 		lang = moment.locale();
 	}
 
-	if (lang && lang.length >= 2) {
-		lang = lang.substring(0, 2).toLowerCase();
-	}
+	lang = lang.toLowerCase();
 
-	const dict = locales[lang];
+	let dict = locales[lang];
+
+	if (!dict && lang.length >= 2) {
+		const shortLang = lang.substring(0, 2);
+		const match = Object.keys(locales).find(k => k.startsWith(shortLang));
+		if (match) {
+			dict = locales[match];
+		}
+	}
 	const defaultDict: Record<string, string> = en;
 
 	const translation =
