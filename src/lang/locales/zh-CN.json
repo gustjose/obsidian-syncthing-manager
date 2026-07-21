@@ -201,8 +201,8 @@
 	"tab_synced": "已同步!",
 	"conflict_delete_error": "删除文件时出错。",
 	"conflict_restore_error": "恢复冲突时出错。",
-	"cmd_file_status": "File status",
-	"notice_file_not_synced": "This file has not been synced to other devices yet.",
-	"notice_file_status_title": "File availability",
-	"device_unknown": "Unknown device"
+	"cmd_file_status": "文件状态",
+	"notice_file_not_synced": "此文件尚未同步到其他设备。",
+	"notice_file_status_title": "文件可用性",
+	"device_unknown": "未知设备"
 }
