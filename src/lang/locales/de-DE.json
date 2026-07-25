@@ -1,6 +1,6 @@
 {
-	"cmd_open_panel": "Open side panel",
-	"cmd_force_sync": "Force sync now",
+	"cmd_open_panel": "Seitenleiste öffnen",
+	"cmd_force_sync": "Synchronisation erzwingen",
 	"cmd_debug_connect": "Debug: test connection",
 	"cmd_copy_debug": "Copy debug info",
 	"ribbon_tooltip": "Open Syncthing manager",
@@ -48,7 +48,7 @@
 	"btn_modify_secret": "Modify secret",
 	"setting_folder_name": "Vault folder ID",
 	"setting_folder_desc": "Select the Syncthing folder ID that matches this Obsidian vault to track its specific status.",
-	"dropdown_default": "Select a folder...",
+	"dropdown_default": "Ordner auswählen...",
 	"dropdown_none": "No folder selected",
 	"btn_search_folders": "Fetch folders from Syncthing",
 	"setting_modal_conflict_name": "Conflict detection",
