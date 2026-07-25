@@ -26,7 +26,7 @@
 	"tooltip_resume": "Resume sync",
 	"setting_header_conn": "Connection settings",
 	"setting_header_folder": "Folder & files",
-	"setting_header_interface": "Interface options",
+	"setting_header_interface": "Schnittstellen Optionen",
 	"setting_header_general": "General",
 	"setting_lang_name": "Language",
 	"setting_lang_desc": "Force the plugin interface to a specific language or follow Obsidian. This plugin is localized by the community. To help translate into your language, click the globe icon to join our Crowdin project.",
